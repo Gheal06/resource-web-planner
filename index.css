@@ -9,8 +9,9 @@ span{
     margin: 10px;
 }
 #nav{
+    background-color: #EEEEFF;
     border-radius: 3px;
-    border: 1px #AAA solid;
+    border: 1px blue solid;
     display: flex;
     justify-content: flex-end;
 }

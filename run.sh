@@ -2,8 +2,8 @@
 # cd /tmp/tehnologii-web/
 # docker run -it --rm --name my-running-script -v "$PWD":/tmp/tehnologii-web -w /tmp/tehnologii-web php:8.4-cli php hw.php
 
-docker stop resource-web-planner
-docker rm resource-web-planner
+docker stop resource-web-planner &&
+docker rm resource-web-planner &&
 docker rmi localhost/resource-web-planner
 
 # cd $(pwd) &&
