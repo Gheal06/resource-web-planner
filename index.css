@@ -1,0 +1,16 @@
+body{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+#page{
+    width: max(200px, 90%);
+    justify-self: center;
+}
+span{
+    margin: 10px;
+}
+#nav{
+    border-radius: 3px;
+    border: 1px #AAA solid;
+    display: flex;
+    justify-content: flex-end;
+}
