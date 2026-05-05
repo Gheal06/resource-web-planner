@@ -1,21 +1,20 @@
-version: "3.8"
 services:
-  db:
-    container_name: postgres_container
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: DB_Admin$5431
-      POSTGRES_DB: rwp
-    ports:
-      - "5431:5431"
+  # db:
+  #  container_name: postgres_container
+  #  image: postgres
+  #  restart: always
+  #  environment:
+  #    POSTGRES_USER: root
+  #    POSTGRES_PASSWORD: DB_Admin!7890
+  #    POSTGRES_DB: rwp
+  #  ports:
+  #    - "7890:5432"
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@rwp.com
-      PGADMIN_DEFAULT_PASSWORD: RWP_Admin$5050
+      PGADMIN_DEFAULT_PASSWORD: RWP_Admin!5050
     ports:
       - "5050:80"
