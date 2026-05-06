@@ -1,6 +1,7 @@
 <?php
-  session_start();
+    session_start();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +17,16 @@ require_once "index.css"     // de modificat ca sa poata da cache
 <body>
     <div id="page">
     <div id="nav">
-        <a href="login.php">Login</a>
-        <a href="register.php">Register</a>
+        <div id="nav_left">
+            <a href="index.php">Home</a>
+        </div>
+        <div id="nav_right">
+            <?php if(!array_key_exists("username", $_SESSION)): ?>
+            <a href="login.php">Login</a>
+            <a href="register.php">Register</a>
+            <?php else: ?>
+            <span><?php echo($_SESSION["username"]);?></span>
+            <a href="logout.php">Logout</a>
+            <?php endif; ?>
+        </div>
     </div>
