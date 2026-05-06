@@ -1,6 +1,5 @@
-<?php require_once "header.php" ?>
 <?php
-
+session_start();
 require_once ("conn.php");
 require_once ("initdb.php");
 $message = "";
@@ -13,19 +12,23 @@ if (isset($_REQUEST["login"])) {
     $checkUserResult = pg_query_params($connection, "SELECT * FROM user_tables WHERE user_name = $1", array($username));
     
     if (pg_num_rows($checkUserResult) == 0) {
-        $message = "Invalid username or password.";
-    } else {
+      $message = "Invalid username or password.";
+      } else {
         $user = pg_fetch_assoc($checkUserResult);
         if (password_verify($password, $user["password_hash"])) {
             $message = "Login successful!";
             $_SESSION["username"] = $username;
-        } else {
-            $message = "Invalid username or password.";
-        }
-    }
+            header("Location: index.php");
+            exit();
+            } else {
+              $message = "Invalid username or password.";
+              }
+              }
 }
 
 ?>
+
+<?php require_once "header.php" ?>
 
 <form action="" method="post">
     <label for="username">Username: </label>
