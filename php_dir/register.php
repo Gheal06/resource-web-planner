@@ -1,3 +1,5 @@
+<?php require_once "header.php" ?>
+
 <?php
 
 require ("conn.php");
@@ -24,10 +26,8 @@ if (isset($_REQUEST["register"])) {
         }
     }
 }
-
 ?>
 
-<?php require_once "header.php" ?>
 <form action="" method="post">
     <label for="username">Username: </label>
     <input type="text" name="username" id="username">
