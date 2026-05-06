@@ -1,3 +1,4 @@
+<?php require_once "header.php" ?>
 <?php
 
 require_once ("conn.php");
@@ -26,7 +27,6 @@ if (isset($_REQUEST["login"])) {
 
 ?>
 
-<?php require_once "header.php" ?>
 <form action="" method="post">
     <label for="username">Username: </label>
     <input type="text" name="username" id="username">

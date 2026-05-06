@@ -1,3 +1,6 @@
+<?php
+  session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         <?php 
-require_once "index.css"     // de modificat ca sa poata da cash
+require_once "index.css"     // de modificat ca sa poata da cache
         ?>
     </style>
     <title>Resource Web Planner</title>

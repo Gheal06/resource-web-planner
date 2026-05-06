@@ -1,3 +1,4 @@
+<?php require_once "header.php" ?>
 <?php
 
 require_once ("conn.php");
@@ -19,7 +20,7 @@ if (isset($_REQUEST["register"])) {
         
         if ($insertResult) {
             $message = "Registration successful!";
-            $_SESSION["username"] = $username;
+            $_SESSION["username"] = $username; // Set session variable for logged in user
         } else {
             $message = "Error: " . pg_last_error($connection);
         }
@@ -28,7 +29,6 @@ if (isset($_REQUEST["register"])) {
 
 ?>
 
-<?php require_once "header.php" ?>
 <form action="" method="post">
     <label for="username">Username: </label>
     <input type="text" name="username" id="username">
