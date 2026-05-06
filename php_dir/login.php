@@ -1,33 +1,32 @@
+<?php require_once "header.php" ?>
 <?php
 
-require ("conn.php");
-require ("initdb.php");
+require_once ("conn.php");
+require_once ("initdb.php");
 $message = "";
 
-if (isset($_REQUEST["register"])) {
+if (isset($_REQUEST["login"])) {
     $username = $_POST["username"];
     $password = $_POST["password"];
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
     // Check if user exists
     $checkUserResult = pg_query_params($connection, "SELECT * FROM user_tables WHERE user_name = $1", array($username));
     
-    if (pg_num_rows($checkUserResult) > 0) {
-        $message = "Username already exists.";
+    if (pg_num_rows($checkUserResult) == 0) {
+        $message = "Invalid username or password.";
     } else {
-        $insertResult = pg_query_params($connection, "INSERT INTO user_tables (user_name, password_hash) VALUES ($1, $2)", array($username, $hashedPassword));
-        
-        if ($insertResult) {
-            $message = "Registration successful!";
+        $user = pg_fetch_assoc($checkUserResult);
+        if (password_verify($password, $user["password_hash"])) {
+            $message = "Login successful!";
+            $_SESSION["username"] = $username;
         } else {
-            $message = "Error: " . pg_last_error($connection);
+            $message = "Invalid username or password.";
         }
     }
 }
 
 ?>
 
-<?php require_once "header.php" ?>
 <form action="" method="post">
     <label for="username">Username: </label>
     <input type="text" name="username" id="username">
