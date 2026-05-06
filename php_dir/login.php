@@ -33,7 +33,7 @@ if (isset($_REQUEST["register"])) {
     <input type="text" name="username" id="username">
     <label for="password">Password: </label>
     <input type="password" name="password" id="password">
-    <input type="submit" name="register" value="Register">
+    <input type="submit" name="login" value="Login">
 </form>
 
 <?php if ($message): ?>
