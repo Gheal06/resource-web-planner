@@ -1,7 +1,7 @@
 <?php
 
 require("conn.php");
-
+echo("Test");
 ?>
 <!DOCTYPE html>
 <html lang="en">
