@@ -1,7 +1,7 @@
 <?php
 
-require ("conn.php");
-require ("initdb.php");
+require_once ("conn.php");
+require_once ("initdb.php");
 $message = "";
 
 if (isset($_REQUEST["register"])) {
@@ -19,6 +19,7 @@ if (isset($_REQUEST["register"])) {
         
         if ($insertResult) {
             $message = "Registration successful!";
+            $_SESSION["username"] = $username;
         } else {
             $message = "Error: " . pg_last_error($connection);
         }

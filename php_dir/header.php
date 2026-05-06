@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         <?php 
-require_once "index.css" 
+require_once "index.css"     // de modificat ca sa poata da cash
         ?>
     </style>
     <title>Resource Web Planner</title>
