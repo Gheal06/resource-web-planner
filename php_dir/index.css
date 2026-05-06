@@ -4,7 +4,8 @@ body{
 
 #page{
     width: max(200px, 90%);
-    justify-self: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 span{
