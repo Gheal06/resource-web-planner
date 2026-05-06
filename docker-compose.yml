@@ -5,7 +5,7 @@ services:
     networks:
       - rwp-net
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: DB_Admin!7890
@@ -28,6 +28,9 @@ services:
       dockerfile: ./Dockerfile
     container_name: rwp-container
     working_dir: /var/www/html/
+    user: "1000:1000"
+    volumes:
+      - ./php_dir:/var/www/html
     networks: 
       - rwp-net
     depends_on:
