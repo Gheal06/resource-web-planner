@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "RWP",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "Username": "root",
+      "Password": "DB_Admin!7890",
+      "SSLMode": "prefer",
+      "MaintenanceDB": "rwp"
+    }
+  }
+}
