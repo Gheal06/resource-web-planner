@@ -1,6 +1,6 @@
 <?php
 
-require("conn.php");
+require("initdb.php");
 echo("Test");
 ?>
 <!DOCTYPE html>
