@@ -1,11 +1,14 @@
 body{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: #BBBBFF;
+    margin: 0;
+    padding: 0;
 }
 
 #page{
-    width: max(200px, 90%);
-    margin-left: auto;
-    margin-right: auto;
+    left: 0;
+    right: 0;
+    width: max(200px, 100%);
 }
 
 span{
@@ -13,11 +16,11 @@ span{
 }
 
 #nav{
-    padding: 5px;
-    background-color: #EEEEFF;
-    border-radius: 3px;
-    border: 1px blue solid;
+    position: sticky;
+    padding: 15px;
+    background-color: #5555FF;
     display: flex;
+    border: 2px white solid;
 }
 
 #nav_left{
@@ -29,11 +32,47 @@ span{
 }
 
 #nav a:hover{
-    color: blue;
+    font-weight: bold;
+    border-bottom: 2px #FFFFFF solid;
 }
-
+#nav span{
+    color: white;
+}
 #nav a{
     padding: 5px;
-    color: black;
+    color: white;
     text-decoration: none;
+}
+input[type="submit"]{
+    border: 2px white solid;
+    color: white;
+    background-color: #6666FF;
+    font-size: 1.2rem;
+    justify-self: center;
+}
+label{
+    font-size: 1.2rem;
+}
+input[type="text"], input[type="password"]{
+    margin: 10px 0px;
+    border: 1px white solid;
+    color: white;
+    background-color: #5555FF;
+    padding: 3px;
+    font-size: 1.2rem;
+}
+input:hover, input:focus{
+    background-color: #7777FF;
+}
+input:-webkit-autofill{
+    -webkit-text-fill-color: #7777FF;
+}
+.container{
+    background-color: #5555FF;
+    justify-self: center;
+    width: min-content;
+    color: white;
+    padding: 10px;
+    margin: 10px;
+    border: 2px white solid;
 }

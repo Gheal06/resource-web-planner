@@ -30,3 +30,4 @@ require_once "index.css"     // de modificat ca sa poata da cache
             <?php endif; ?>
         </div>
     </div>
+    <div>
