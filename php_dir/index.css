@@ -1,6 +1,5 @@
 body{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    background-color: #BBBBFF;
     margin: 0;
     padding: 0;
 }
@@ -20,7 +19,6 @@ span{
     padding: 15px;
     background-color: #5555FF;
     display: flex;
-    border: 2px white solid;
 }
 
 #nav_left{
@@ -43,36 +41,38 @@ span{
     color: white;
     text-decoration: none;
 }
-input[type="submit"]{
-    border: 2px white solid;
-    color: white;
-    background-color: #6666FF;
+.container input[type="submit"]{
+    border: 2px #5555FF solid;
+    padding: 2px 5px;
     font-size: 1.2rem;
-    justify-self: center;
+    background-color: white;
 }
 label{
     font-size: 1.2rem;
 }
 input[type="text"], input[type="password"]{
+    border-radius: 5px;
     margin: 10px 0px;
     border: 1px white solid;
-    color: white;
-    background-color: #5555FF;
+    color: black;
+    border-bottom: 1px #5555FF solid;
     padding: 3px;
     font-size: 1.2rem;
 }
 input:hover, input:focus{
-    background-color: #7777FF;
+    background-color: #EEEEFF;
+    border-bottom: 2px #5555FF solid;
+}
+.container input[type="submit"]:hover{
+    background-color: #EEEEFF;
 }
 input:-webkit-autofill{
-    -webkit-text-fill-color: #7777FF;
+    -webkit-text-fill-color: black;
 }
 .container{
-    background-color: #5555FF;
+    border: 2px #5555FF solid;
     justify-self: center;
     width: min-content;
-    color: white;
     padding: 10px;
     margin: 10px;
-    border: 2px white solid;
 }
