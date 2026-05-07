@@ -33,11 +33,11 @@ if (isset($_REQUEST["login"])) {
 <form action="" method="post">
     <label for="username">Username: </label>
     <input type="text" name="username" id="username">
-    <br> <br>
     <label for="password">Password: </label>
     <input type="password" name="password" id="password">
-    <br> <br>
-    <input type="submit" name="login" value="Login">
+    <center>
+        <input type="submit" name="login" value="Login">
+    </center>
 </form>
 </div>
 <?php if ($message): ?>

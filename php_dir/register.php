@@ -33,13 +33,13 @@ if (isset($_REQUEST["register"])) {
 <?php require_once "header.php" ?>
 <div class="container">
 <form action="" method="post">
-  <label for="username">Username: </label>
-  <input type="text" name="username" id="username">
-  <br><br>
-  <label for="password">Password: </label>
-  <input type="password" name="password" id="password">
-   <br><br>
-  <input type="submit" name="register" value="Register">
+    <label for="username">Username: </label>
+    <input type="text" name="username" id="username">
+    <label for="password">Password: </label>
+    <input type="password" name="password" id="password">
+    <center>
+        <input type="submit" name="register" value="Register">
+    </center>
 </form>
 </div>
 <?php if ($message): ?>
