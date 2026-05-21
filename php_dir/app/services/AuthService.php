@@ -1,11 +1,14 @@
 <?php
 require_once __DIR__ . "/../models/UserModel.php";
+require_once __DIR__ . "/JwtService.php";
 
 class AuthService {
     private $userModel;
+    private $jwtService;
 
     public function __construct($connection) {
         $this->userModel = new UserModel($connection);
+        $this->jwtService = new JwtService();
     }
 
     public function register($username, $password) {
@@ -14,7 +17,9 @@ class AuthService {
         }
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $ok = $this->userModel->create($username, $hash);
-        if ($ok) return array('success' => true, 'message' => 'Registration successful.');
+        if ($ok) {
+            return array('success' => true, 'message' => 'Registration successful.');
+        }
         return array('success' => false, 'message' => pg_last_error());
     }
 
@@ -22,9 +27,35 @@ class AuthService {
         $user = $this->userModel->findByUsername($username);
         if (!$user) return array('success' => false, 'message' => 'Invalid username or password.');
         if (password_verify($password, $user['password_hash'])) {
-            return array('success' => true, 'message' => 'Login successful.');
+            $token = $this->jwtService->encode(array(
+                'sub' => $user['user_name'],
+                'iat' => time(),
+                'exp' => time() + 60 * 60 * 24
+            ));
+            return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $user['user_name']);
         }
         return array('success' => false, 'message' => 'Invalid username or password.');
+    }
+
+    public function createTokenForUser($username) {
+        return $this->jwtService->encode(array(
+            'sub' => $username,
+            'iat' => time(),
+            'exp' => time() + 60 * 60 * 24
+        ));
+    }
+
+    public function getCurrentUserFromToken($token) {
+        if (!$token) {
+            return null;
+        }
+
+        $payload = $this->jwtService->decode($token);
+        if (!$payload || empty($payload['sub'])) {
+            return null;
+        }
+
+        return $payload['sub'];
     }
 }
 

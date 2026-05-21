@@ -1,10 +1,10 @@
 <?php
-session_start();
 require_once "conn.php";
 require_once "app/controllers/AuthController.php";
 
 $controller = new AuthController($connection);
 $action = $_GET['action'] ?? '';
+$currentUser = $controller->getCurrentUser();
 
 $message = '';
 $view = null;
@@ -18,7 +18,7 @@ if ($action === 'login') {
 } elseif ($action === 'logout') {
     $controller->handleLogout();
 } else {
-    if (isset($_SESSION['username'])) {
+    if ($currentUser) {
         $view = 'app/views/dashboard_view.php';
     }
 }

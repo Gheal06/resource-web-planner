@@ -3,19 +3,19 @@ require_once __DIR__ . "/../services/AuthService.php";
 
 class AuthController {
     private $authService;
+    private $cookieName = 'auth_token';
 
     public function __construct($connection) {
         $this->authService = new AuthService($connection);
     }
 
     public function handleLogin() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $username = $_POST['username'] ?? '';
             $password = $_POST['password'] ?? '';
             $result = $this->authService->login($username, $password);
             if ($result['success']) {
-                $_SESSION['username'] = $username;
+                $this->setAuthCookie($result['token']);
                 header('Location: index.php');
                 exit();
             }
@@ -25,13 +25,12 @@ class AuthController {
     }
 
     public function handleRegister() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             $username = $_POST['username'] ?? '';
             $password = $_POST['password'] ?? '';
             $result = $this->authService->register($username, $password);
             if ($result['success']) {
-                $_SESSION['username'] = $username;
+                $this->setAuthCookie($this->authService->createTokenForUser($username));
                 header('Location: index.php');
                 exit();
             }
@@ -41,11 +40,35 @@ class AuthController {
     }
 
     public function handleLogout() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        $_SESSION = array();
-        session_destroy();
+        $this->clearAuthCookie();
         header('Location: index.php');
         exit();
+    }
+
+    public function getCurrentUser() {
+        return $this->authService->getCurrentUserFromToken($_COOKIE[$this->cookieName] ?? null);
+    }
+
+    private function setAuthCookie($token) {
+        setcookie($this->cookieName, $token, array(
+            'expires' => time() + 60 * 60 * 24,
+            'path' => '/',
+            'httponly' => true,
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'samesite' => 'Lax'
+        ));
+        $_COOKIE[$this->cookieName] = $token;
+    }
+
+    private function clearAuthCookie() {
+        setcookie($this->cookieName, '', array(
+            'expires' => time() - 3600,
+            'path' => '/',
+            'httponly' => true,
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'samesite' => 'Lax'
+        ));
+        unset($_COOKIE[$this->cookieName]);
     }
 }
 
