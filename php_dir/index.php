@@ -5,7 +5,6 @@ require_once "app/controllers/AuthController.php";
 $controller = new AuthController($connection);
 $action = $_GET['action'] ?? '';
 $currentUser = $controller->getCurrentUser();
-
 $message = '';
 $view = null;
 

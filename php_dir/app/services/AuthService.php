@@ -11,12 +11,15 @@ class AuthService {
         $this->jwtService = new JwtService();
     }
 
-    public function register($username, $password) {
+    public function register($username, $email, $password) {
         if ($this->userModel->findByUsername($username)) {
             return array('success' => false, 'message' => 'Username already exists.');
         }
+        if ($this->userModel->findByEmail($email)) {
+            return array('success' => false, 'message' => 'This email is already in use.');
+        }
         $hash = password_hash($password, PASSWORD_DEFAULT);
-        $ok = $this->userModel->create($username, $hash);
+        $ok = $this->userModel->create($username, $email, $hash);
         if ($ok) {
             return array('success' => true, 'message' => 'Registration successful.');
         }

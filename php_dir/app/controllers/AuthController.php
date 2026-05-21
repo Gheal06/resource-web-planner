@@ -28,7 +28,8 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             $username = $_POST['username'] ?? '';
             $password = $_POST['password'] ?? '';
-            $result = $this->authService->register($username, $password);
+            $email    = $_POST['email'] ?? '';
+            $result = $this->authService->register($username, $email, $password);
             if ($result['success']) {
                 $this->setAuthCookie($this->authService->createTokenForUser($username));
                 header('Location: index.php');

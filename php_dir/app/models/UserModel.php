@@ -7,13 +7,19 @@ class UserModel {
     }
 
     public function findByUsername($username) {
-        $res = pg_query_params($this->conn, "SELECT * FROM user_table WHERE user_name = $1", array($username));
+        $res = pg_query_params($this->conn, "SELECT * FROM user_table WHERE username = $1", array($username));
         if (!$res) return null;
         return pg_fetch_assoc($res);
     }
 
-    public function create($username, $password_hash) {
-        return pg_query_params($this->conn, "INSERT INTO user_table (user_name, password_hash) VALUES ($1, $2)", array($username, $password_hash));
+    public function findByEmail($email) {
+        $res = pg_query_params($this->conn, "SELECT * FROM user_table WHERE email = $1", array($email));
+        if (!$res) return null;
+        return pg_fetch_assoc($res);
+    }
+
+    public function create($username, $email, $password_hash) {
+        return pg_query_params($this->conn, "INSERT INTO user_table (username, email, password_hash) VALUES ($1, $2, $3)", array($username, $email, $password_hash));
     }
 }
 
