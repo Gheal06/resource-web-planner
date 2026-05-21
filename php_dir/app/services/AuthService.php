@@ -31,11 +31,11 @@ class AuthService {
         if (!$user) return array('success' => false, 'message' => 'Invalid username or password.');
         if (password_verify($password, $user['password_hash'])) {
             $token = $this->jwtService->encode(array(
-                'sub' => $user['user_name'],
+                'sub' => $user['username'],
                 'iat' => time(),
                 'exp' => time() + 60 * 60 * 24
             ));
-            return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $user['user_name']);
+            return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $user['username']);
         }
         return array('success' => false, 'message' => 'Invalid username or password.');
     }

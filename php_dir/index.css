@@ -69,6 +69,16 @@ input:hover, input:focus{
 input:-webkit-autofill{
     -webkit-text-fill-color: black;
 }
+.gravatar-image{
+    width: auto;
+    height: 1.5rem;
+    border-radius: 43%;
+    margin-right: 10px;
+}
+.centerY{
+  margin-top: auto;
+  margin-bottom: auto;
+}
 .container{
     border: 2px #5555FF solid;
     justify-self: center;
