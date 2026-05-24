@@ -2,7 +2,7 @@
 <div class="container">
     <h2>Dashboard</h2>
     <p>Welcome, <?php echo htmlspecialchars($currentUser ?? ''); ?>!</p>
-    <p>Tables you have access to:</p>
+    <p>You have acces to : <?php echo count($inventoryTableIDs); ?> tables:</p>
     <ul>
         <?php foreach ($inventoryTableIDs as $id): ?>
             <li><?php echo $id; ?></li>
