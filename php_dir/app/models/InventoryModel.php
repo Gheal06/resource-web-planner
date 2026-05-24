@@ -18,10 +18,10 @@
         );
     }
     public function getUserInventoryTableIDs($username) {
-        $res = pg_query_params($this->conn, "SELECT id FROM inventory_table JOIN users ON inventory_table.user_id = users.id WHERE users.username = $1", array($username));
+        $res = pg_query_params($this->conn, "SELECT inventory_id FROM user_table_permission JOIN user_table ON user_table_permission.user_id = user_table.id WHERE user_table.username = $1 AND user_table_permission.can_read = true", array($username));
         $ids = array();
         while ($row = pg_fetch_assoc($res)) {
-            $ids[] = $row['id'];
+            $ids[] = $row['inventory_id'];
         }
 
         return $ids;
@@ -29,4 +29,4 @@
 
   }
 
->
+?>
