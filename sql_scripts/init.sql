@@ -15,7 +15,7 @@ CREATE TABLE inventory_table (
     id                     BIGSERIAL PRIMARY KEY,
     name                   VARCHAR(255) NOT NULL,
     description            TEXT,
-    owner_id               BIGINT NOT NULL REFERENCES user_table(id) ON DELETE CASCADE
+    owner_id               BIGINT REFERENCES inventory_table(id) ON DELETE CASCADE
 );
 
 CREATE TABLE user_table_permission (
