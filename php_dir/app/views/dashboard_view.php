@@ -4,8 +4,9 @@
     <p>Welcome, <?php echo htmlspecialchars($currentUser ?? ''); ?>!</p>
     <p>You have acces to : <?php echo count($inventoryTableIDs); ?> tables:</p>
     <ul>
-        <?php foreach ($inventoryTableIDs as $id): ?>
-            <li><?php echo $id; ?></li>
+        <?php foreach ($inventoryTableIDs as $inv): ?>
+            <li><?php echo $inv['name']; ?></li>
+            <li><?php echo "**" . $inv['description'] . "**"; ?></li>
         <?php endforeach; ?>
     </ul>
     <p><a href="index.php?action=logout">Logout</a></p>

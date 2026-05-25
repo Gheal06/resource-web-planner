@@ -8,8 +8,11 @@ class DashboardController {
         $this->inventoryModel = new InventoryModel($connection);
     }
 
-    public function getUserInventoryTableIDs($username) {
-        return $this->inventoryModel->getUserInventoryTableIDs($username);
+    public function getUserReadableInventoryTableIDs($username) {
+        return $this->inventoryModel->getUserReadableInventoryTableIDs($username);
+    }
+    public function getUserReadableInventoryTables($username) {
+        return $this->inventoryModel->getUserReadableInventoryTables($username);
     }
 }
 ?>

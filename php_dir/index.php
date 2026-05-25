@@ -21,7 +21,7 @@ if ($action === 'login') {
     $controller->handleLogout();
 } else {
     if ($currentUser) {
-        $inventoryTableIDs = $dashboardController->getUserInventoryTableIDs($currentUser);
+        $inventoryTableIDs = $dashboardController->getUserReadableInventoryTables($currentUser);
         $view = 'app/views/dashboard_view.php';
     }
 }
