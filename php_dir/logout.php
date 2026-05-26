@@ -1,7 +1,8 @@
-<?php 
-  session_start();
-  $_SESSION = array(); // Clear all session data
-  session_destroy();
-  header("Location: index.php");
-  exit();
+<?php
+require_once "conn.php";
+require_once "app/controllers/AuthController.php";
+
+$controller = new AuthController($connection);
+$controller->handleLogout();
+
 ?>
