@@ -9,11 +9,14 @@ require_once __DIR__ . "/../models/InventoryModel.php";
     public function getUserInventoryIDsByMask($username, $permission_mask) {
         return $this->inventoryModel->getUserInventoryIDsByMask($username, $permission_mask);
     }
-    public function getUserInventoryTablesByMask($username, $permission_mask) {
+    public function getUserInventoryById($id) {
+        return $this->inventoryModel->getInventoryById($id);
+    }
+    public function getUserInventoriesByMask($username, $permission_mask) {
         $ids = $this->getUserInventoryIDsByMask($username, $permission_mask);
         $inventories = array();
         foreach ($ids as $id) {
-            $inventories[] = $this->inventoryModel->getInventoryTableById($id);
+            $inventories[] = $this->inventoryModel->getInventoryById($id);
         }
         return $inventories;
     }

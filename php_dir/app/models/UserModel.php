@@ -7,13 +7,13 @@ class UserModel {
     }
 
     public function findByUsername($username) {
-        $res = pg_query_params($this->conn, "SELECT * FROM user_table WHERE username = $1", array($username));
+        $res = pg_query_params($this->conn, "SELECT * FROM users WHERE username = $1", array($username));
         if (!$res) return null;
         return pg_fetch_assoc($res);
     }
 
     public function findByEmail($email) {
-        $res = pg_query_params($this->conn, "SELECT * FROM user_table WHERE email = $1", array($email));
+        $res = pg_query_params($this->conn, "SELECT * FROM users WHERE email = $1", array($email));
         if (!$res) return null;
         return pg_fetch_assoc($res);
     }
