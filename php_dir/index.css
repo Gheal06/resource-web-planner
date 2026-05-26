@@ -25,6 +25,7 @@ span{
     margin-right: auto;
     margin-top: auto;
     margin-bottom: auto;
+    display: flex;
 }
 
 #nav-right{
