@@ -18,6 +18,5 @@ class InventoryController {
             $inventories[] = $this->inventoryModel->getInventoryTableById($id);
         }
         return $inventories;
-    }
 }
 ?>
