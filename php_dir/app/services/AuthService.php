@@ -2,16 +2,19 @@
 require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/JwtService.php";
 require_once __DIR__ . "/MailingService.php";
+require_once __DIR__ . "/../models/PasswordRecoveryTokenModel.php";
 
 class AuthService {
     private $userModel;
     private $jwtService;
     private $mailingService;
+    private $passwordRecoveryTokenModel;
 
     public function __construct($connection) {
         $this->userModel = new UserModel($connection);
         $this->jwtService = new JwtService();
         $this->mailingService = new MailingService();
+        $this->passwordRecoveryTokenModel = new PasswordRecoveryTokenModel($connection);
     }
 
     public function register($username, $email, $password) {
@@ -43,6 +46,7 @@ class AuthService {
         }
         $this->passwordRecoveryTokenModel->create($user['id'], '', date('Y-m-d H:i:s')); // șterge codul
         $token = $this->create_token_for_user($user['username']);
+        $this->passwordRecoveryTokenModel->delete($user['id']);
         return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $user['username']);
     }   
 
@@ -62,11 +66,9 @@ class AuthService {
             $code .= $alphabet[random_int(0, strlen($alphabet) - 1)];
         }
         $expires_at = date('Y-m-d H:i:s', time() + 60 * 5); // expira peste 5 minute
-        $res = pg_query_params($this->userModel->conn, "INSERT INTO password_recovery_codes (user_id, code, expires_at) VALUES ($1, $2, $3)", array($user['id'], $code, $expires_at));
-        if ($res) {
-            return array('success' => true, 'message' => 'Recovery code created.', 'code' => $code);
-        }
-        return array('success' => false, 'message' => pg_last_error());
+        return $this->passwordRecoveryTokenModel->create($user['id'], $code, $expires_at) 
+            ? array('success' => true, 'code' => $code) 
+            : array('success' => false, 'message' => 'Failed to create recovery code.');
     }
 
     public function send_OTC_to_username($username){
@@ -90,8 +92,7 @@ class AuthService {
             return array('success' => false, 'message' => 'Failed to create recovery code.');
         }
         $code = $codeData['code'];
-        $this->mailingService->send_OTC($user['email'], $code);
-        return array('success' => true, 'message' => 'Recovery code sent.');
+        return $this->mailingService->send_OTC($user['email'], $code);
     }
 
     public function create_token_for_user($username) {

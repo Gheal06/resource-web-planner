@@ -41,6 +41,13 @@ services:
       - postgres
     ports:
       - "8081:80"
+    environment:
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USER=rwp.no.reply@gmail.com
+      - MAIL_PASS=wawvysunvwurrsie 
+      - MAIL_FROM=rwp.no.reply@gmail.com
+      - MAIL_DEBUG=0
 
 networks:
   rwp-net:

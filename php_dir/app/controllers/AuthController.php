@@ -40,6 +40,34 @@ class AuthController {
         return '';
     }
 
+    public function handleOTCLogin() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['OTC_login'])) {
+            $username = $_POST['username'] ?? '';
+            $code = $_POST['OTC'] ?? '';
+            $result = $this->authService->login_with_OTC($username, $code);
+            if ($result['success']) {
+                $this->setAuthCookie($result['token']);
+                header('Location: index.php');
+                exit();
+            }
+            return $result['message'];
+        }
+        return '';
+    }
+
+    public function sendOTC() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['OTC_request'])) {
+            $email = $_POST['email'] ?? '';
+            $result = $this->authService->send_OTC_to_email($email);
+            if ($result['success']) {
+              header('Location: OTCLogin.php?action=OTClogin');
+              exit();
+            }
+            return $result['message'];
+        }
+        return '';
+    }
+
     public function handleLogout() {
         $this->clearAuthCookie();
         header('Location: index.php');

@@ -1,7 +1,7 @@
 
 <div class="container">
     <h2>Login</h2>
-    <form action= <?php echo $formAction; ?>  method="post">
+    <form action= <?php echo $loginAction; ?>  method="post">
         <label for="username">Username: </label>
         <input type="text" name="username" id="username" required>
         <label for="password">Password: </label>
