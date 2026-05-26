@@ -21,12 +21,19 @@ span{
     display: flex;
 }
 
-#nav_left{
+#nav-left{
     margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
-#nav_right{
+#nav-right{
+    display: flex;
     margin-left: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+    justify-content: center;
+    align-items: center;
 }
 
 #nav a:hover{
@@ -38,6 +45,7 @@ span{
 }
 #nav a{
     padding: 5px;
+    margin-left: 10px;
     color: white;
     text-decoration: none;
 }
@@ -73,7 +81,7 @@ input:-webkit-autofill{
     width: auto;
     height: 1.5rem;
     border-radius: 43%;
-    margin-right: 10px;
+    padding: 3px;
 }
 .centerY{
   margin-top: auto;
@@ -85,4 +93,8 @@ input:-webkit-autofill{
     width: min-content;
     padding: 10px;
     margin: 10px;
+}
+.full{
+    width: max(95%, 400px);
+    margin-bottom: 0;
 }

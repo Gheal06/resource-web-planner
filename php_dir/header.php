@@ -20,17 +20,17 @@ require_once "index.css"     // de modificat ca sa poata da cache
 <body>
     <div id="page">
     <div id="nav">
-        <div id="nav_left">
+        <div id="nav-left">
             <a href="index.php">Home</a>
         </div>
-        <div id="nav_right">
+        <div id="nav-right">
             <?php if(!$currentUser): ?>
-              <a href="login.php">Login</a>
-              <a href="register.php">Register</a>
+              <a href="login.php" class="centerY">Login</a>
+              <a href="register.php" class="centerY">Register</a>
             <?php else: ?>
-              <img class = "gravatar-image centerY" src="<?php echo $gravatarService->getGravatarUrl($currentUser); ?>" alt="">
-              <span><?php echo htmlspecialchars($currentUser);?></span>
-            <a href="logout.php">Logout</a>
+              <img class="gravatar-image centerY" src="<?php echo $gravatarService->getGravatarUrl($currentUser); ?>" alt="">
+              <a href="account.php" class="centerY"><?php echo htmlspecialchars($currentUser);?></a>
+            <a href="logout.php" class="centerY">Logout</a>
             <?php endif; ?>
         </div>
     </div>
