@@ -12,7 +12,12 @@ class DashboardController {
         return $this->inventoryModel->getUserReadableInventoryTableIDs($username);
     }
     public function getUserReadableInventoryTables($username) {
-        return $this->inventoryModel->getUserReadableInventoryTables($username);
+        $ids = $this->inventoryModel->getUserReadableInventoryTableIDs($username);
+        $inventories = array();
+        foreach ($ids as $id) {
+            $inventories[] = $this->inventoryModel->getInventoryTableById($id);
+        }
+        return $inventories;
     }
 }
 ?>
