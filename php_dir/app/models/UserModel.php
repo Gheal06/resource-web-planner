@@ -21,6 +21,9 @@ class UserModel {
     public function create($username, $email, $password_hash) {
         return pg_query_params($this->conn, "INSERT INTO user_table (username, email, password_hash) VALUES ($1, $2, $3)", array($username, $email, $password_hash));
     }
+    public function update_password($username, $password_hash) {
+        return pg_query_params($this->conn, "UPDATE user_table SET password_hash = $1 WHERE username = $2", array($password_hash, $username));
+    }
 }
 
 ?>
