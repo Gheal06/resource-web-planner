@@ -18,11 +18,24 @@ class UserModel {
         return pg_fetch_assoc($res);
     }
 
-    public function create($username, $email, $password_hash) {
-        return pg_query_params($this->conn, "INSERT INTO user_table (username, email, password_hash) VALUES ($1, $2, $3)", array($username, $email, $password_hash));
+    public function register($username, $email, $password) {
+        $res = pg_query_params($this->conn, "CALL register_user($1, $2, $3)", array($username, $email, $password));
+        if ($res === false) {
+            return array('success' => false, 'message' => pg_last_error($this->conn));
+        }
+        return array('success' => true, 'message' => 'Registration successful.');
     }
-    public function update_password($username, $password_hash) {
-        return pg_query_params($this->conn, "UPDATE user_table SET password_hash = $1 WHERE username = $2", array($password_hash, $username));
+    public function authenticate_user($username, $password) {
+        $res = pg_query_params($this->conn, "SELECT authenticate_user($1, $2) AS ok", array($username, $password));
+        if (!$res){
+          echo pg_last_error($this->conn);
+          return false;
+        }
+        return pg_fetch_assoc($res)['ok'] == 't';
+    }
+    public function change_password($username, $password) {
+        $res = pg_query_params($this->conn, "SELECT change_user_password($1, $2)", array($username, $password));
+        return $res && pg_affected_rows($res) > 0;
     }
 }
 
