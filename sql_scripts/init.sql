@@ -17,6 +17,7 @@ CREATE TABLE password_recovery_codes (
     expires_at            TIMESTAMP NOT NULL
 );
 
+
 CREATE TABLE inventory_table (
     id                     BIGSERIAL PRIMARY KEY,
     name                   VARCHAR(255) NOT NULL,
@@ -40,5 +41,3 @@ CREATE TABLE resources_table (
     unit                   VARCHAR(50) NOT NULL, -- ce inseamna "o unitate" in contextul acestei resurse
     inventory_id           BIGINT NOT NULL REFERENCES inventory_table(id) ON DELETE CASCADE
 );
-
-COMMIT;
