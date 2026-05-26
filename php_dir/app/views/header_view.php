@@ -15,6 +15,7 @@
     <div id="page">
     <div id="nav">
         <div id="nav-left">
+            <img src="favicon.ico">
             <a href="index.php">Home</a>
         </div>
         <div id="nav-right">
