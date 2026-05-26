@@ -1,10 +1,10 @@
 <?php
 require_once "conn.php";
 require_once "app/controllers/AuthController.php";
-require_once "app/controllers/DashboardController.php";
+require_once "app/controllers/InventoryController.php";
 
 $controller = new AuthController($connection);
-$dashboardController = new DashboardController($connection);
+$inventoryController = new InventoryController($connection);
 $action = $_GET['action'] ?? '';
 $currentUser = $controller->getCurrentUser();
 

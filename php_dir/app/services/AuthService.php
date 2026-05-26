@@ -17,7 +17,7 @@ class AuthService {
     public function register($username, $email, $password) {
         if ($this->userModel->register($username, $email, $password)) {
             $token = $this->create_token_for_user($username);            
-            return array('success' => true, 'message' => 'Registration successful.');
+            return array('success' => true, 'message' => 'Registration successful.', 'token' => $token, 'user' => $username);
         }
         return array('success' => false, 'message' => 'Registration failed.');
     }
@@ -35,8 +35,11 @@ class AuthService {
         $user = $this->userModel->findByUsername($username);
         if (!$user) return array('success' => false, 'message' => 'Invalid username or code.');
         $tokenData = $this->passwordRecoveryTokenModel->findByUsername($user['id']);
-        if (!$tokenData || $tokenData['code'] !== $code || strtotime($tokenData['expires_at']) < time()) {
+        if (!$tokenData || $tokenData['code'] !== $code){
             return array('success' => false, 'message' => 'Invalid username or code.');
+        }
+        if (strtotime($tokenData['expires_at']) < time()) {
+            return array('success' => false, 'message' => 'This code has expired. Please request a new one.');
         }
         $this->passwordRecoveryTokenModel->create($user['id'], '', date('Y-m-d H:i:s')); // șterge codul
         $token = $this->create_token_for_user($user['username']);
@@ -81,7 +84,7 @@ class AuthService {
 
     public function send_OTC_to_email($user_email){
         $user = $this->userModel->findByEmail($user_email);
-        if (!$user) return array('success' => false, 'message' => 'User not found.');
+        if (!$user) return array('success' => false, 'message' => 'No account with this email.');
         $codeData = $this->create_password_recovery_code($user['username']);
         if (!$codeData['success']) {
             return array('success' => false, 'message' => 'Failed to create recovery code.');

@@ -1,19 +1,11 @@
 <?php
-require_once "conn.php";
-require_once "app/controllers/AuthController.php";
-require_once "app/controllers/InventoryController.php";
 
-$controller = new AuthController($connection);
-$inventoryController = new InventoryController($connection);
-$action = $_GET['action'] ?? '';
-$currentUser = $controller->getCurrentUser();
-$message = '';
-$view = null;
-$inventoryTableIDs = array();
+require_once "header.php";
 
 if ($action === 'login') {
     $message = $controller->handleLogin();
     $view = 'app/views/login_view.php';
+    $formAction = 'index.php?action=login';
 } elseif ($action === 'register') {
     $message = $controller->handleRegister();
     $view = 'app/views/register_view.php';
@@ -26,7 +18,7 @@ if ($action === 'login') {
     }
 }
 
-require_once "header.php";
+require_once __DIR__ . '/app/views/header_view.php';
 
 if ($view) {
     require $view;
