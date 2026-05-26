@@ -4,7 +4,7 @@ require_once "header.php";
 
 {
   if ($currentUser) {
-      $inventoryTableIDs = $inventoryController->getUserReadableInventoryTables($currentUser);
+      $inventoryTableIDs = $inventoryController->getUserReadableInventories($currentUser);
       $view = 'app/views/dashboard_view.php';
   }
 }

@@ -48,6 +48,7 @@ services:
       - MAIL_PASS=wawvysunvwurrsie 
       - MAIL_FROM=rwp.no.reply@gmail.com
       - MAIL_DEBUG=0
+      - EXCHANGERATE_API_KEY=fb8b38696a4eef5aea9a6023
 
 networks:
   rwp-net:
