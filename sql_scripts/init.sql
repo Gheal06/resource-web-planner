@@ -1,14 +1,22 @@
 DROP TABLE IF EXISTS resources_table;
 DROP TABLE IF EXISTS user_table_permission;
 DROP TABLE IF EXISTS inventory_table;
+DROP TABLE IF EXISTS password_recovery_codes;
 DROP TABLE IF EXISTS user_table;
-DROP TABLE IF EXISTS users;
 CREATE TABLE user_table (
     id                    BIGSERIAL PRIMARY KEY,
     username              VARCHAR(255) UNIQUE NOT NULL,
     email                 VARCHAR(255) UNIQUE NOT NULL, 
     password_hash         VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE password_recovery_codes (
+    id                    BIGSERIAL PRIMARY KEY,
+    user_id               BIGINT NOT NULL REFERENCES user_table(id) ON DELETE CASCADE,
+    code                  VARCHAR(255) NOT NULL,
+    expires_at            TIMESTAMP NOT NULL
+);
+
 
 CREATE TABLE inventory_table (
     id                     BIGSERIAL PRIMARY KEY,
