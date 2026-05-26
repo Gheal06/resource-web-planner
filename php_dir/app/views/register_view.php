@@ -1,7 +1,7 @@
 
 <div class="container">
     <h2>Register</h2>
-    <form action="index.php?action=register" method="post">
+    <form action= <?php echo $registerAction; ?>  method="post">
         <label for="username">Username: </label>
         <input type="text" name="username" id="username" required>
         <label for="email">Email: </label>

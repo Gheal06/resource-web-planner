@@ -4,10 +4,10 @@
     require_once "app/controllers/InventoryController.php";
     require_once "app/services/GravatarService.php";
     
-    $controller = new AuthController($connection);
+    $authController = new AuthController($connection);
     $inventoryController = new InventoryController($connection);
     $action = $_GET['action'] ?? '';
-    $currentUser = $controller->getCurrentUser();
+    $currentUser = $authController->getCurrentUser();
     $message = '';
     $view = null;
     $inventoryTableIDs = array();
