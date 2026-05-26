@@ -22,11 +22,8 @@ CREATE TABLE user_table_permission (
     id                     BIGSERIAL PRIMARY KEY,
     user_id                BIGINT NOT NULL REFERENCES user_table(id) ON DELETE CASCADE,
     inventory_id           BIGINT NOT NULL REFERENCES inventory_table(id) ON DELETE CASCADE,
-    can_insert             BOOLEAN NOT NULL DEFAULT FALSE,
-    can_update             BOOLEAN NOT NULL DEFAULT FALSE,
-    can_delete             BOOLEAN NOT NULL DEFAULT FALSE,
-    can_read               BOOLEAN NOT NULL DEFAULT FALSE,
-    CHECK (can_read OR NOT (can_insert OR can_update OR can_delete))
+    permissions            INT NOT NULL DEFAULT 0, -- insert update delete read
+    CHECK ((permissions & 1) > 0 OR (permissions & 14) = 0)
 );
 
 CREATE TABLE resources_table (
