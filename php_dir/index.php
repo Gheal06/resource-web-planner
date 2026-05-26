@@ -4,7 +4,7 @@ require_once "app/controllers/AuthController.php";
 require_once "app/controllers/DashboardController.php";
 
 $controller = new AuthController($connection);
-$dashboardController = new DashboardController($connection);
+$dashboardController = new InventoryController($connection);
 $action = $_GET['action'] ?? '';
 $currentUser = $controller->getCurrentUser();
 $message = '';
