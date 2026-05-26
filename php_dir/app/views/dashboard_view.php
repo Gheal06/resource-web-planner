@@ -3,13 +3,42 @@
     <h2>Dashboard</h2>
     <p>Welcome, <?php echo htmlspecialchars($currentUser ?? ''); ?>!</p>
     <p>You have acces to <?php echo count($inventoryTableIDs); ?> inventories:</p>
-    <p><a href="index.php?action=create-inventory">Create new inventory</a></p>
-    <ul>
+    <table id="inventory-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Test</td>
+            <td>Description</td>
+        </tr>
+        <tr>
+            <td>Test</td>
+            <td>Description</td>
+        </tr>
+        <tr>
+            <td>Test</td>
+            <td>Description</td>
+        </tr>
+        <tr>
+            <td>Test</td>
+            <td>Description</td>
+        </tr>
         <?php foreach ($inventoryTableIDs as $inv): ?>
-            <li><?php echo $inv['name']; ?></li>
-            <li><?php echo "**" . $inv['description'] . "**"; ?></li>
+            <tr>
+                <td><?php echo $inv['name']; ?></td>
+                <td><?php echo "**" . $inv['description'] . "**"; ?></td>
+            </tr>
         <?php endforeach; ?>
-    </ul>
+        <tr>
+            <td><a href="index.php?action=create-inventory">Create new inventory</a></td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
     <!-- <p><a href="index.php?action=logout">Logout</a></p> -->
 </div>
 <?php require_once __DIR__ . '/../../footer.php'; ?>
