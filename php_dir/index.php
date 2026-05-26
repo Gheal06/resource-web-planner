@@ -1,10 +1,10 @@
 <?php
 require_once "conn.php";
 require_once "app/controllers/AuthController.php";
-require_once "app/controllers/DashboardController.php";
+require_once "app/controllers/InventoryController.php";
 
 $controller = new AuthController($connection);
-$dashboardController = new InventoryController($connection);
+$inventoryController = new InventoryController($connection);
 $action = $_GET['action'] ?? '';
 $currentUser = $controller->getCurrentUser();
 $message = '';
@@ -21,7 +21,7 @@ if ($action === 'login') {
     $controller->handleLogout();
 } else {
     if ($currentUser) {
-        $inventoryTableIDs = $dashboardController->getUserReadableInventoryTables($currentUser);
+        $inventoryTableIDs = $inventoryController->getUserReadableInventoryTables($currentUser);
         $view = 'app/views/dashboard_view.php';
     }
 }
