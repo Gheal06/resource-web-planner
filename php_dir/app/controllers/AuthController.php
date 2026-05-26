@@ -31,7 +31,7 @@ class AuthController {
             $email    = $_POST['email'] ?? '';
             $result = $this->authService->register($username, $email, $password);
             if ($result['success']) {
-                $this->setAuthCookie($this->authService->createTokenForUser($username));
+                $this->setAuthCookie($this->authService->create_token_for_user($username));
                 header('Location: index.php');
                 exit();
             }

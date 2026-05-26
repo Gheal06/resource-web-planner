@@ -30,7 +30,7 @@
         <?php foreach ($inventoryTableIDs as $inv): ?>
             <tr>
                 <td><?php echo $inv['name']; ?></td>
-                <td><?php echo "**" . $inv['description'] . "**"; ?></td>
+                <td><?php echo "<it>" . $inv['description'] . "<it>"; ?></td>
             </tr>
         <?php endforeach; ?>
         <tr>

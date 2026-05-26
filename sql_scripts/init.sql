@@ -7,7 +7,7 @@ CREATE TABLE user_table (
     id                    BIGSERIAL PRIMARY KEY,
     username              VARCHAR(255) UNIQUE NOT NULL,
     email                 VARCHAR(255) UNIQUE NOT NULL, 
-    password_hash         VARCHAR(255) NOT NULL
+    password_hash         VARCHAR(64) NOT NULL
 );
 
 CREATE TABLE password_recovery_codes (
