@@ -18,7 +18,7 @@ require_once "index.css"     // de modificat ca sa poata da cache
         </div>
         <div id="nav-right">
             <?php if(!$currentUser): ?>
-              <a href=<?php echo 'login.php'; ?> class="centerY">Login</a>
+              <a href="login.php" class="centerY">Login</a>
               <a href="register.php" class="centerY">Register</a>
             <?php else: ?>
               <img class="gravatar-image centerY" src="<?php echo $gravatarService->getGravatarUrl($currentUser); ?>" alt="">

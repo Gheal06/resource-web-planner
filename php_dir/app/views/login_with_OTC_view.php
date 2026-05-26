@@ -1,13 +1,13 @@
 
 <div class="container">
     <h2>Login</h2>
-    <form action="index.php?action=login" method="post">
+    <form action= <?php echo $OTCLoginAction; ?>  method="post">
         <label for="username">Username: </label>
         <input type="text" name="username" id="username" required>
         <label for="OTC">OTC: </label>
         <input type="password" name="OTC" id="OTC" required>
         <div style="text-align:center; margin-top:10px;">
-            <input type="submit" name="login" value="Login">
+            <input type="submit" name="OTC_login" value="Login">
         </div>
     </form>
     <?php if (!empty(
