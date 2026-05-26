@@ -15,26 +15,18 @@ class AuthService {
     }
 
     public function register($username, $email, $password) {
-        if ($this->userModel->findByUsername($username)) {
-            return array('success' => false, 'message' => 'Username already exists.');
-        }
-        if ($this->userModel->findByEmail($email)) {
-            return array('success' => false, 'message' => 'This email is already in use.');
-        }
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        $ok = $this->userModel->create($username, $email, $hash);
-        if ($ok) {
+        if ($this->userModel->register($username, $email, $password)) {
+            $token = $this->create_token_for_user($username);            
             return array('success' => true, 'message' => 'Registration successful.');
         }
-        return array('success' => false, 'message' => pg_last_error());
+        return array('success' => false, 'message' => 'Registration failed.');
     }
 
     public function login($username, $password) {
-        $user = $this->userModel->findByUsername($username);
-        if (!$user) return array('success' => false, 'message' => 'Invalid username or password.');
-        if (password_verify($password, $user['password_hash'])) {
+        // echo $this->userModel->authenticate_user($username, $password);
+        if ($this->userModel->authenticate_user($username, $password)) {
             $token = $this->create_token_for_user($username);
-            return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $user['username']);
+            return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $username);
         }
         return array('success' => false, 'message' => 'Invalid username or password.');
     }
@@ -51,13 +43,9 @@ class AuthService {
         return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $user['username']);
     }   
 
-    public function reset_password($username, $password) {
-        $user = $this->userModel->findByUsername($username);
-        if (!$user) return array('success' => false, 'message' => 'User not found.');
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        $res = $this->userModel->update_password($username, $hash);
-        if ($res) {
-            return array('success' => true, 'message' => 'Password reset successful.');
+    public function change_password($username, $password) {
+        if ($this->userModel->change_password($username, $password)) {
+            return array('success' => true, 'message' => 'Password changed successfully.');
         }
         return array('success' => false, 'message' => pg_last_error());
     }
