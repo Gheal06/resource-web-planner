@@ -9,6 +9,7 @@ CREATE TABLE user_table (
     email                 VARCHAR(255) UNIQUE NOT NULL, 
     password_hash         VARCHAR(255) NOT NULL
 );
+COMMIT;
 
 CREATE TABLE inventory_table (
     id                     BIGSERIAL PRIMARY KEY,
@@ -30,6 +31,8 @@ CREATE TABLE resources_table (
     name                   VARCHAR(255) NOT NULL,
     description            TEXT,
     quantity               DOUBLE PRECISION NOT NULL,
-    unit                   VARCHAR(50) NOT NULL,
+    unit                   VARCHAR(50) NOT NULL, -- ce inseamna "o unitate" in contextul acestei resurse
     inventory_id           BIGINT NOT NULL REFERENCES inventory_table(id) ON DELETE CASCADE
 );
+
+COMMIT;

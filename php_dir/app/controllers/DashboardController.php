@@ -9,10 +9,10 @@ class DashboardController {
     }
 
     public function getUserReadableInventoryTableIDs($username) {
-        return $this->inventoryModel->getUserReadableInventoryTableIDs($username);
+        return $this->inventoryModel->getUserInventoryIDsByMask($username, 1); // 1 = can_read
     }
     public function getUserReadableInventoryTables($username) {
-        $ids = $this->inventoryModel->getUserReadableInventoryTableIDs($username);
+        $ids = $this->getUserReadableInventoryTableIDs($username);
         $inventories = array();
         foreach ($ids as $id) {
             $inventories[] = $this->inventoryModel->getInventoryTableById($id);
