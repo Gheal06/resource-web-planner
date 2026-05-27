@@ -71,7 +71,6 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
     }
 
     public function createInventory($name, $description, $username) {
-      // start transaction
       $this->inventoryModel->beginTransaction();
       try {
         $owner = $this->userModel->findByUsername($username);
@@ -217,9 +216,6 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return array('success' => true, 'message' => 'Amount set.');
     }
 
-    /**
-     * Return tags for a resource (requires read permission on containing inventory)
-     */
     public function getTagsForResource($username, $resource_id) {
       $resource = $this->resurseModel->getResurseById($resource_id);
       if (!$resource) return $this->notFound('Resource not found.');
@@ -227,42 +223,23 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return $this->resurseModel->getTagsForResource($resource_id);
     }
 
-    /**
-     * Return resources in inventory that match ALL provided tag IDs (intersection)
-     */
     public function getResourcesByTags($username, $inventory_id, $tag_ids) {
       if (!$this->canRead($username, $inventory_id)) return $this->accessDenied();
       return $this->resurseModel->getResourcesByTags($inventory_id, $tag_ids);
     }
 
-    /**
-     * Return all tags in the system
-     */
     public function getAllTags() {
       return $this->resurseModel->getAllTags();
     }
 
-    /**
-     * Return all currencies from the database
-     */
     public function getAllCurrencies() {
       return $this->currencyModel->getAllCurrencies();
     }
 
-    /**
-     * Get a single tag by id
-     */
     public function getTagById($tag_id) {
       return $this->resurseModel->getTagById($tag_id);
     }
 
-    /**
-     * Create a new tag with foreground and background colors
-     * $name: unique tag name (required)
-     * $foreground_color: hex color string e.g. '#000000' (required)
-     * $background_color: hex color string e.g. '#FFFFFF' (required)
-     * $description: optional description
-     */
     public function createTag($name, $foreground_color, $background_color, $description = null) {
       $tag_id = $this->resurseModel->createTag($name, $foreground_color, $background_color, $description);
       if ($tag_id === false) {
@@ -271,9 +248,6 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return array('success' => true, 'message' => 'Tag created.', 'id' => $tag_id);
     }
 
-    /**
-     * Update an existing tag (colors and metadata)
-     */
     public function updateTag($tag_id, $name = null, $description = null, $foreground_color = null, $background_color = null) {
       $res = $this->resurseModel->updateTag($tag_id, $name, $description, $foreground_color, $background_color);
       if ($res === false) {
