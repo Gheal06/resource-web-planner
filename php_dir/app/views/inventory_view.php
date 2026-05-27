@@ -1,8 +1,8 @@
 
 <div class="container full">
     <h2>Dashboard</h2>
-    <h3>[WIP] nume inventar</h3>
-    <?php require_once __DIR__ . '/currency_view.php'; ?>
+    <h3><?php echo htmlspecialchars($inventory['name'] ?? 'Inventory'); ?></h3>
+    <?php require_once __DIR__ . '/fonduri_view.php'; ?>
     <div class="split-container3 centerX">
     <?php require_once __DIR__ . '/resources_view.php'; ?>
     <?php require_once __DIR__ . '/transactions_view.php'; ?>

@@ -11,26 +11,10 @@
             </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>Test</td>
-            <td>Description</td>
-        </tr>
-        <tr>
-            <td>Test</td>
-            <td>Description</td>
-        </tr>
-        <tr>
-            <td>Test</td>
-            <td>Description</td>
-        </tr>
-        <tr>
-            <td>Test</td>
-            <td>Description</td>
-        </tr>
         <?php foreach ($inventoryTableIDs as $inv): ?>
             <tr>
-                <td><?php echo $inv['name']; ?></td>
-                <td><?php echo "<it>" . $inv['description'] . "<it>"; ?></td>
+                <td><a href="inventory.php?inventory_id=<?php echo urlencode($inv['id']); ?>"><?php echo htmlspecialchars($inv['name']); ?></a></td>
+                <td><?php echo htmlspecialchars($inv['description'] ?? ''); ?></td>
             </tr>
         <?php endforeach; ?>
         <tr>

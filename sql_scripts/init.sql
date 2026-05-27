@@ -31,7 +31,7 @@ CREATE TABLE user_inventory_permission (
     id                     BIGSERIAL PRIMARY KEY,
     user_id                BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
-    permissions            INT NOT NULL DEFAULT 0, -- insert update delete read
+    permissions            INT NOT NULL DEFAULT 0, -- edit update delete read
     CHECK ((permissions & 1) > 0 OR (permissions & 14) = 0)
 );
 
@@ -39,7 +39,7 @@ CREATE TABLE resources (
     id                     BIGSERIAL PRIMARY KEY,
     name                   VARCHAR(255) NOT NULL,
     description            TEXT,
-    quantity               DOUBLE PRECISION NOT NULL,
+    quantity               DOUBLE PRECISION NOT NULL CHECK (quantity >= 0),
     unit                   VARCHAR(50) NOT NULL, -- ce inseamna "o unitate" in contextul acestei resurse
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE
 );
