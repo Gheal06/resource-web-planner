@@ -213,5 +213,30 @@ require_once __DIR__ . "/../models/ResurseModel.php";
       }
       return array('success' => true, 'message' => 'Amount set.');
     }
+
+    /**
+     * Return tags for a resource (requires read permission on containing inventory)
+     */
+    public function getTagsForResource($username, $resource_id) {
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      if (!$resource) return $this->notFound('Resource not found.');
+      if (!$this->canRead($username, $resource['inventory_id'])) return $this->accessDenied();
+      return $this->resurseModel->getTagsForResource($resource_id);
+    }
+
+    /**
+     * Return resources in inventory that match ALL provided tag IDs (intersection)
+     */
+    public function getResourcesByTags($username, $inventory_id, $tag_ids) {
+      if (!$this->canRead($username, $inventory_id)) return $this->accessDenied();
+      return $this->resurseModel->getResourcesByTags($inventory_id, $tag_ids);
+    }
+
+    /**
+     * Return all tags in the system
+     */
+    public function getAllTags() {
+      return $this->resurseModel->getAllTags();
+    }
   }
 ?>

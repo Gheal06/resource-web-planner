@@ -1,4 +1,6 @@
 DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS has_tag;
+DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS fonduri;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS resources;
@@ -43,6 +45,19 @@ CREATE TABLE resources (
     quantity               DOUBLE PRECISION NOT NULL CHECK (quantity >= 0),
     unit                   VARCHAR(50) NOT NULL, -- ce inseamna "o unitate" in contextul acestei resurse
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tags (
+    id                     BIGSERIAL PRIMARY KEY,
+    name                   VARCHAR(255) NOT NULL UNIQUE,
+    description            TEXT
+);
+
+CREATE TABLE has_tag (
+    id                     BIGSERIAL PRIMARY KEY,
+    resource_id            BIGINT NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+    tag_id                 BIGINT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    UNIQUE(resource_id, tag_id)
 );
 
 CREATE TABLE currencies (
