@@ -29,11 +29,8 @@
         <td>01, 00:00</td>
     </tr>
     <tr>
-        <td><a href="index.php?action=create-transaction">Create new transaction</a></td>
+        <td colspan="4"><a href="index.php?action=create-transaction">Create new transaction</a></td>
         <!-- de pus id-ul inventory-ului in linkul de mai sus -->
-        <td></td>
-        <td></td>
-        <td></td>
     </tr>
     </tbody>
 </table>

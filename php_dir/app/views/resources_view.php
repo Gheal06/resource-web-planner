@@ -33,11 +33,8 @@
     </tr>
 
     <tr>
-        <td><a href="index.php?action=create-resource">Create new resource</a></td>
+        <td colspan="3"><a href="index.php?action=create-resource">Create new resource</a></td>
         <!-- de pus id-ul inventory-ului in linkul de mai sus -->
-
-        <td></td>
-        <td></td>
     </tr>
     </tbody>
 </table>
