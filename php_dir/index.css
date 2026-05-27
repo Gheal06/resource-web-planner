@@ -168,7 +168,9 @@ thead tr{
 .sep{
     width: 100%;
     height: 1px;
-    background-color: #DDDDDD;
+    background-color: #AAAAAA;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 textarea{

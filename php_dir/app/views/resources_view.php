@@ -22,7 +22,7 @@
     <?php endforeach; ?>
 
     <tr>
-        <td colspan="3"><a href="index.php?action=create-resource&inventory_id=<?php echo urlencode($inventory_id); ?>">Create new resource</a></td>
+        <td colspan="3"><a href="new_resource.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Create new resource</a></td>
     </tr>
     </tbody>
 </table>
