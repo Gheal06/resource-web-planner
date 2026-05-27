@@ -44,7 +44,8 @@ CREATE TABLE resources (
     description            TEXT,
     quantity               DOUBLE PRECISION NOT NULL CHECK (quantity >= 0),
     unit                   VARCHAR(50) NOT NULL, -- ce inseamna "o unitate" in contextul acestei resurse
-    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE
+    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
+    UNIQUE(name, inventory_id) -- toate resursele din acelasi inventory au nume diferite
 );
 
 CREATE TABLE tags (
