@@ -21,5 +21,21 @@ class InventoryManagementController {
     public function getUserInventoriesByMask($username, $permission_mask) {
         return $this->inventoryManagementService->getUserInventoriesByMask($username, $permission_mask);
     }
+    public function getUserInventoryById($id) {
+        return $this->inventoryManagementService->getUserInventoryById($id);
+    }
+    public function getFonduriForInventory($username, $inventory_id) {
+        if (!$this->inventoryManagementService->canRead($username, $inventory_id)) {
+            return array();
+        }
+        return $this->inventoryManagementService->getFonduriByInventoryId($inventory_id);
+    }
+
+    public function getResourcesForInventory($username, $inventory_id) {
+        if (!$this->inventoryManagementService->canRead($username, $inventory_id)) {
+            return array();
+        }
+        return $this->inventoryManagementService->getResourcesByInventoryId($inventory_id);
+    }
 }
 ?>

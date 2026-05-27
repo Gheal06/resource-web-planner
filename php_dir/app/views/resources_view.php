@@ -9,32 +9,20 @@
         </tr>
     </thead>
     <tbody>
+    <?php
+        $inventory_id = $inventory['id'] ?? null;
+        $rows = $inventory_id ? $inventoryController->getResourcesForInventory($currentUser, $inventory_id) : array();
+        foreach ($rows as $row):
+    ?>
     <tr>
-        <td>Money (RON)</td>
-        <td>1234</td>
-        <td>Lei</td>
+        <td><?php echo htmlspecialchars($row['name']); ?></td>
+        <td><?php echo htmlspecialchars($row['quantity']); ?> <?php echo htmlspecialchars($row['unit']); ?></td>
+        <td><?php echo htmlspecialchars($row['description']); ?></td>
     </tr>
-    <tr>
-        <td>Money (EUR)</td>
-        <td>4321</td>
-        <td>Euro</td>
-    </tr>
+    <?php endforeach; ?>
 
     <tr>
-        <td>Test</td>
-        <td>Test</td>
-        <td>Test</td>
-    </tr>
-
-    <tr>
-        <td>Test</td>
-        <td>Test</td>
-        <td>Test</td>
-    </tr>
-
-    <tr>
-        <td colspan="3"><a href="index.php?action=create-resource">Create new resource</a></td>
-        <!-- de pus id-ul inventory-ului in linkul de mai sus -->
+        <td colspan="3"><a href="index.php?action=create-resource&inventory_id=<?php echo urlencode($inventory_id); ?>">Create new resource</a></td>
     </tr>
     </tbody>
 </table>
