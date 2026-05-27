@@ -18,8 +18,7 @@
             </tr>
         <?php endforeach; ?>
         <tr>
-            <td><a href="index.php?action=create-inventory">Create new inventory</a></td>
-            <td></td>
+            <td colspan="2"><a href="new_inventory.php">Create new inventory</a></td>
         </tr>
         </tbody>
     </table>

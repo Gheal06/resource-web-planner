@@ -170,3 +170,22 @@ thead tr{
     height: 1px;
     background-color: #DDDDDD;
 }
+
+textarea{
+    border: 1px #0000FF solid;
+    resize: none;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: 1rem;
+    width: max(100px, 100%);
+    margin-top: 10px;
+}
+textarea:focus{
+    background-color: #EEEEFF;
+}
+textarea:hover{
+    background-color: #EEEEFF;
+    border: 2px #5555FF solid;
+}
+.new-inventory{
+    width: max(200px, 50%)
+}
