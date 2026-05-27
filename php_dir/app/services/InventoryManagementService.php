@@ -122,7 +122,7 @@ require_once __DIR__ . "/../models/ResurseModel.php";
       return $res === null ? null : $res;
     }
 
-    public function addFonduri($username, $inventory_id, $amount, $currency_code) {
+    public function addFonduri($username, $inventory_id, $amount, $currency_code, $name = null, $description = null) {
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
       if ($fonduri) {
         if (!$this->canEdit($username, $inventory_id)) {
@@ -133,14 +133,14 @@ require_once __DIR__ . "/../models/ResurseModel.php";
           return $this->accessDenied();
         }
       }
-      $res = $this->fonduriModel->addFonduri($inventory_id, $amount, $currency_code);
+      $res = $this->fonduriModel->addFonduri($inventory_id, $amount, $currency_code, $name, $description);
       if ($res === false) {
         return array('success' => false, 'message' => 'Failed to add funds.');
       }
       return array('success' => true, 'message' => 'Funds added.');
     }
 
-    public function setFonduri($username, $inventory_id, $amount, $currency_code) {
+    public function setFonduri($username, $inventory_id, $amount, $currency_code, $name = null, $description = null) {
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
       if ($fonduri) {
         if (!$this->canEdit($username, $inventory_id)) {
@@ -151,7 +151,7 @@ require_once __DIR__ . "/../models/ResurseModel.php";
           return $this->accessDenied();
         }
       }
-      $res = $this->fonduriModel->setFonduri($inventory_id, $amount, $currency_code);
+      $res = $this->fonduriModel->setFonduri($inventory_id, $amount, $currency_code, $name, $description);
       if ($res === false) {
         return array('success' => false, 'message' => 'Failed to set funds.');
       }

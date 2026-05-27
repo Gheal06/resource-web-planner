@@ -68,7 +68,9 @@ CREATE TABLE fonduri (
     id                     BIGSERIAL PRIMARY KEY,
     amount                 DOUBLE PRECISION NOT NULL,
     currency_code          VARCHAR(3) NOT NULL REFERENCES currencies(code),
-    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE
+    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
+    name                   VARCHAR(255),
+    description            TEXT
 );
 
 CREATE TABLE transactions (
