@@ -38,7 +38,7 @@ class AuthService {
             $token = $this->create_token_for_user($username);
             return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $username);
         }
-        return array('success' => false, 'message' => 'Invalid username or password.');
+        return array('success' => false, 'message' => 'Invalid username or password');
     }
 
     public function login_with_OTC($username, $code){
