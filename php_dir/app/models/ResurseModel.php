@@ -68,9 +68,6 @@ class ResurseModel {
         return array('success' => true, 'message' => 'Amount set.');
     }
 
-    /**
-     * Get all tags for a resource
-     */
     public function getTagsForResource($resource_id) {
         $sql = "SELECT t.* FROM tags t JOIN has_tag ht ON ht.tag_id = t.id WHERE ht.resource_id = $1";
         $res = @pg_query_params($this->connection, $sql, array($resource_id));
@@ -82,10 +79,6 @@ class ResurseModel {
         return $rows;
     }
 
-    /**
-     * Get resources by a list of tag IDs (intersection - resource must have ALL tags)
-     * $tag_ids is an array of tag IDs
-     */
     public function getResourcesByTags($inventory_id, $tag_ids) {
         if (empty($tag_ids)) return array();
         
@@ -113,9 +106,6 @@ class ResurseModel {
         return $rows;
     }
 
-    /**
-     * Get all tags in the system
-     */
     public function getAllTags() {
         $res = @pg_query_params($this->connection, "SELECT * FROM tags ORDER BY name", array());
         if (!$res) return array();
@@ -124,6 +114,56 @@ class ResurseModel {
             $rows[] = $row;
         }
         return $rows;
+    }
+
+    public function getTagById($tag_id) {
+        $res = @pg_query_params($this->connection, "SELECT * FROM tags WHERE id = $1", array($tag_id));
+        if (!$res) return null;
+        return pg_fetch_assoc($res);
+    }
+
+    public function createTag($name, $foreground_color, $background_color, $description = null) {
+        if (!$name || !$foreground_color || !$background_color) {
+            return false;
+        }
+        $res = @pg_query_params($this->connection,
+            "INSERT INTO tags (name, description, foreground_color, background_color) VALUES ($1, $2, $3, $4) RETURNING id",
+            array($name, $description, $foreground_color, $background_color)
+        );
+        if ($res === false) return false;
+        $row = pg_fetch_assoc($res);
+        return $row ? $row['id'] : false;
+    }
+
+    public function updateTag($tag_id, $name = null, $description = null, $foreground_color = null, $background_color = null) {
+        $updates = array();
+        $params = array();
+        $param_count = 1;
+
+        if ($name !== null) {
+            $updates[] = "name = \$" . $param_count++;
+            $params[] = $name;
+        }
+        if ($description !== null) {
+            $updates[] = "description = \$" . $param_count++;
+            $params[] = $description;
+        }
+        if ($foreground_color !== null) {
+            $updates[] = "foreground_color = \$" . $param_count++;
+            $params[] = $foreground_color;
+        }
+        if ($background_color !== null) {
+            $updates[] = "background_color = \$" . $param_count++;
+            $params[] = $background_color;
+        }
+
+        if (empty($updates)) return false;
+
+        $updates[] = "id = \$" . $param_count;
+        $params[] = $tag_id;
+
+        $sql = "UPDATE tags SET " . implode(", ", array_slice($updates, 0, -1)) . " WHERE id = \$" . $param_count;
+        return @pg_query_params($this->connection, $sql, $params);
     }
 }
 

@@ -24,7 +24,6 @@ class FonduriModel {
     }
 
     public function addFonduri($inventory_id, $amount, $currency_code, $name = null, $description = null) {
-        // Try to update existing row by increasing the amount
         $res = @pg_query_params($this->connection,
             "UPDATE fonduri SET amount = amount + $1 WHERE inventory_id = $2 AND currency_code = $3",
             array($amount, $inventory_id, $currency_code)
@@ -34,7 +33,6 @@ class FonduriModel {
             return $res;
         }
 
-        // If no row was updated, insert a new one (amount is the initial value)
         return @pg_query_params($this->connection,
             "INSERT INTO fonduri (amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5)",
             array($amount, $currency_code, $inventory_id, $name, $description)

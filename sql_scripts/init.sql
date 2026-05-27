@@ -51,7 +51,9 @@ CREATE TABLE resources (
 CREATE TABLE tags (
     id                     BIGSERIAL PRIMARY KEY,
     name                   VARCHAR(255) NOT NULL UNIQUE,
-    description            TEXT
+    description            TEXT,
+    foreground_color       VARCHAR(7) NOT NULL,
+    background_color       VARCHAR(7) NOT NULL
 );
 
 CREATE TABLE has_tag (

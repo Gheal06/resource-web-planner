@@ -50,8 +50,8 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->readPermissionMask);
     }
 
-    public function canInsert($username, $inventory_id) {
-      return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->insertPermissionMask);
+    public function canUpdate($username, $inventory_id) {
+      return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->updatePermissionMask);
     }
 
     public function canEdit($username, $inventory_id) {
@@ -70,8 +70,398 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return array('success' => false, 'message' => $message);
     }
 
+    private function getInventoryExportData($username, $inventory_id) {
+      if (!$this->canRead($username, $inventory_id)) {
+        return $this->accessDenied();
+      }
+
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return $this->notFound('Inventory not found.');
+      }
+
+      $exportInventory = array(
+        'id' => isset($inventory['id']) ? $inventory['id'] : null,
+        'name' => isset($inventory['name']) ? $inventory['name'] : null,
+        'description' => isset($inventory['description']) ? $inventory['description'] : null,
+      );
+
+      $funds = $this->getFonduriByInventoryId($inventory_id);
+      usort($funds, function ($left, $right) {
+        return strcmp((string)($left['currency_code'] ?? ''), (string)($right['currency_code'] ?? ''));
+      });
+
+      $exportFunds = array();
+      foreach ($funds as $fund) {
+        $exportFunds[] = array(
+          'id' => isset($fund['id']) ? $fund['id'] : null,
+          'inventory_id' => isset($fund['inventory_id']) ? $fund['inventory_id'] : null,
+          'amount' => isset($fund['amount']) ? $fund['amount'] : null,
+          'currency_code' => isset($fund['currency_code']) ? $fund['currency_code'] : null,
+          'name' => isset($fund['name']) ? $fund['name'] : null,
+          'description' => isset($fund['description']) ? $fund['description'] : null,
+        );
+      }
+
+      $resources = $this->getResourcesByInventoryId($inventory_id);
+      usort($resources, function ($left, $right) {
+        return (int)($left['id'] ?? 0) <=> (int)($right['id'] ?? 0);
+      });
+
+      $exportResources = array();
+      foreach ($resources as $resource) {
+        $tags = $this->resurseModel->getTagsForResource($resource['id']);
+        usort($tags, function ($left, $right) {
+          return strcmp((string)($left['name'] ?? ''), (string)($right['name'] ?? ''));
+        });
+
+        $exportTags = array();
+        foreach ($tags as $tag) {
+          $exportTags[] = array(
+            'id' => isset($tag['id']) ? $tag['id'] : null,
+            'name' => isset($tag['name']) ? $tag['name'] : null,
+            'description' => isset($tag['description']) ? $tag['description'] : null,
+            'foreground_color' => isset($tag['foreground_color']) ? $tag['foreground_color'] : null,
+            'background_color' => isset($tag['background_color']) ? $tag['background_color'] : null,
+          );
+        }
+
+        $exportResources[] = array(
+          'id' => isset($resource['id']) ? $resource['id'] : null,
+          'inventory_id' => isset($resource['inventory_id']) ? $resource['inventory_id'] : null,
+          'name' => isset($resource['name']) ? $resource['name'] : null,
+          'description' => isset($resource['description']) ? $resource['description'] : null,
+          'quantity' => isset($resource['quantity']) ? $resource['quantity'] : null,
+          'unit' => isset($resource['unit']) ? $resource['unit'] : null,
+          'tags' => $exportTags,
+        );
+      }
+
+      return array(
+        'success' => true,
+        'inventory' => $exportInventory,
+        'funds' => $exportFunds,
+        'resources' => $exportResources,
+      );
+    }
+
+    private function getExportFilename($inventory_id, $extension) {
+      return 'inventory-' . $inventory_id . '.' . $extension;
+    }
+
+    private function jsonEncodeExport($value) {
+      return json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+    }
+
+    private function jsonEncodeInline($value) {
+      return json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+    }
+
+    private function buildInventoryCsvContent($exportData) {
+      $handle = fopen('php://temp', 'r+');
+      if ($handle === false) {
+        return false;
+      }
+
+      fputcsv($handle, array('record_type', 'inventory_id', 'inventory_name', 'inventory_description', 'record_id', 'name', 'description', 'quantity', 'unit', 'currency_code', 'amount', 'tags_json'));
+
+      $inventory = $exportData['inventory'];
+      fputcsv($handle, array(
+        'inventory',
+        $inventory['id'],
+        $inventory['name'],
+        $inventory['description'],
+        $inventory['id'],
+        $inventory['name'],
+        $inventory['description'],
+        '',
+        '',
+        '',
+        '',
+        $this->jsonEncodeInline(array()),
+      ));
+
+      foreach ($exportData['funds'] as $fund) {
+        fputcsv($handle, array(
+          'fund',
+          $fund['inventory_id'],
+          $inventory['name'],
+          $inventory['description'],
+          $fund['id'],
+          $fund['name'],
+          $fund['description'],
+          '',
+          '',
+          $fund['currency_code'],
+          $fund['amount'],
+          $this->jsonEncodeInline(array()),
+        ));
+      }
+
+      foreach ($exportData['resources'] as $resource) {
+        fputcsv($handle, array(
+          'resource',
+          $resource['inventory_id'],
+          $inventory['name'],
+          $inventory['description'],
+          $resource['id'],
+          $resource['name'],
+          $resource['description'],
+          $resource['quantity'],
+          $resource['unit'],
+          '',
+          '',
+          $this->jsonEncodeInline($resource['tags']),
+        ));
+      }
+
+      rewind($handle);
+      $content = stream_get_contents($handle);
+      fclose($handle);
+      return $content;
+    }
+
+    private function buildInventorySummaryLines($exportData) {
+      $lines = array();
+      $inventory = $exportData['inventory'];
+
+      $lines[] = array('type' => 'title', 'text' => 'Inventory export: ' . $inventory['name']);
+      $lines[] = array('type' => 'body', 'text' => 'Inventory ID: ' . $inventory['id']);
+      if (!empty($inventory['description'])) {
+        $lines[] = array('type' => 'body', 'text' => 'Description: ' . $inventory['description']);
+      }
+
+      $lines[] = array('type' => 'section', 'text' => 'Funds');
+      if (empty($exportData['funds'])) {
+        $lines[] = array('type' => 'body', 'text' => 'No funds recorded.');
+      } else {
+        foreach ($exportData['funds'] as $fund) {
+          $fundLabel = trim(($fund['currency_code'] ?? '') . ' ' . ($fund['amount'] ?? ''));
+          $fundName = !empty($fund['name']) ? ' - ' . $fund['name'] : '';
+          $lines[] = array('type' => 'body', 'text' => '- ' . $fundLabel . $fundName);
+          if (!empty($fund['description'])) {
+            $lines[] = array('type' => 'body', 'text' => '  Description: ' . $fund['description']);
+          }
+        }
+      }
+
+      $lines[] = array('type' => 'section', 'text' => 'Resources');
+      if (empty($exportData['resources'])) {
+        $lines[] = array('type' => 'body', 'text' => 'No resources recorded.');
+      } else {
+        foreach ($exportData['resources'] as $resource) {
+          $lines[] = array('type' => 'body', 'text' => '- ' . $resource['name'] . ' (' . $resource['quantity'] . ' ' . $resource['unit'] . ')');
+          if (!empty($resource['description'])) {
+            $lines[] = array('type' => 'body', 'text' => '  Description: ' . $resource['description']);
+          }
+
+          $tagNames = array();
+          foreach ($resource['tags'] as $tag) {
+            $tagNames[] = $tag['name'];
+          }
+
+          $lines[] = array('type' => 'body', 'text' => '  Tags: ' . (empty($tagNames) ? 'none' : implode(', ', $tagNames)));
+        }
+      }
+
+      return $lines;
+    }
+
+    private function renderInventoryImage($exportData, $format) {
+      if (!function_exists('imagecreatetruecolor')) {
+        return false;
+      }
+
+      $lines = $this->buildInventorySummaryLines($exportData);
+      $bodyFont = 3;
+      $titleFont = 5;
+      $sectionFont = 4;
+      $width = 1400;
+      $leftMargin = 40;
+      $rightMargin = 40;
+      $topMargin = 30;
+      $bottomMargin = 30;
+      $lineGap = 6;
+      $bodyLineHeight = imagefontheight($bodyFont) + $lineGap;
+      $titleLineHeight = imagefontheight($titleFont) + 14;
+      $sectionLineHeight = imagefontheight($sectionFont) + 12;
+
+      $wrappedLines = array();
+      foreach ($lines as $line) {
+        $text = isset($line['text']) ? (string)$line['text'] : '';
+        $chunks = explode("\n", wordwrap($text, 120, "\n", true));
+        foreach ($chunks as $chunk) {
+          $wrappedLines[] = array(
+            'type' => $line['type'],
+            'text' => $chunk,
+          );
+        }
+      }
+
+      $height = $topMargin + $bottomMargin + 90;
+      foreach ($wrappedLines as $line) {
+        if ($line['type'] === 'title') {
+          $height += $titleLineHeight + 6;
+        } elseif ($line['type'] === 'section') {
+          $height += $sectionLineHeight + 8;
+        } else {
+          $height += $bodyLineHeight;
+        }
+      }
+
+      $image = imagecreatetruecolor($width, $height);
+      if ($image === false) {
+        return false;
+      }
+
+      $background = imagecolorallocate($image, 246, 248, 252);
+      $titleBackground = imagecolorallocate($image, 15, 23, 42);
+      $sectionBackground = imagecolorallocate($image, 31, 111, 139);
+      $bodyText = imagecolorallocate($image, 17, 24, 39);
+      $mutedText = imagecolorallocate($image, 75, 85, 99);
+      $white = imagecolorallocate($image, 255, 255, 255);
+      $border = imagecolorallocate($image, 209, 213, 219);
+
+      imagefilledrectangle($image, 0, 0, $width - 1, $height - 1, $background);
+      imagerectangle($image, 0, 0, $width - 1, $height - 1, $border);
+
+      imagefilledrectangle($image, 0, 0, $width - 1, 72, $titleBackground);
+      imagestring($image, $titleFont, $leftMargin, 20, 'Inventory export: ' . $exportData['inventory']['name'], $white);
+      imagestring($image, $bodyFont, $leftMargin, 46, 'Inventory ID: ' . $exportData['inventory']['id'], $white);
+
+      $currentY = 96;
+      foreach ($wrappedLines as $line) {
+        if ($line['type'] === 'title') {
+          continue;
+        }
+
+        if ($line['type'] === 'section') {
+          imagefilledrectangle($image, $leftMargin - 12, $currentY - 4, $width - $rightMargin + 12, $currentY + $sectionLineHeight + 2, $sectionBackground);
+          imagestring($image, $sectionFont, $leftMargin, $currentY + 2, $line['text'], $white);
+          $currentY += $sectionLineHeight + 10;
+          continue;
+        }
+
+        imagestring($image, $bodyFont, $leftMargin, $currentY, $line['text'], $bodyText);
+        $currentY += $bodyLineHeight;
+      }
+
+      imagestring($image, $bodyFont, $leftMargin, $height - 20, 'Generated from inventory export', $mutedText);
+
+      ob_start();
+      if ($format === 'png') {
+        imagepng($image);
+      } elseif ($format === 'webp' && function_exists('imagewebp')) {
+        imagewebp($image, null, 85);
+      } else {
+        imagedestroy($image);
+        ob_end_clean();
+        return false;
+      }
+      $binary = ob_get_clean();
+      imagedestroy($image);
+      return $binary;
+    }
+
+    public function exportInventoryAsCsv($username, $inventory_id) {
+      $exportData = $this->getInventoryExportData($username, $inventory_id);
+      if (!empty($exportData['success']) && $exportData['success'] === false) {
+        return $exportData;
+      }
+
+      $content = $this->buildInventoryCsvContent($exportData);
+      if ($content === false) {
+        return array('success' => false, 'message' => 'Failed to build CSV export.', 'code' => 'export_error');
+      }
+
+      return array(
+        'success' => true,
+        'filename' => $this->getExportFilename($inventory_id, 'csv'),
+        'mime' => 'text/csv',
+        'content' => $content,
+      );
+    }
+
+    public function exportInventoryAsJson($username, $inventory_id) {
+      $exportData = $this->getInventoryExportData($username, $inventory_id);
+      if (!empty($exportData['success']) && $exportData['success'] === false) {
+        return $exportData;
+      }
+
+      $content = $this->jsonEncodeExport($exportData);
+      if ($content === false) {
+        return array('success' => false, 'message' => 'Failed to build JSON export.', 'code' => 'export_error');
+      }
+
+      return array(
+        'success' => true,
+        'filename' => $this->getExportFilename($inventory_id, 'json'),
+        'mime' => 'application/json',
+        'content' => $content,
+      );
+    }
+
+    public function exportInventoryAsPng($username, $inventory_id) {
+      $exportData = $this->getInventoryExportData($username, $inventory_id);
+      if (!empty($exportData['success']) && $exportData['success'] === false) {
+        return $exportData;
+      }
+
+      $content = $this->renderInventoryImage($exportData, 'png');
+      if ($content === false) {
+        return array('success' => false, 'message' => 'Failed to build PNG export.', 'code' => 'export_error');
+      }
+
+      return array(
+        'success' => true,
+        'filename' => $this->getExportFilename($inventory_id, 'png'),
+        'mime' => 'image/png',
+        'content' => $content,
+      );
+    }
+
+    public function exportInventoryAsWebp($username, $inventory_id) {
+      $exportData = $this->getInventoryExportData($username, $inventory_id);
+      if (!empty($exportData['success']) && $exportData['success'] === false) {
+        return $exportData;
+      }
+
+      $content = $this->renderInventoryImage($exportData, 'webp');
+      if ($content === false) {
+        return array('success' => false, 'message' => 'Failed to build WebP export.', 'code' => 'export_error');
+      }
+
+      return array(
+        'success' => true,
+        'filename' => $this->getExportFilename($inventory_id, 'webp'),
+        'mime' => 'image/webp',
+        'content' => $content,
+      );
+    }
+
+    public function exportInventory($username, $inventory_id, $type) {
+      $normalizedType = strtolower(trim((string)$type));
+
+      if ($normalizedType === 'csv') {
+        return $this->exportInventoryAsCsv($username, $inventory_id);
+      }
+
+      if ($normalizedType === 'json') {
+        return $this->exportInventoryAsJson($username, $inventory_id);
+      }
+
+      if ($normalizedType === 'png') {
+        return $this->exportInventoryAsPng($username, $inventory_id);
+      }
+
+      if ($normalizedType === 'webp') {
+        return $this->exportInventoryAsWebp($username, $inventory_id);
+      }
+
+      return array('success' => false, 'message' => 'Unsupported export type.', 'code' => 'invalid_export_type');
+    }
+
     public function createInventory($name, $description, $username) {
-      // start transaction
       $this->inventoryModel->beginTransaction();
       try {
         $owner = $this->userModel->findByUsername($username);
@@ -217,9 +607,6 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return array('success' => true, 'message' => 'Amount set.');
     }
 
-    /**
-     * Return tags for a resource (requires read permission on containing inventory)
-     */
     public function getTagsForResource($username, $resource_id) {
       $resource = $this->resurseModel->getResurseById($resource_id);
       if (!$resource) return $this->notFound('Resource not found.');
@@ -227,26 +614,37 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return $this->resurseModel->getTagsForResource($resource_id);
     }
 
-    /**
-     * Return resources in inventory that match ALL provided tag IDs (intersection)
-     */
     public function getResourcesByTags($username, $inventory_id, $tag_ids) {
       if (!$this->canRead($username, $inventory_id)) return $this->accessDenied();
       return $this->resurseModel->getResourcesByTags($inventory_id, $tag_ids);
     }
 
-    /**
-     * Return all tags in the system
-     */
     public function getAllTags() {
       return $this->resurseModel->getAllTags();
     }
 
-    /**
-     * Return all currencies from the database
-     */
     public function getAllCurrencies() {
       return $this->currencyModel->getAllCurrencies();
+    }
+
+    public function getTagById($tag_id) {
+      return $this->resurseModel->getTagById($tag_id);
+    }
+
+    public function createTag($name, $foreground_color, $background_color, $description = null) {
+      $tag_id = $this->resurseModel->createTag($name, $foreground_color, $background_color, $description);
+      if ($tag_id === false) {
+        return array('success' => false, 'message' => 'Failed to create tag.', 'code' => 'db_error');
+      }
+      return array('success' => true, 'message' => 'Tag created.', 'id' => $tag_id);
+    }
+
+    public function updateTag($tag_id, $name = null, $description = null, $foreground_color = null, $background_color = null) {
+      $res = $this->resurseModel->updateTag($tag_id, $name, $description, $foreground_color, $background_color);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to update tag.', 'code' => 'db_error');
+      }
+      return array('success' => true, 'message' => 'Tag updated.');
     }
   }
 ?>
