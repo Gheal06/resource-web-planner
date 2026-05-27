@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/../services/InventoryManagementService.php";
 
-class InventoryController {
+class InventoryManagementController {
     private $inventoryManagementService;
     public function __construct($connection) {
         $this->inventoryManagementService = new InventoryManagementService($connection);
