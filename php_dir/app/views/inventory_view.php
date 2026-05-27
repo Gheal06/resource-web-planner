@@ -5,6 +5,7 @@
     <h2><?php echo htmlspecialchars($inventory['name'] ?? 'Inventory'); ?></h2>
     <p><?php echo htmlspecialchars($inventory['description'] ?? ''); ?></p>
     <div class="sep"></div>
+    <?php require_once __DIR__ . '/tags_view.php'; ?>
     <?php require_once __DIR__ . '/fonduri_view.php'; ?>
 
     <div class="split-container3 centerX">

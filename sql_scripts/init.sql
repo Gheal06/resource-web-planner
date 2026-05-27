@@ -50,16 +50,13 @@ CREATE TABLE resources (
 
 CREATE TABLE tags (
     id                     BIGSERIAL PRIMARY KEY,
-    name                   VARCHAR(255) NOT NULL UNIQUE,
-    description            TEXT
+    name                   VARCHAR(255) NOT NULL,
+    bgcolor VARCHAR(32)    NOT NULL DEFAULT '#DDDDFF',
+    fgcolor VARCHAR(32)    NOT NULL DEFAULT '#000000',
+    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
+    UNIQUE(name, inventory_id)
 );
 
-CREATE TABLE has_tag (
-    id                     BIGSERIAL PRIMARY KEY,
-    resource_id            BIGINT NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
-    tag_id                 BIGINT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
-    UNIQUE(resource_id, tag_id)
-);
 
 CREATE TABLE currencies (
     code                   VARCHAR(3) PRIMARY KEY -- ISO 4217 currency code
