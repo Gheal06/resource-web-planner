@@ -8,6 +8,8 @@
         <input type="email" name="email" id="email" required>
         <label for="password">Password: </label>
         <input type="password" name="password" id="password" required>
+        <label for="repeat-password">Repeat Password: </label>
+        <input type="password" name="repeat-password" id="password" required>
         <div style="text-align:center; margin-top:10px;">
             <input type="submit" name="register" value="Register">
         </div>
