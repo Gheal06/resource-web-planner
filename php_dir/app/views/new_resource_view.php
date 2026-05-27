@@ -7,6 +7,8 @@
     <form action="<?php echo "$action"?>"  method="post">
         <label for="resource-name">Resource Name: </label>
         <input type="text" name="resource-name" id="resource-name" required> <br>
+        <label for="unit">Unit: </label>
+        <input type="text" name="unit" id="unit" placeholder="(e.g. kg, pcs)"> <br>
         <label for="description">Description: </label>
         <textarea name="description" id="description" maxlength="255" rows="10"> </textarea>
         <?php if (!empty( $message ?? '')): ?>
