@@ -165,3 +165,8 @@ thead tr{
     font-size: 0.8rem;
     color:red;
 }
+.sep{
+    width: 100%;
+    height: 1px;
+    background-color: #DDDDDD;
+}
