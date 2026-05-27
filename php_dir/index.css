@@ -3,15 +3,13 @@ body{
     margin: 0;
     padding: 0;
 }
-
+.flex{
+    display: flex;
+}
 #page{
     left: 0;
     right: 0;
     width: max(200px, 100%);
-}
-
-span{
-    margin: 10px;
 }
 
 #nav{
@@ -190,4 +188,12 @@ textarea:hover{
 }
 .new-inventory{
     width: max(200px, 50%)
+}
+.tag{
+    border-radius: 1000000000px;
+    width: fit-content;
+    padding: 6px;
+}
+#tag-output-text{
+    margin: 0;
 }
