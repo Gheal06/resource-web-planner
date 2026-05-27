@@ -248,5 +248,38 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
     public function getAllCurrencies() {
       return $this->currencyModel->getAllCurrencies();
     }
+
+    /**
+     * Get a single tag by id
+     */
+    public function getTagById($tag_id) {
+      return $this->resurseModel->getTagById($tag_id);
+    }
+
+    /**
+     * Create a new tag with foreground and background colors
+     * $name: unique tag name (required)
+     * $foreground_color: hex color string e.g. '#000000' (required)
+     * $background_color: hex color string e.g. '#FFFFFF' (required)
+     * $description: optional description
+     */
+    public function createTag($name, $foreground_color, $background_color, $description = null) {
+      $tag_id = $this->resurseModel->createTag($name, $foreground_color, $background_color, $description);
+      if ($tag_id === false) {
+        return array('success' => false, 'message' => 'Failed to create tag.', 'code' => 'db_error');
+      }
+      return array('success' => true, 'message' => 'Tag created.', 'id' => $tag_id);
+    }
+
+    /**
+     * Update an existing tag (colors and metadata)
+     */
+    public function updateTag($tag_id, $name = null, $description = null, $foreground_color = null, $background_color = null) {
+      $res = $this->resurseModel->updateTag($tag_id, $name, $description, $foreground_color, $background_color);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to update tag.', 'code' => 'db_error');
+      }
+      return array('success' => true, 'message' => 'Tag updated.');
+    }
   }
 ?>
