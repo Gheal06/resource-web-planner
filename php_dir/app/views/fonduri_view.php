@@ -4,6 +4,7 @@
     <thead>
         <tr>
             <th>Name</th>
+            <th>Currency</th>
             <th>Quantity</th>
             <th>Description</th>
         </tr>
@@ -15,13 +16,14 @@
         foreach ($rows as $row):
     ?>
     <tr>
+        <td></td>
         <td><?php echo htmlspecialchars($row['currency_code']); ?></td>
         <td><?php echo htmlspecialchars($row['amount']); ?></td>
         <td></td>
     </tr>
     <?php endforeach; ?>
     <tr>
-        <td colspan="3"><a href="index.php?action=create-resource&inventory_id=<?php echo urlencode($inventory_id); ?>">Add new currency</a></td>
+        <td colspan="4"><a href="new_currency.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Add new currency</a></td>
     </tr>
     </tbody>
 </table>
