@@ -77,7 +77,7 @@ CREATE TABLE transactions (
     currency_code          VARCHAR(3) REFERENCES currencies(code),
     quantity_change        DOUBLE PRECISION NOT NULL, -- poate fi pozitiv sau negativ
     total_price_change     DOUBLE PRECISION, -- poate fi pozitiv sau negativ, NULL daca tranzactia nu implica schimb valutar
-    start_timestamp       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    start_timestamp        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     end_timestamp          TIMESTAMPTZ, -- NULL daca tranzactia e one time
     frequency              INTERVAL, -- NULL daca tranzactia e one time
     description            TEXT
