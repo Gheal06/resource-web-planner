@@ -18,16 +18,23 @@ class AuthService {
     }
 
     public function register($username, $email, $password) {
-        if ($this->userModel->register($username, $email, $password)) {
-            $token = $this->create_token_for_user($username);            
-            return array('success' => true, 'message' => 'Registration successful.', 'token' => $token, 'user' => $username);
+        $res = $this->userModel->register($username, $email, $password);
+        if (is_array($res) && isset($res['success']) && $res['success']) {
+            $token = $this->create_token_for_user($username);
+            return array('success' => true, 'message' => $res['message'], 'token' => $token, 'user' => $username);
         }
-        return array('success' => false, 'message' => 'Registration failed.');
+        $msg = is_array($res) && isset($res['message']) ? $res['message'] : 'Registration failed.';
+        return array('success' => false, 'message' => $msg);
     }
 
     public function login($username, $password) {
         // echo $this->userModel->authenticate_user($username, $password);
-        if ($this->userModel->authenticate_user($username, $password)) {
+        $res = $this->userModel->authenticate_user($username, $password);
+        if (is_array($res) && isset($res['success']) && !$res['success']) {
+            return array('success' => false, 'message' => $res['message']);
+        }
+        $ok = is_array($res) && isset($res['ok']) && $res['ok'];
+        if ($ok) {
             $token = $this->create_token_for_user($username);
             return array('success' => true, 'message' => 'Login successful.', 'token' => $token, 'user' => $username);
         }
@@ -51,10 +58,14 @@ class AuthService {
     }   
 
     public function change_password($username, $password) {
-        if ($this->userModel->change_password($username, $password)) {
-            return array('success' => true, 'message' => 'Password changed successfully.');
+        $res = $this->userModel->change_password($username, $password);
+        if (is_array($res) && isset($res['success'])) {
+            if ($res['success']) {
+                return array('success' => true, 'message' => 'Password changed successfully.');
+            }
+            return array('success' => false, 'message' => isset($res['message']) ? $res['message'] : 'Failed to change password.');
         }
-        return array('success' => false, 'message' => pg_last_error());
+        return array('success' => false, 'message' => 'Failed to change password.');
     }
 
     public function create_password_recovery_code($username) {
