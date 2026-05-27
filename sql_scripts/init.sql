@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS fonduri;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS resources;
@@ -53,4 +54,16 @@ CREATE TABLE fonduri (
     amount                 DOUBLE PRECISION NOT NULL,
     currency_code          VARCHAR(3) NOT NULL REFERENCES currencies(code),
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE
+);
+
+CREATE TABLE transactions (
+    id                     BIGSERIAL PRIMARY KEY,
+    resource_id            BIGINT NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+    currency_code          VARCHAR(3) REFERENCES currencies(code),
+    quantity_change        DOUBLE PRECISION NOT NULL, -- poate fi pozitiv sau negativ
+    total_price_change     DOUBLE PRECISION, -- poate fi pozitiv sau negativ, NULL daca tranzactia nu implica schimb valutar
+    start_timestamp       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    end_timestamp          TIMESTAMPTZ, -- NULL daca tranzactia e one time
+    frequency              INTERVAL, -- NULL daca tranzactia e one time
+    description            TEXT
 );
