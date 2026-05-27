@@ -23,8 +23,7 @@ class FonduriModel {
         return @pg_fetch_assoc($res);
     }
 
-    public function addFonduri($inventory_id, $amount, $currency_code) {
-        // Try to update existing row by increasing the amount
+    public function addFonduri($inventory_id, $amount, $currency_code, $name = null, $description = null) {
         $res = @pg_query_params($this->connection,
             "UPDATE fonduri SET amount = amount + $1 WHERE inventory_id = $2 AND currency_code = $3",
             array($amount, $inventory_id, $currency_code)
@@ -34,21 +33,20 @@ class FonduriModel {
             return $res;
         }
 
-        // If no row was updated, insert a new one (amount is the initial value)
         return @pg_query_params($this->connection,
-            "INSERT INTO fonduri (amount, currency_code, inventory_id) VALUES ($1, $2, $3)",
-            array($amount, $currency_code, $inventory_id)
+            "INSERT INTO fonduri (amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5)",
+            array($amount, $currency_code, $inventory_id, $name, $description)
         );
     }
 
-    public function setFonduri($inventory_id, $amount, $currency_code) {
+    public function setFonduri($inventory_id, $amount, $currency_code, $name = null, $description = null) {
         $res = @pg_query_params($this->connection, "SELECT id FROM fonduri WHERE inventory_id = $1 AND currency_code = $2", array($inventory_id, $currency_code));
         if (!$res) return null;
         $row = @pg_fetch_assoc($res);
         if ($row) {
-            return @pg_query_params($this->connection, "UPDATE fonduri SET amount = $1 WHERE id = $2", array($amount, $row['id']));
+            return @pg_query_params($this->connection, "UPDATE fonduri SET amount = $1, name = $2, description = $3 WHERE id = $4", array($amount, $name, $description, $row['id']));
         } else {
-            return @pg_query_params($this->connection, "INSERT INTO fonduri (amount, currency_code, inventory_id) VALUES ($1, $2, $3)", array($amount, $currency_code, $inventory_id));
+            return @pg_query_params($this->connection, "INSERT INTO fonduri (amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5)", array($amount, $currency_code, $inventory_id, $name, $description));
         }
     }
 

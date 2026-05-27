@@ -51,8 +51,8 @@ CREATE TABLE resources (
 CREATE TABLE tags (
     id                     BIGSERIAL PRIMARY KEY,
     name                   VARCHAR(255) NOT NULL,
-    bgcolor VARCHAR(32)    NOT NULL DEFAULT '#DDDDFF',
-    fgcolor VARCHAR(32)    NOT NULL DEFAULT '#000000',
+    bgcolor VARCHAR(7)    NOT NULL DEFAULT '#DDDDFF',
+    fgcolor VARCHAR(7)    NOT NULL DEFAULT '#000000',
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
     UNIQUE(name, inventory_id)
 );
@@ -66,7 +66,9 @@ CREATE TABLE fonduri (
     id                     BIGSERIAL PRIMARY KEY,
     amount                 DOUBLE PRECISION NOT NULL,
     currency_code          VARCHAR(3) NOT NULL REFERENCES currencies(code),
-    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE
+    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
+    name                   VARCHAR(255),
+    description            TEXT
 );
 
 CREATE TABLE transactions (
