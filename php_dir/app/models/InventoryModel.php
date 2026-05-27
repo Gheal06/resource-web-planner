@@ -12,7 +12,7 @@
     }
 
     public function create($name, $description, $owner_user_id) {
-        $res = pg_query_params($this->conn, "INSERT INTO inventories (name, description, owner_user_id) VALUES ($1, $2, $3) RETURNING id", array($name, $description, $owner_user_id));
+        $res = pg_query_params($this->conn, "INSERT INTO inventories (name, description, owner_id) VALUES ($1, $2, $3) RETURNING id", array($name, $description, $owner_user_id));
         if (!$res) return false;
         $row = pg_fetch_assoc($res);
         return $row ? $row['id'] : false;

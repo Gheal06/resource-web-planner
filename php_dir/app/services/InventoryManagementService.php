@@ -463,29 +463,23 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
 
     public function createInventory($name, $description, $username) {
       $this->inventoryModel->beginTransaction();
-      try {
-        $owner = $this->userModel->findByUsername($username);
-        if (!$owner || !isset($owner['id'])) {
-          throw new Exception('Owner user not found');
-        }
-
-        $owner_user_id = $owner['id'];
-        $i_id = $this->inventoryModel->create($name, $description, $owner_user_id);
-        if ($i_id === false) {
-          throw new Exception('Failed to create inventory');
-        }
-
-        $permRes = $this->inventoryPermissionsModel->setUserInventoryPermissions($owner_user_id, $i_id, $this->readPermissionMask | $this->insertPermissionMask | $this->updatePermissionMask | $this->deletePermissionMask);
-        if ($permRes === false) {
-          throw new Exception('Failed to set inventory permissions');
-        }
-
-        $this->inventoryModel->commitTransaction();
-        return $i_id;
-      } catch (Exception $e) {
-        $this->inventoryModel->rollbackTransaction();
-        return false;
+      $owner = $this->userModel->findByUsername($username);
+      if (!$owner || !isset($owner['id'])) {
+        throw new Exception('Owner user not found');
       }
+
+      $owner_user_id = $owner['id'];
+      $i_id = $this->inventoryModel->create($name, $description, $owner_user_id);
+      if ($i_id === false) {
+        throw new Exception('Failed to create inventory');
+      }
+
+      $permRes = $this->inventoryPermissionsModel->setUserInventoryPermissions($owner_user_id, $i_id, $this->readPermissionMask | $this->insertPermissionMask | $this->updatePermissionMask | $this->deletePermissionMask);
+      if ($permRes === false) {
+        throw new Exception('Failed to set inventory permissions');
+      }
+      $this->inventoryModel->commitTransaction();
+      return $i_id;
     }
     public function updateInventory($username, $id, $name, $description) {
       if (!$this->canEdit($username, $id)) {
