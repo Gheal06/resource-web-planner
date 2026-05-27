@@ -10,6 +10,7 @@
             <input type="submit" name="login" value="Login">
         </div>
     </form>
+    <p style="text-align:center; margin-top:10px;"><a href=<?php echo $OTCrequestAction; ?>>Forgot password?</a></p>
     
     <?php if (!empty(
 $message ?? '')): ?>

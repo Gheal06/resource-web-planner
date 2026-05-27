@@ -6,20 +6,30 @@
         $this->conn = $connection;
     }
 
-    public function getInventoryTableById($id) {
-        $res = pg_query_params($this->conn, "SELECT * FROM inventory_table WHERE id = $1", array($id));
+    public function getInventoryById($id) {
+        $res = pg_query_params($this->conn, "SELECT * FROM inventories WHERE id = $1", array($id));
         return pg_fetch_assoc($res);
     }
-    public function getUserInventoryIDsByMask($username, $permission_mask) {
-      // returneaza id-urile tabelelor pt care utilizatorul are MACAR drepturile din permission_mask
-        $res = pg_query_params($this->conn, "SELECT inventory_id FROM user_table_permission JOIN user_table ON user_table_permission.user_id = user_table.id WHERE user_table.username = $1 AND (user_table_permission.permissions & $2) > 0", array($username, $permission_mask));
-        $ids = array();
-        while ($row = pg_fetch_assoc($res)) {
-            $ids[] = $row['inventory_id'];
-        }
 
-        return $ids;
+    public function create($name, $description, $owner_user_id) {
+        return pg_query_params($this->conn, "INSERT INTO inventories (name, description, owner_user_id) VALUES ($1, $2, $3) RETURNING id", array($name, $description, $owner_user_id));
     }
+
+    public function update($id, $name, $description) {
+        return pg_query_params($this->conn, "UPDATE inventories SET name = $1, description = $2 WHERE id = $3", array($name, $description, $id));
+    }
+    public function updateName($id, $name) {
+        return pg_query_params($this->conn, "UPDATE inventories SET name = $1 WHERE id = $2", array($name, $id));
+    }
+    public function updateDescription($id, $description) {
+        return pg_query_params($this->conn, "UPDATE inventories SET description = $1 WHERE id = $2", array($description, $id));
+    }
+
+    
+    public function delete($id) {
+        return pg_query_params($this->conn, "DELETE FROM inventories WHERE id = $1", array($id));
+    }
+
   }
 
 ?>
