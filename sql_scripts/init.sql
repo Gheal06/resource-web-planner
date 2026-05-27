@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS fonduri;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS resources;
 DROP TABLE IF EXISTS user_inventory_permission;
@@ -44,6 +45,12 @@ CREATE TABLE resources (
 );
 
 CREATE TABLE currencies (
+    code                   VARCHAR(3) PRIMARY KEY -- ISO 4217 currency code
+);
+
+CREATE TABLE fonduri (
     id                     BIGSERIAL PRIMARY KEY,
-    code                   VARCHAR(3) UNIQUE NOT NULL -- ISO 4217 currency code
+    amount                 DOUBLE PRECISION NOT NULL,
+    currency_code          VARCHAR(3) NOT NULL REFERENCES currencies(code),
+    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE
 );
