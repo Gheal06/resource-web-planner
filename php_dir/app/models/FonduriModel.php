@@ -22,7 +22,13 @@ class FonduriModel {
         if (!$res) return null;
         return @pg_fetch_assoc($res);
     }
-
+    public function create($inventory_id, $currency_code, $name = null, $description = null) {
+        
+        return pg_query_params($this->connection,
+            "INSERT INTO fonduri (amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+            array(0, $currency_code, $inventory_id, $name, $description)
+        );
+    }
     public function addFonduri($inventory_id, $amount, $currency_code, $name = null, $description = null) {
         $res = @pg_query_params($this->connection,
             "UPDATE fonduri SET amount = amount + $1 WHERE inventory_id = $2 AND currency_code = $3",
