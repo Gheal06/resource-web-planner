@@ -33,6 +33,10 @@ require_once __DIR__ . "/../models/UserModel.php";
         return $inventories;
     }
 
+    public function canUserAccessInventory($username, $inventory_id, $permission_mask) {
+        return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $permission_mask);
+    }
+    
     public function canRead($username, $inventory_id) {
       return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->readPermissionMask);
     }
@@ -47,6 +51,17 @@ require_once __DIR__ . "/../models/UserModel.php";
 
     public function canDelete($username, $inventory_id) {
       return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->deletePermissionMask);
+    }
+
+    public function createInventory($name, $description, $owner_user_id) {
+      return $this->inventoryModel->create($name, $description, $owner_user_id);
+    }
+    public function updateInventory($id, $name, $description) {
+      return $this->inventoryModel->update($id, $name, $description);
+    }
+    public function updateInventoryName($id, $name) {
+
+      return $this->inventoryModel->update($id, $name, null);
     }
   }
 ?>

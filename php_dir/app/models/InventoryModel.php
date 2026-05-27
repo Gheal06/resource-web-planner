@@ -11,10 +11,25 @@
         return pg_fetch_assoc($res);
     }
 
-    public function create($name, $description) {
-        return pg_query_params($this->conn, "INSERT INTO inventories (name, description) VALUES ($1, $2) RETURNING id", array($name, $description));
-        
+    public function create($name, $description, $owner_user_id) {
+        return pg_query_params($this->conn, "INSERT INTO inventories (name, description, owner_user_id) VALUES ($1, $2, $3) RETURNING id", array($name, $description, $owner_user_id));
     }
+
+    public function update($id, $name, $description) {
+        return pg_query_params($this->conn, "UPDATE inventories SET name = $1, description = $2 WHERE id = $3", array($name, $description, $id));
+    }
+    public function updateName($id, $name) {
+        return pg_query_params($this->conn, "UPDATE inventories SET name = $1 WHERE id = $2", array($name, $id));
+    }
+    public function updateDescription($id, $description) {
+        return pg_query_params($this->conn, "UPDATE inventories SET description = $1 WHERE id = $2", array($description, $id));
+    }
+
+    
+    public function delete($id) {
+        return pg_query_params($this->conn, "DELETE FROM inventories WHERE id = $1", array($id));
+    }
+
   }
 
 ?>

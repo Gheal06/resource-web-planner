@@ -19,16 +19,16 @@
         return $this->currencyController->getCurrencyByCode($code);
     }
     public function getCurrencyExchangeRates($code) {
-        $currency = $this->getCurrencyByCode($code);
-        if (!$currency) {
-            return null;
-        }
-        $exchangeRates = json_decode($currency, true);
+        $currency = get_file_contents($this->exchangeRateURL($code));
+        if (!$currency) return null;
+        $currencyData = json_decode($currency, true);
+        if (!$currencyData || $currencyData['result'] !== 'success') return null;
+        $exchangeRates = $currencyData['conversion_rates'];
         return $exchangeRates;
     }
     public function exchangeRateURL($code) {
       $API_KEY = getenv("EXCHANGERATE_API_KEY");
-      $url = "https://v6.exchangerate-api.com/v6/$API_KEY/latest/$code";
+      $url = "https://v6.exchangerate-api.com/v6/{$API_KEY}/latest/{$code}";
       return $url;
     }
 

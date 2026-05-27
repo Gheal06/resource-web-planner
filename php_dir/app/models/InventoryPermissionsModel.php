@@ -29,6 +29,36 @@
       $row = pg_fetch_assoc($res);
       return $row && $row['has_access'] == 't';
     }
+
+    public function getAllAssociatedUsers ($inventory_id) {
+      // returneaza toti utilizatorii care au drepturi pe un tabel, impreuna cu drepturile lor
+      $res = pg_query_params($this->conn, "SELECT users.username, user_inventory_permission.permissions FROM user_inventory_permission JOIN users ON user_inventory_permission.user_id = users.id WHERE user_inventory_permission.inventory_id = $1", array($inventory_id));
+      if (!$res) {
+        return array();
+      }
+      $users = array();
+      while ($row = pg_fetch_assoc($res)) {
+        $users[] = array('username' => $row['username'], 'permissions' => $row['permissions']);
+      }
+      return $users;
+    }
+
+    public function setUserInventoryPermissions($username, $inventory_id, $permissions_mask) {
+      // seteaza drepturile pentru un utilizator pt un tabel, suprascriind ce era inainte
+      $res = pg_query_params($this->conn, "SELECT id FROM users WHERE username = $1", array($username));
+      if (!$res) {
+        return false;
+      }
+      $row = pg_fetch_assoc($res);
+      if (!$row) {
+        return false;
+      }
+      $user_id = $row['id'];
+
+      pg_query_params($this->conn, "DELETE FROM user_inventory_permission WHERE user_id = $1 AND inventory_id = $2", array($user_id, $inventory_id));
+
+      return pg_query_params($this->conn, "INSERT INTO user_inventory_permission (user_id, inventory_id, permissions) VALUES ($1, $2, $3)", array($user_id, $inventory_id, $permissions_mask));
+    }
   }
 
 ?>
