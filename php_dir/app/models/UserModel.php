@@ -18,6 +18,12 @@ class UserModel {
         return pg_fetch_assoc($res);
     }
 
+    public function findById($id) {
+        $res = @pg_query_params($this->conn, "SELECT * FROM users WHERE id = $1", array($id));
+        if (!$res) return null;
+        return pg_fetch_assoc($res);
+    }
+
     public function register($username, $email, $password) {
         $res = @pg_query_params($this->conn, "CALL register_user($1, $2, $3)", array($username, $email, $password));
         if ($res === false) {

@@ -12,7 +12,22 @@
     }
 
     public function create($name, $description, $owner_user_id) {
-        return pg_query_params($this->conn, "INSERT INTO inventories (name, description, owner_user_id) VALUES ($1, $2, $3) RETURNING id", array($name, $description, $owner_user_id));
+        $res = pg_query_params($this->conn, "INSERT INTO inventories (name, description, owner_user_id) VALUES ($1, $2, $3) RETURNING id", array($name, $description, $owner_user_id));
+        if (!$res) return false;
+        $row = pg_fetch_assoc($res);
+        return $row ? $row['id'] : false;
+    }
+
+    public function beginTransaction() {
+        return pg_query($this->conn, 'BEGIN');
+    }
+
+    public function commitTransaction() {
+        return pg_query($this->conn, 'COMMIT');
+    }
+
+    public function rollbackTransaction() {
+        return pg_query($this->conn, 'ROLLBACK');
     }
 
     public function update($id, $name, $description) {

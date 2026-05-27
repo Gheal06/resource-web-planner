@@ -43,17 +43,8 @@
       return $users;
     }
 
-    public function setUserInventoryPermissions($username, $inventory_id, $permissions_mask) {
+    public function setUserInventoryPermissions($user_id, $inventory_id, $permissions_mask) {
       // seteaza drepturile pentru un utilizator pt un tabel, suprascriind ce era inainte
-      $res = pg_query_params($this->conn, "SELECT id FROM users WHERE username = $1", array($username));
-      if (!$res) {
-        return false;
-      }
-      $row = pg_fetch_assoc($res);
-      if (!$row) {
-        return false;
-      }
-      $user_id = $row['id'];
 
       pg_query_params($this->conn, "DELETE FROM user_inventory_permission WHERE user_id = $1 AND inventory_id = $2", array($user_id, $inventory_id));
 
