@@ -122,6 +122,21 @@ thead tr{
     color: white;
 }
 
+#currency-table tbody tr:nth-child(even) {
+  background-color: #DDFFDD;
+}
+#currency-table tbody tr:nth-child(odd) {
+  background-color: #FFF;
+}
+#currency-table thead tr{
+    background-color: #55DD55;
+    color: white;
+}
+#currency-table{
+    border: 1px #00FF00 solid;
+    margin-bottom: 20px;
+}
+
 .split-container3{
     width: 100%;
     display: flex;
