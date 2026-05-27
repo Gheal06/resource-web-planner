@@ -193,6 +193,7 @@ textarea:hover{
     border-radius: 1000000000px;
     width: fit-content;
     padding: 6px;
+    margin-right: 10px;
 }
 #tag-output-text{
     margin: 0;

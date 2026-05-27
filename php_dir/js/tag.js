@@ -17,11 +17,27 @@ function renderTag(){
 function makeTag(parentId, tagText, fgColor, bgColor){
     // console.log('Rendering tag');
     var div = document.createElement('div');
-    var p = document.getElementById('p');
-    p.innerText = tagText;
-    if(p.innerText == '') p.innerText='<empty tag>';
-    p.style.color = fgColor;
+    div.classList.add('tag');
+    var span = document.createElement('span');
+    span.innerText = tagText;
+    if(span.innerText == '') span.innerText='<empty tag>';
+    span.style.color = fgColor;
     div.style.backgroundColor = bgColor;
+    div.appendChild(span);
+    document.getElementById(parentId).appendChild(div);
+    return div;
+}
+function makeLinkTag(parentId, tagText, href, fgColor, bgColor){
+    // console.log('Rendering tag');
+    var div = document.createElement('div');
+    div.classList.add('tag');
+    var a = document.createElement('a');
+    a.href=href;
+    a.innerText = tagText;
+    if(a.innerText == '') a.innerText='<empty tag>';
+    a.style.color = fgColor;
+    div.style.backgroundColor = bgColor;
+    div.appendChild(a);
     document.getElementById(parentId).appendChild(div);
     return div;
 }
