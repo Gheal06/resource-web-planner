@@ -37,5 +37,16 @@ class InventoryManagementController {
         }
         return $this->inventoryManagementService->getResourcesByInventoryId($inventory_id);
     }
+    public function createInventory($username) {
+        if($_SERVER['REQUEST_METHOD']=='POST' && isset($_POST['submitNewInventory']) && isset($username)){
+            try{
+                $retval = $this->inventoryManagementService->createInventory($_POST['inventoryName'], $_POST['description'], $username);
+                header("Location: inventory.php?inventory_id=".$retval);
+            }catch(Exception $e){
+                return $e->getMessage();
+            }
+            return "";
+        }
+    }
 }
 ?>
