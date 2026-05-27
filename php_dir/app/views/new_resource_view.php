@@ -1,5 +1,5 @@
 <?php
-    $inventoryId = $_GET['inventory_id'];
+    $inventoryId = $_GET['inventory_id'] ?? NULL;
     $action = is_null($inventoryId) ? "new_resource.php" : ($createResourceAction . "?inventory_id=". $inventoryId);
 ?>
 <div class="container new-inventory">
@@ -15,7 +15,7 @@
         <p class="error"><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
         <div style="text-align:center; margin-top:10px;">
-            <input type="submit" name="submit" value="Submit">
+            <input type="submit" name="submitNewResource" value="Submit">
         </div>
     </form>
 </div>

@@ -1,7 +1,10 @@
-<div class="split-container3-r center-conent">
-    <h2 class="center-content">Upcoming Transactions</h2>
-    <table id="upcoming-transactions-table">
-        <thead>
+<div>
+    <script>
+        <?php require_once "js/toggle_table_contents.js"; ?>
+    </script>
+    <h2 class="center-content">Transaction History</h2>
+    <table id="history-table">
+        <thead onclick="toggleTableContents(event)">
             <tr>
                 <th>Name</th>
                 <th>Description</th>
@@ -23,6 +26,10 @@
             <td>salarii</td>
             <td>Salarii</td>
             <td>01 June 2026, 00:00</td>
+        </tr>
+        <tr>
+            <td colspan="3"><a href="new_transaction.php?inventoryId=<?php echo urlencode($inventory_id); ?>">Create new transaction</a></td>
+            <!-- de pus id-ul inventory-ului in linkul de mai sus -->
         </tr>
         <!-- de inserat toate tranzactiile upcoming-->
         </tbody>
