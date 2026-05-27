@@ -28,12 +28,36 @@ class AuthController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
             $username = $_POST['username'] ?? '';
             $password = $_POST['password'] ?? '';
+            $repeated_password = $_POST['repeat-password'] ?? '';
+            if ($password !== $repeated_password) {
+                return 'Passwords do not match.';
+            }
             $email    = $_POST['email'] ?? '';
             $result = $this->authService->register($username, $email, $password);
             if ($result['success']) {
                 $this->setAuthCookie($result['token']);
                 header('Location: index.php');
                 exit();
+            }
+            return $result['message'];
+        }
+        return '';
+    }
+
+    public function handleChangePassword() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change-password'])) {
+            $currentUser = $this->getCurrentUser();
+            if (!$currentUser) {
+                return 'You must be logged in to change your password.';
+            }
+            $new_password = $_POST['new-password'] ?? '';
+            $repeated_password = $_POST['repeat-password'] ?? '';
+            if ($new_password !== $repeated_password) {
+                return 'Passwords do not match.';
+            }
+            $result = $this->authService->change_password($currentUser, $new_password);
+            if ($result['success']) {
+                return 'Password changed successfully.';
             }
             return $result['message'];
         }
