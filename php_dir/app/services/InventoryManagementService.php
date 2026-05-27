@@ -4,6 +4,7 @@ require_once __DIR__ . "/../models/InventoryPermissionsModel.php";
 require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/FonduriModel.php";
 require_once __DIR__ . "/../models/ResurseModel.php";
+require_once __DIR__ . "/../models/CurrencyModel.php";
 
   class InventoryManagementService {
     private $inventoryModel;
@@ -11,6 +12,7 @@ require_once __DIR__ . "/../models/ResurseModel.php";
     private $userModel;
     private $fonduriModel;
     private $resurseModel;
+    private $currencyModel;
 
     private $readPermissionMask = 1;
     private $insertPermissionMask = 2;
@@ -23,6 +25,7 @@ require_once __DIR__ . "/../models/ResurseModel.php";
       $this->userModel = new UserModel($connection);
       $this->fonduriModel = new FonduriModel($connection);
       $this->resurseModel = new ResurseModel($connection);
+      $this->currencyModel = new CurrencyModel($connection);
     }
     public function getUserInventoryIDsByMask($username, $permission_mask) {
         return $this->inventoryPermissionsModel->getUserInventoryIDsByMask($username, $permission_mask);
@@ -237,6 +240,13 @@ require_once __DIR__ . "/../models/ResurseModel.php";
      */
     public function getAllTags() {
       return $this->resurseModel->getAllTags();
+    }
+
+    /**
+     * Return all currencies from the database
+     */
+    public function getAllCurrencies() {
+      return $this->currencyModel->getAllCurrencies();
     }
   }
 ?>
