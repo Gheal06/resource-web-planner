@@ -9,7 +9,7 @@
     <h2 class="center-content">Create new tag</h2>
     <form action="<?php echo "$action"?>"  method="post">
         <label for="tag-name" >Tag Name: </label>
-        <input type="text" name="resource-name" id="tag-name" value="New Tag" required oninput="renderTag()"> <br>
+        <input type="text" name="tag-name" id="tag-name" value="New Tag" required oninput="renderTag()"> <br>
         <label for="bgcolor">Background Color: </label>
         <input type="color" name="bgcolor" id="bgcolor" value="#DDDDFF" required oninput="renderTag()"> <br>
         <label for="fgcolor">Text Color: </label>
@@ -27,7 +27,7 @@
         <p class="error"><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
         <div style="text-align:center; margin-top:10px;">
-            <input type="submit" name="submit" value="Submit">
+            <input type="submit" name="submitNewTag" value="Submit">
         </div>
     </form>
 </div>

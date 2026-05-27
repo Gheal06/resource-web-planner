@@ -8,11 +8,8 @@
     <?php require_once __DIR__ . '/tags_view.php'; ?>
     <?php require_once __DIR__ . '/fonduri_view.php'; ?>
 
-    <div class="split-container3 centerX">
     <?php require_once __DIR__ . '/resources_view.php'; ?>
-    <?php require_once __DIR__ . '/transactions_view.php'; ?>
-    <?php require_once __DIR__ . '/upcoming_transactions_view.php'; ?>
-    </div>
+    <?php require_once __DIR__ . '/transaction_history_view.php'; ?>
 </div>
     <!-- <p><a href="index.php?action=logout">Logout</a></p> -->
 <?php require_once __DIR__ . '/../../footer.php'; ?>

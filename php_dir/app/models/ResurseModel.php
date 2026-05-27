@@ -123,13 +123,13 @@ class ResurseModel {
         return pg_fetch_assoc($res);
     }
 
-    public function createTag($name, $foreground_color, $background_color, $description = null) {
+    public function createTag($inventory_id, $name, $foreground_color, $background_color) {
         if (!$name || !$foreground_color || !$background_color) {
             return false;
         }
         $res = @pg_query_params($this->connection,
-            "INSERT INTO tags (name, description, foreground_color, background_color) VALUES ($1, $2, $3, $4) RETURNING id",
-            array($name, $description, $foreground_color, $background_color)
+            "INSERT INTO tags (name, inventory_id, fgcolor, bgcolor) VALUES ($1, $2, $3, $4) RETURNING id",
+            array($name, $inventory_id, $foreground_color, $background_color)
         );
         if ($res === false) return false;
         $row = pg_fetch_assoc($res);

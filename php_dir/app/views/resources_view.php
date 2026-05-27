@@ -1,7 +1,10 @@
-<div class="split-container3-l center-conent">
+<div>
+<script>
+    <?php require_once "js/toggle_table_contents.js"; ?>
+</script>
 <h2 class="center-content">Resources</h2>
 <table id="resource-table">
-    <thead>
+    <thead onclick="toggleTableContents(event)">
         <tr>
             <th>Name</th>
             <th>Quantity</th>

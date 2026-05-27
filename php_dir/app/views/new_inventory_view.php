@@ -10,7 +10,7 @@
         <p class="error"><?php echo htmlspecialchars($message); ?></p>
         <?php endif; ?>
         <div style="text-align:center; margin-top:10px;">
-            <input type="submit" name="submit" value="Submit">
+            <input type="submit" name="submitNewInventory" value="Submit">
         </div>
     </form>
 </div>

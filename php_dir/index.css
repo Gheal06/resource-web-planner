@@ -48,6 +48,9 @@ body{
     color: white;
     text-decoration: none;
 }
+.container{
+    overflow: scroll;
+}
 .container input[type="submit"]{
     border: 2px #5555FF solid;
     padding: 2px 5px;
@@ -95,7 +98,9 @@ input:-webkit-autofill{
 }
 .full{
     width: max(95%, 400px);
-    margin-bottom: 0;
+}
+.full-width{
+    width: 95%;
 }
 td, th{
     padding: 10px;
@@ -130,6 +135,24 @@ thead tr{
     background-color: #55DD55;
     color: white;
 }
+#currency-table{
+    border: 1px #00FF00 solid;
+}
+
+#history-table tbody tr:nth-child(even) {
+  background-color: #ffdd99;
+}
+#history-table tbody tr:nth-child(odd) {
+  background-color: #FFF;
+}
+#history-table thead tr{
+    background-color: #ffaa11;
+    color: white;
+}
+#currency-table{
+    border: 1px #ffdd99 solid;
+}
+
 #currency-table{
     border: 1px #00FF00 solid;
     margin-bottom: 20px;

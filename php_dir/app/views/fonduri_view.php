@@ -1,7 +1,10 @@
 <div>
+<script>
+    <?php require_once "js/toggle_table_contents.js"; ?>
+</script>
 <h2 class="center-content">Funds</h2>
 <table id="currency-table">
-    <thead>
+    <thead onclick="toggleTableContents(event)">
         <tr>
             <th>Name</th>
             <th>Currency</th>
