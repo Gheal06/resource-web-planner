@@ -41,6 +41,9 @@ services:
       - postgres
     ports:
       - "8081:80"
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     environment:
       - MAIL_HOST=smtp.gmail.com
       - MAIL_PORT=587
