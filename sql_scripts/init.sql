@@ -36,7 +36,8 @@ CREATE TABLE user_inventory_permission (
     user_id                BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
     permissions            INT NOT NULL DEFAULT 0, -- edit update delete read
-    CHECK ((permissions & 1) > 0 OR (permissions & 14) = 0)
+    CHECK ((permissions & 1) > 0 OR (permissions & 14) = 0),
+    UNIQUE(user_id, inventory_id) -- un user poate avea doar un set de permisiuni pe un inventory
 );
 
 CREATE TABLE resources (
