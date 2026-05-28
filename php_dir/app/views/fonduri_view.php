@@ -10,6 +10,7 @@
             <th>Currency</th>
             <th>Quantity</th>
             <th>Description</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -23,10 +24,15 @@
         <td><?php echo htmlspecialchars($row['currency_code']); ?></td>
         <td><?php echo htmlspecialchars($row['amount']); ?></td>
         <td><?php echo htmlspecialchars($row['description'] ?? '-'); ?></td>
+        <td>
+            <form onsubmit="return confirm('Are you sure you want to remove this fund?');" action="delete_currency.php?inventory_id=<?php echo urlencode($inventory_id); ?>&currencyId=<?php echo urlencode($row['id']); ?>" method="post">
+                <input name="submitRemoveCurrency" type="submit" value="Delete">
+            </form>
+        </td>
     </tr>
     <?php endforeach; ?>
     <tr>
-        <td colspan="4"><a href="new_currency.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Add new currency</a></td>
+        <td colspan="5"><a href="new_currency.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Add new currency</a></td>
     </tr>
     </tbody>
 </table>

@@ -27,6 +27,19 @@
                 return $msg;
             }
         }
+        public function removeCurrency(){
+            if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitRemoveCurrency']) && isset($_GET['inventory_id']) && isset($_GET['currencyId'])){
+                try{
+                    $msg = new FonduriModel($this->connection) -> deleteFonduri($_GET['inventory_id'], $_GET['currencyId']);
+                }catch(Exception $e){
+                }
+                finally{
+                    header('Location: inventory.php?inventory_id='.$_GET['inventory_id']);
+                }
+                return $msg;
+            }
+            header('Location: error.php');
+        }
         public function addTag(){
             if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitNewTag']) && isset($_GET['inventory_id'])){
                 $msg = $this -> resourceService -> addTag($_GET['inventory_id'], $_POST['tag-name'], $_POST['bgcolor'], $_POST['fgcolor']);
