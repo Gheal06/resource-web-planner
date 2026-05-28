@@ -19,6 +19,7 @@ function makeTag(parentId, tagText, fgColor, bgColor){
     var div = document.createElement('div');
     div.classList.add('tag');
     var span = document.createElement('span');
+    span.classList.add('tag-output-text');
     span.innerText = tagText;
     if(span.innerText == '') span.innerText='<empty tag>';
     span.style.color = fgColor;
@@ -32,6 +33,7 @@ function makeLinkTag(parentId, tagText, href, fgColor, bgColor){
     var div = document.createElement('div');
     div.classList.add('tag');
     var a = document.createElement('a');
+    a.classList.add('tag-output-text');
     a.href=href;
     a.innerText = tagText;
     if(a.innerText == '') a.innerText='<empty tag>';

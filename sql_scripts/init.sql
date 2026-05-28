@@ -73,6 +73,12 @@ CREATE TABLE fonduri (
     description            TEXT
 );
 
+CREATE TABLE has_tag (
+    resource_id BIGINT REFERENCES resources(id) ON DELETE CASCADE,
+    tag_id BIGINT REFERENCES tags(id) ON DELETE CASCADE,
+    UNIQUE(resource_id, tag_id)
+);
+
 CREATE TABLE transactions (
     id                     BIGSERIAL PRIMARY KEY,
     resource_id            BIGINT NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
