@@ -32,7 +32,7 @@ class ResurseModel {
         $row = pg_fetch_assoc($res);
         return $row ? $row['id'] : false;
     }
-    public function delete($id, $inventory_id) {
+    public function delete($inventory_id, $id) {
         return pg_query_params($this->connection,
             "DELETE FROM resources WHERE id=$1 AND inventory_id=$2",
             array($id, $inventory_id));
