@@ -73,5 +73,21 @@ class InventoryManagementController {
         }
         header('Location: ../error.php');
     }
+
+    public function getManageAccessData($username, $inventory_id) {
+        return $this->inventoryManagementService->getAccessManagementData($username, $inventory_id);
+    }
+
+    public function updateUserAccess($username, $inventory_id, $target_user_id, $new_permissions) {
+        return $this->inventoryManagementService->updateUserInventoryAccess($username, $inventory_id, $target_user_id, $new_permissions);
+    }
+
+    public function removeUserAccess($username, $inventory_id, $target_user_id) {
+        return $this->inventoryManagementService->removeUserInventoryAccess($username, $inventory_id, $target_user_id);
+    }
+
+    public function addUserAccess($username, $inventory_id, $target_username, $initial_permissions = 1) {
+        return $this->inventoryManagementService->addUserInventoryAccess($username, $inventory_id, $target_username, $initial_permissions);
+    }
 }
 ?>

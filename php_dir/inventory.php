@@ -2,17 +2,24 @@
 
 require_once "header.php";
 require_once "app/controllers/InventoryManagementController.php";
+require_once "app/models/UserModel.php";
 require_once "app/views/header_view.php";
+require_once "app/services/InventoryManagementService.php";
 
 $inventoryController = new InventoryManagementController($connection);
+$inventoryService = new InventoryManagementService($connection);
 $inventoryId = $_GET['inventory_id'] ?? null;
 $inventory = $inventoryId ? $inventoryController->getUserInventoryById($inventoryId) : null;
-if(!isset($inventory)){
+if(!isset($inventory) || !isset($inventory['id'])){
     require_once "app/views/error_view.php";
 }
 else{
     $resourceModel = new ResurseModel($connection);
     $tags = $resourceModel -> getAllTags($inventoryId);
+
+    // Get owner info
+    $owner = $authController->getUserById($inventory['owner_id']);
+    $inventoryOwnerUsername = $owner ? $owner['username'] : 'Unknown';
 
     require_once "app/views/inventory_view.php";
 }

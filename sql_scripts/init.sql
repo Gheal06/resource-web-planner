@@ -70,8 +70,8 @@ CREATE TABLE fonduri (
     currency_code          VARCHAR(3) NOT NULL REFERENCES currencies(code),
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
     name                   VARCHAR(255),
-    description            TEXT
-    unique(inventory_id, name)
+    description            TEXT,
+    UNIQUE(inventory_id, name)
 );
 
 CREATE TABLE transactions (
