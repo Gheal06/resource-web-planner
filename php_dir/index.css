@@ -51,12 +51,7 @@ body{
 .container{
     overflow: scroll;
 }
-.container input[type="submit"]{
-    border: 2px #5555FF solid;
-    padding: 2px 5px;
-    font-size: 1.2rem;
-    background-color: white;
-}
+
 label{
     font-size: 1.2rem;
 }
@@ -69,13 +64,31 @@ input[type="text"], input[type="password"], input[type="email"]{
     padding: 3px;
     font-size: 1.2rem;
 }
-input:hover, input:focus{
+input[type="text"]:hover, input[type="text"]:focus{
     background-color: #EEEEFF;
     border-bottom: 2px #5555FF solid;
 }
-.container input[type="submit"]:hover{
+input[type="password"]:hover, input[type="password"]:focus{
+    background-color: #EEEEFF;
+    border-bottom: 2px #5555FF solid;
+}
+input[type="email"]:hover, input[type="email"]:focus{
+    background-color: #EEEEFF;
+    border-bottom: 2px #5555FF solid;
+}
+textarea:hover, textarea:focus{
     background-color: #EEEEFF;
 }
+input[type="submit"]{
+    border: 2px #5555FF solid;
+    padding: 2px 5px;
+    font-size: 1.2rem;
+    background-color: white;
+}
+input[type="submit"]:hover{
+    background-color: #EEEEFF;
+}
+
 input:-webkit-autofill{
     -webkit-text-fill-color: black;
 }
@@ -274,4 +287,16 @@ textarea:hover{
 }
 .tag-output-text{
     
+}
+input[type="submit"].tag-delete-btn{
+    background-color: #FFFFFF66;
+    border-radius: 9999px;
+    font-weight: bold;
+    border-width:0px;
+    font-size: 1rem;
+    margin: 1px;
+    margin-right: 3px;
+}
+input[type="submit"].tag-delete-btn:hover{
+    background-color: #FFFFFF99;
 }
