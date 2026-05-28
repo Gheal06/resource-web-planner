@@ -5,6 +5,7 @@ require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/FonduriModel.php";
 require_once __DIR__ . "/../models/ResurseModel.php";
 require_once __DIR__ . "/../models/CurrencyModel.php";
+require_once __DIR__ . "/MailingService.php";
 
   class InventoryManagementService {
     private $inventoryModel;
@@ -13,6 +14,8 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
     private $fonduriModel;
     private $resurseModel;
     private $currencyModel;
+
+    private $mailingService;
 
     private $readPermissionMask = 1;
     private $insertPermissionMask = 2;
@@ -26,40 +29,81 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       $this->fonduriModel = new FonduriModel($connection);
       $this->resurseModel = new ResurseModel($connection);
       $this->currencyModel = new CurrencyModel($connection);
+      $this->mailingService = new MailingService();
     }
+
+    
+
     public function getUserInventoryIDsByMask($username, $permission_mask) {
-        return $this->inventoryPermissionsModel->getUserInventoryIDsByMask($username, $permission_mask);
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return array();
+      }
+        return $this->inventoryPermissionsModel->getUserInventoryIDsByMask($user['id'], $permission_mask);
     }
     public function getUserInventoryById($id) {
         return $this->inventoryModel->getInventoryById($id);
     }
     public function getUserInventoriesByMask($username, $permission_mask) {
-        $ids = $this->getUserInventoryIDsByMask($username, $permission_mask);
-        $inventories = array();
-        foreach ($ids as $id) {
-            $inventories[] = $this->inventoryModel->getInventoryById($id);
-        }
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return array();
+      }
+      $ids = $this->getUserInventoryIDsByMask($username, $permission_mask);
+      $inventories = array();
+      foreach ($ids as $id) {
+        $inventories[] = $this->inventoryModel->getInventoryById($id);
+      }
         return $inventories;
     }
 
-    public function canUserAccessInventory($username, $inventory_id, $permission_mask) {
-        return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $permission_mask);
+    
+    public function sendEmailToOwner($inventory_id, $subject, $body) {
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return false;
+      }
+      $owner = $this->userModel->findById($inventory['owner_user_id']);
+      if (!$owner || !isset($owner['email'])) {
+        return false;
+      }
+      $to = $owner['email'];
+      return $this->mailingService->send_email($to, $subject, $body);
+    }
+
+    public function sendEmailToAllAssoc($inventory_id, $subject, $body) {
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return false;
+      }
+      $associates = $this->inventoryPermissionsModel->getAllAssociatedUsers($inventory_id);
+      foreach ($associates as $associate) {
+        if (isset($associate['email'])) {
+          $to = $associate['email'];
+          $this->mailingService->send_email($to, $subject, $body);
+        }
+      }
+      return true;
+    }
+
+    public function canUserAccessInventory($user_id, $inventory_id, $permission_mask) {
+        return $this->inventoryPermissionsModel->canUserAccessInventory($user_id, $inventory_id, $permission_mask);
     }
     
-    public function canRead($username, $inventory_id) {
-      return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->readPermissionMask);
+    public function canRead($user_id, $inventory_id) {
+      return $this->inventoryPermissionsModel->canUserAccessInventory($user_id, $inventory_id, $this->readPermissionMask);
     }
 
-    public function canUpdate($username, $inventory_id) {
-      return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->updatePermissionMask);
+    public function canUpdate($user_id, $inventory_id) {
+      return $this->inventoryPermissionsModel->canUserAccessInventory($user_id, $inventory_id, $this->updatePermissionMask);
     }
 
-    public function canEdit($username, $inventory_id) {
-      return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->editPermissionMask);
+    public function canEdit($user_id, $inventory_id) {
+      return $this->inventoryPermissionsModel->canUserAccessInventory($user_id, $inventory_id, $this->editPermissionMask);
     }
 
-    public function canDelete($username, $inventory_id) {
-      return $this->inventoryPermissionsModel->canUserAccessInventory($username, $inventory_id, $this->deletePermissionMask);
+    public function canDelete($user_id, $inventory_id) {
+      return $this->inventoryPermissionsModel->canUserAccessInventory($user_id, $inventory_id, $this->deletePermissionMask);
     }
 
     private function accessDenied() {
@@ -70,8 +114,8 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return array('success' => false, 'message' => $message);
     }
 
-    private function getInventoryExportData($username, $inventory_id) {
-      if (!$this->canRead($username, $inventory_id)) {
+    private function getInventoryExportData($user_id, $inventory_id) {
+      if (!$this->canRead($user_id, $inventory_id)) {
         return $this->accessDenied();
       }
 
@@ -363,8 +407,8 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return $binary;
     }
 
-    public function exportInventoryAsCsv($username, $inventory_id) {
-      $exportData = $this->getInventoryExportData($username, $inventory_id);
+    public function exportInventoryAsCsv($user_id, $inventory_id) {
+      $exportData = $this->getInventoryExportData($user_id, $inventory_id);
       if (!empty($exportData['success']) && $exportData['success'] === false) {
         return $exportData;
       }
@@ -382,8 +426,8 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       );
     }
 
-    public function exportInventoryAsJson($username, $inventory_id) {
-      $exportData = $this->getInventoryExportData($username, $inventory_id);
+    public function exportInventoryAsJson($user_id, $inventory_id) {
+      $exportData = $this->getInventoryExportData($user_id, $inventory_id);
       if (!empty($exportData['success']) && $exportData['success'] === false) {
         return $exportData;
       }
@@ -401,64 +445,23 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       );
     }
 
-    public function exportInventoryAsPng($username, $inventory_id) {
-      $exportData = $this->getInventoryExportData($username, $inventory_id);
-      if (!empty($exportData['success']) && $exportData['success'] === false) {
-        return $exportData;
-      }
-
-      $content = $this->renderInventoryImage($exportData, 'png');
-      if ($content === false) {
-        return array('success' => false, 'message' => 'Failed to build PNG export.', 'code' => 'export_error');
-      }
-
-      return array(
-        'success' => true,
-        'filename' => $this->getExportFilename($inventory_id, 'png'),
-        'mime' => 'image/png',
-        'content' => $content,
-      );
-    }
-
-    public function exportInventoryAsWebp($username, $inventory_id) {
-      $exportData = $this->getInventoryExportData($username, $inventory_id);
-      if (!empty($exportData['success']) && $exportData['success'] === false) {
-        return $exportData;
-      }
-
-      $content = $this->renderInventoryImage($exportData, 'webp');
-      if ($content === false) {
-        return array('success' => false, 'message' => 'Failed to build WebP export.', 'code' => 'export_error');
-      }
-
-      return array(
-        'success' => true,
-        'filename' => $this->getExportFilename($inventory_id, 'webp'),
-        'mime' => 'image/webp',
-        'content' => $content,
-      );
-    }
-
     public function exportInventory($username, $inventory_id, $type) {
       $normalizedType = strtolower(trim((string)$type));
 
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return array('success' => false, 'message' => 'User not found.');
+      }
       if ($normalizedType === 'csv') {
-        return $this->exportInventoryAsCsv($username, $inventory_id);
+        return $this->exportInventoryAsCsv($user['id'], $inventory_id);
       }
 
       if ($normalizedType === 'json') {
-        return $this->exportInventoryAsJson($username, $inventory_id);
+        return $this->exportInventoryAsJson($user['id'], $inventory_id);
       }
 
-      if ($normalizedType === 'png') {
-        return $this->exportInventoryAsPng($username, $inventory_id);
-      }
 
-      if ($normalizedType === 'webp') {
-        return $this->exportInventoryAsWebp($username, $inventory_id);
-      }
-
-      return array('success' => false, 'message' => 'Unsupported export type.', 'code' => 'invalid_export_type');
+      return array('success' => false, 'message' => 'Unsupported export type.');
     }
 
     public function createInventory($name, $description, $username) {
@@ -482,22 +485,39 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       return $i_id;
     }
     public function updateInventory($username, $id, $name, $description) {
-      if (!$this->canEdit($username, $id)) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $id)) {
         return $this->accessDenied();
       }
       return $this->inventoryModel->update($id, $name, $description);
     }
     public function updateInventoryName($username, $id, $name) {
-      if (!$this->canEdit($username, $id)) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $id)) {
         return $this->accessDenied();
       }
       return $this->inventoryModel->update($id, $name, null);
     }
-    public function deleteInventory($user_id, $inventory_id){
-      if(!$this->canDelete($user_id, $inventory_id)){
+    public function deleteInventory($username, $inventory_id){
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if(!$this->canDelete($user['id'], $inventory_id)){
           throw new Exception("Permission Denied");
       }
-      return $this->inventoryModel->delete($inventory_id);
+
+      $this->sendEmailToAllAssoc($inventory_id, "Inventory Deleted: " . $inventory_id, "The inventory with ID " . $inventory_id . " has been deleted by user " . $user['id'] . ".");
+      if ($this->inventoryModel->delete($inventory_id)) {
+        return array('success' => true, 'message' => 'Inventory deleted.');
+      }
+      return array('success' => false, 'message' => 'Failed to delete inventory.');
     }
     public function getFonduriByInventoryId($inventory_id) {
       $res = $this->fonduriModel->getFonduriByInventoryId($inventory_id);
@@ -515,13 +535,17 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
     }
 
     public function addFonduri($username, $inventory_id, $amount, $currency_code, $name = null, $description = null) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
       if ($fonduri) {
-        if (!$this->canEdit($username, $inventory_id)) {
+        if (!$this->canEdit($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       } else {
-        if (!$this->canInsert($username, $inventory_id)) {
+        if (!$this->canInsert($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       }
@@ -533,13 +557,17 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
     }
 
     public function setFonduri($username, $inventory_id, $amount, $currency_code, $name = null, $description = null) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
       if ($fonduri) {
-        if (!$this->canEdit($username, $inventory_id)) {
+        if (!$this->canEdit($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       } else {
-        if (!$this->canInsert($username, $inventory_id)) {
+        if (!$this->canInsert($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       }
@@ -551,7 +579,11 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
     }
 
     public function createResurse($username, $name, $description, $quantity, $unit, $inventory_id) {
-      if (!$this->canInsert($username, $inventory_id)) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canInsert($user['id'], $inventory_id)) {
         return $this->accessDenied();
       }
       $res = $this->resurseModel->create($name, $description, $quantity, $unit, $inventory_id);
@@ -566,7 +598,11 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       if (!$resource) {
         return $this->notFound('Resource not found.');
       }
-      if (!$this->canDelete($username, $resource['inventory_id']) || !$this->canInsert($username, $new_inventory_id)) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canDelete($user['id'], $resource['inventory_id']) || !$this->canInsert($user['id'], $new_inventory_id)) {
         return $this->accessDenied();
       }
       $res = $this->resurseModel->move($resource_id, $new_inventory_id);
@@ -581,7 +617,11 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       if (!$resource) {
         return $this->notFound('Resource not found.');
       }
-      if (!$this->canEdit($username, $resource['inventory_id'])) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $resource['inventory_id'])) {
         return $this->accessDenied();
       }
       $res = $this->resurseModel->add_ammount($resource_id, $amount);
@@ -596,7 +636,11 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       if (!$resource) {
         return $this->notFound('Resource not found.');
       }
-      if (!$this->canEdit($username, $resource['inventory_id'])) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $resource['inventory_id'])) {
         return $this->accessDenied();
       }
       $res = $this->resurseModel->set_ammount($resource_id, $amount);
@@ -645,5 +689,8 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       }
       return array('success' => true, 'message' => 'Tag updated.');
     }
+
+
+
   }
 ?>
