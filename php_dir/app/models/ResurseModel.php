@@ -75,11 +75,13 @@ class ResurseModel {
 
     public function getTagsForResource($resource_id) {
         $sql = "SELECT t.* FROM tags t JOIN has_tag ht ON ht.tag_id = t.id WHERE ht.resource_id = $1";
-        $res = @pg_query_params($this->connection, $sql, array($resource_id));
-        if (!$res) return array();
+        $res = pg_query_params($this->connection, $sql, array($resource_id));
+        if (!$res){
+            return array();
+        }
         $rows = array();
         while ($row = pg_fetch_assoc($res)) {
-            $rows[] = $row;
+            array_push($rows, $row);
         }
         return $rows;
     }

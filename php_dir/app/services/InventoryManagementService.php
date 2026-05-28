@@ -762,7 +762,12 @@ require_once __DIR__ . "/MailingService.php";
         return $this->notFound('User not found.');
       }
       if (!$this->canRead($user['id'], $resource['inventory_id'])) return $this->accessDenied();
-      return $this->resurseModel->getTagsForResource($resource_id);
+      try{
+          return $this->resurseModel->getTagsForResource($resource_id);
+      }catch(Exception $e){
+          return array();
+      }
+      return array();
     }
 
     public function removeResourceById($username, $resource_id) {

@@ -102,6 +102,9 @@ input:-webkit-autofill{
 .full-width{
     width: 95%;
 }
+.min-width{
+    width:auto;
+}
 td, th{
     padding: 10px;
     /*background-color: #0000FF;*/
@@ -258,7 +261,17 @@ textarea:hover{
     width: fit-content;
     padding: 6px;
     margin-right: 10px;
+    display: flex;
+    align-items: center;
+}
+.tag-container{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 #tag-output-text{
     margin: 0;
+}
+.tag-output-text{
+    
 }
