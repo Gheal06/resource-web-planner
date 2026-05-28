@@ -35,7 +35,7 @@ CREATE TABLE user_inventory_permission (
     id                     BIGSERIAL PRIMARY KEY,
     user_id                BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
-    permissions            INT NOT NULL DEFAULT 0, -- edit update delete read
+    permissions            INT NOT NULL DEFAULT 0, -- delete update edit read
     CHECK ((permissions & 1) > 0 OR (permissions & 14) = 0),
     UNIQUE(user_id, inventory_id) -- un user poate avea doar un set de permisiuni pe un inventory
 );
@@ -71,6 +71,7 @@ CREATE TABLE fonduri (
     inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
     name                   VARCHAR(255),
     description            TEXT
+    unique(inventory_id, name)
 );
 
 CREATE TABLE transactions (

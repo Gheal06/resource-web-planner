@@ -5,6 +5,7 @@ require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/FonduriModel.php";
 require_once __DIR__ . "/../models/ResurseModel.php";
 require_once __DIR__ . "/../models/CurrencyModel.php";
+require_once __DIR__ . "/ResourceService.php";
 require_once __DIR__ . "/MailingService.php";
 
   class InventoryManagementService {
@@ -14,11 +15,12 @@ require_once __DIR__ . "/MailingService.php";
     private $fonduriModel;
     private $resurseModel;
     private $currencyModel;
+    private $resourceService;
 
     private $mailingService;
 
     private $readPermissionMask = 1;
-    private $insertPermissionMask = 2;
+    private $editPermissionMask = 2;
     private $updatePermissionMask = 4;
     private $deletePermissionMask = 8;
 
@@ -29,6 +31,7 @@ require_once __DIR__ . "/MailingService.php";
       $this->fonduriModel = new FonduriModel($connection);
       $this->resurseModel = new ResurseModel($connection);
       $this->currencyModel = new CurrencyModel($connection);
+      $this->resourceService = new ResourceService($connection);
       $this->mailingService = new MailingService();
     }
 
@@ -68,7 +71,7 @@ require_once __DIR__ . "/MailingService.php";
       if (!$inventory) {
         return false;
       }
-      $owner = $this->userModel->findById($inventory['owner_user_id']);
+      $owner = $this->userModel->findById($inventory['owner_id']);
       if (!$owner || !isset($owner['email'])) {
         return false;
       }
@@ -563,14 +566,8 @@ require_once __DIR__ . "/MailingService.php";
         return $this->notFound('User not found.');
       }
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
-      if ($fonduri) {
-        if (!$this->canEdit($user['id'], $inventory_id)) {
-          return $this->accessDenied();
-        }
-      } else {
-        if (!$this->canInsert($user['id'], $inventory_id)) {
-          return $this->accessDenied();
-        }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
       }
       $res = $this->fonduriModel->addFonduri($inventory_id, $amount, $currency_code, $name, $description);
       if ($res === false) {
@@ -586,11 +583,11 @@ require_once __DIR__ . "/MailingService.php";
       }
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
       if ($fonduri) {
-        if (!$this->canEdit($user['id'], $inventory_id)) {
+        if (!$this->canUpdate($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       } else {
-        if (!$this->canInsert($user['id'], $inventory_id)) {
+        if (!$this->canEdit($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       }
@@ -601,19 +598,103 @@ require_once __DIR__ . "/MailingService.php";
       return array('success' => true, 'message' => 'Funds set.');
     }
 
+    public function createFonduri($username, $inventory_id, $currency_code, $name = null, $description = null) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+      $res = $this->fonduriModel->create($inventory_id, $currency_code, $name, $description);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to create fund.');
+      }
+      return array('success' => true, 'message' => 'Fund created.');
+    }
+
+    public function deleteFonduri($username, $inventory_id, $currency_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canDelete($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+
+      $fonduri = $this->getFonduriByInventoryId($inventory_id);
+      $target = null;
+      foreach ($fonduri as $f) {
+        if (isset($f['id']) && (string)$f['id'] === (string)$currency_id) {
+          $target = $f;
+          break;
+        }
+      }
+      if (!$target) {
+        return $this->notFound('Fund not found.');
+      }
+
+      $res = $this->fonduriModel->deleteFonduri($inventory_id, $currency_id);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to delete fund.');
+      }
+
+      $this->sendEmailToOwner($inventory_id, "Fund Deleted: " . ($target['name'] ?? $target['currency_code'] ?? ''), "The fund with ID " . $currency_id . " (" . ($target['name'] ?? $target['currency_code'] ?? '') . ") has been deleted from inventory " . ($this->inventoryModel->getInventoryById($inventory_id)['name'] ?? $inventory_id) . " by user " . $user['username'] . ".");
+
+      return array('success' => true, 'message' => 'Fund deleted.');
+    }
+
     public function createResurse($username, $name, $description, $quantity, $unit, $inventory_id) {
       $user = $this->userModel->findByUsername($username);
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
       }
-      if (!$this->canInsert($user['id'], $inventory_id)) {
+      if (!$this->canEdit($user['id'], $inventory_id)) {
         return $this->accessDenied();
       }
-      $res = $this->resurseModel->create($name, $description, $quantity, $unit, $inventory_id);
+      $res = $this->resourceService->addResource($inventory_id, $name, $unit, $description);
       if ($res === false) {
         return array('success' => false, 'message' => 'Failed to create resource.');
       }
       return array('success' => true, 'message' => 'Resource created.', 'id' => $res);
+    }
+
+    public function addResource($username, $inventory_id, $name, $unit, $description) {
+      return $this->createResurse($username, $name, $description, 0, $unit, $inventory_id);
+    }
+
+    public function removeResource($username, $inventory_id, $resource_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canDelete($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      $res = $this->resourceService->removeResource($inventory_id, $resource_id);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to delete resource.');
+      }
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+
+      $this->sendEmailToOwner($inventory_id, "Resource Deleted: " . $resource['name'], "The resource with ID " . $resource_id . " has been deleted from inventory " . $inventory['name'] . " by user " . $user['username'] . ".");
+      return array('success' => true, 'message' => 'Resource deleted.');
+    }
+
+    public function addTag($username, $inventory_id, $name, $bgColor, $fgColor) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+      $res = $this->resourceService->addTag($inventory_id, $name, $bgColor, $fgColor);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to create tag.');
+      }
+      return array('success' => true, 'message' => 'Tag created.', 'id' => $res);
     }
 
     public function moveResurse($username, $resource_id, $new_inventory_id) {
@@ -625,7 +706,7 @@ require_once __DIR__ . "/MailingService.php";
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
       }
-      if (!$this->canDelete($user['id'], $resource['inventory_id']) || !$this->canInsert($user['id'], $new_inventory_id)) {
+      if (!$this->canDelete($user['id'], $resource['inventory_id']) || !$this->canEdit($user['id'], $new_inventory_id)) {
         return $this->accessDenied();
       }
       $res = $this->resurseModel->move($resource_id, $new_inventory_id);
@@ -682,6 +763,14 @@ require_once __DIR__ . "/MailingService.php";
       }
       if (!$this->canRead($user['id'], $resource['inventory_id'])) return $this->accessDenied();
       return $this->resurseModel->getTagsForResource($resource_id);
+    }
+
+    public function removeResourceById($username, $resource_id) {
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      if (!$resource) {
+        return $this->notFound('Resource not found.');
+      }
+      return $this->removeResource($username, $resource['inventory_id'], $resource_id);
     }
 
     public function getResourcesByTags($username, $inventory_id, $tag_ids) {
