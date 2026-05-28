@@ -158,6 +158,47 @@ thead tr{
     margin-bottom: 20px;
 }
 
+.exchange-page{
+    width: min(1100px, calc(100% - 20px));
+}
+
+.exchange-form{
+    margin-bottom: 16px;
+}
+
+.exchange-form-row{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.exchange-form-row input[type="text"]{
+    width: 130px;
+    text-transform: uppercase;
+}
+
+.exchange-summary{
+    margin: 10px 0 14px;
+}
+
+#exchange-rates-table{
+    border: 1px #5555FF solid;
+}
+
+#exchange-rates-table thead tr{
+    background-color: #5555FF;
+    color: white;
+}
+
+#exchange-rates-table tbody tr:nth-child(even){
+    background-color: #EEF0FF;
+}
+
+#exchange-rates-table tbody tr:nth-child(odd){
+    background-color: #FFF;
+}
+
 .split-container3{
     width: 100%;
     display: flex;

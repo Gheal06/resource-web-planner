@@ -17,6 +17,7 @@
         <div id="nav-left">
             <img src="favicon.ico">
             <a href="index.php">Home</a>
+            <a href="exchange_rates.php">Exchange Rates</a>
         </div>
         <div id="nav-right">
             <?php if(!$currentUser): ?>
