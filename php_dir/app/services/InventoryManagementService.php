@@ -32,7 +32,12 @@ require_once __DIR__ . "/MailingService.php";
       $this->mailingService = new MailingService();
     }
 
-    
+    public function getUserByUsername($username) {
+      return $this->userModel->findByUsername($username);
+    }
+    public function getUserById($id) {
+      return $this->userModel->findById($id);
+    }
 
     public function getUserInventoryIDsByMask($username, $permission_mask) {
       $user = $this->userModel->findByUsername($username);

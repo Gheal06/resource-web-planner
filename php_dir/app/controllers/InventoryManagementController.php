@@ -27,14 +27,22 @@ class InventoryManagementController {
         return $this->inventoryManagementService->getUserInventoryById($id);
     }
     public function getFonduriForInventory($username, $inventory_id) {
-        if (!$this->inventoryManagementService->canRead($username, $inventory_id)) {
+        $user = $this->inventoryManagementService->getUserByUsername($username);
+        if (!$user || !isset($user['id'])) {
+          return array();
+        }
+        if (!$this->inventoryManagementService->canRead($user['id'], $inventory_id)) {
             return array();
         }
         return $this->inventoryManagementService->getFonduriByInventoryId($inventory_id);
     }
 
     public function getResourcesForInventory($username, $inventory_id) {
-        if (!$this->inventoryManagementService->canRead($username, $inventory_id)) {
+        $user = $this->inventoryManagementService->getUserByUsername($username);
+        if (!$user || !isset($user['id'])) {
+          return array();
+        }
+        if (!$this->inventoryManagementService->canRead($user['id'], $inventory_id)) {
             return array();
         }
         return $this->inventoryManagementService->getResourcesByInventoryId($inventory_id);
