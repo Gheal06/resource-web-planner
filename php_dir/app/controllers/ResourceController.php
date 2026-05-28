@@ -16,6 +16,15 @@
                 return $msg;
             }
         }
+        public function removeResource($username){
+            if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitRemoveResource']) && isset($_GET['inventory_id']) && isset($_GET['resourceId'])){
+                $msg = $this -> resourceService -> removeResource($_GET['inventory_id'], $_GET['resourceId']);
+                if($msg == ""){
+                    header('Location: inventory.php?inventory_id='.$_GET['inventory_id']);
+                }
+                return $msg;
+            }
+        }
         public function addCurrency(){
             if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitNewCurrency']) && isset($_GET['inventory_id'])){
                 try{
