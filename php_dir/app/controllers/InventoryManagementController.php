@@ -1,9 +1,12 @@
 <?php
 require_once __DIR__ . "/../services/InventoryManagementService.php";
+require_once __DIR__ . "/../models/UserModel.php";
 
 class InventoryManagementController {
     private $inventoryManagementService;
+    private $connection;
     public function __construct($connection) {
+        $this->connection = $connection;
         $this->inventoryManagementService = new InventoryManagementService($connection);
     }
     
@@ -47,6 +50,25 @@ class InventoryManagementController {
             }
             return "";
         }
+    }
+    public function removeInventory($username){
+        if($_SERVER['REQUEST_METHOD']=='POST' && isset($_GET["inventory_id"])){
+            try{
+                $user_id = new UserModel($this -> connection) -> findByUsername($username);
+                if(!isset($user_id)){
+                    header('Location: ../error.php');
+                }
+                $msg = $this->inventoryManagementService -> deleteInventory($username, $_GET['inventory_id']);
+                
+            }catch(Exception $e){
+                echo $e;
+            }
+            finally{
+                header('Location: ../index.php');
+            }
+            return $msg;
+        }
+        header('Location: ../error.php');
     }
 }
 ?>

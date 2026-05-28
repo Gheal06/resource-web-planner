@@ -493,7 +493,12 @@ require_once __DIR__ . "/../models/CurrencyModel.php";
       }
       return $this->inventoryModel->update($id, $name, null);
     }
-
+    public function deleteInventory($user_id, $inventory_id){
+      if(!$this->canDelete($user_id, $inventory_id)){
+          throw new Exception("Permission Denied");
+      }
+      return $this->inventoryModel->delete($inventory_id);
+    }
     public function getFonduriByInventoryId($inventory_id) {
       $res = $this->fonduriModel->getFonduriByInventoryId($inventory_id);
       return $res === null ? array() : $res;
