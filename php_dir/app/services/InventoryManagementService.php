@@ -87,7 +87,7 @@ require_once __DIR__ . "/MailingService.php";
         if (isset($user['email'])) {
           $to = $user['email'];
           if ($this->mailingService->send_email($to, $subject, $body)) {
-            echo $user['email'] . " - email sent\n";
+            // echo $user['email'] . " - email sent\n";
           } else {
             return false;
           }
@@ -527,7 +527,12 @@ require_once __DIR__ . "/MailingService.php";
           throw new Exception("Permission Denied");
       }
 
-      if ($this->sendEmailToAllAssoc($inventory_id, "Inventory Deleted: " . $inventory_id, "The inventory with ID " . $inventory_id . " has been deleted by user " . $user['id'] . ".")) {
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return $this->notFound('Inventory not found.');
+      }
+
+      if ($this->sendEmailToAllAssoc($inventory_id, "Inventory Deleted: " . $inventory['name'], "The inventory with ID " . $inventory_id . " has been deleted by user " . $user['username'] . ".")) {
         // merge bine
       } else {
         return array('success' => false, 'message' => 'Failed to send deletion notice emails.');
