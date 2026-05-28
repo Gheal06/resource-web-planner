@@ -33,5 +33,6 @@ class MailingService {
     $message = "Your one-time code is: $code\nThis code will expire in 5 minutes.";
     return $this->send_email($to, $subject, $message);
   }
+
 }
 ?>

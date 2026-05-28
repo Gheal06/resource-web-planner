@@ -78,10 +78,19 @@ require_once __DIR__ . "/MailingService.php";
       }
       $associates = $this->inventoryPermissionsModel->getAllAssociatedUsers($inventory_id);
       foreach ($associates as $associate) {
-        if (isset($associate['email'])) {
-          $to = $associate['email'];
-          $this->mailingService->send_email($to, $subject, $body);
+        $user = $this->userModel->findById($associate['user_id']);
+        if (isset($user['email'])) {
+          $to = $user['email'];
+          if ($this->mailingService->send_email($to, $subject, $body)) {
+            echo $user['email'] . " - email sent\n";
+          } else {
+            return false;
+          }
+          // echo $user['email'] . "\n";
         }
+        // else{
+        //   echo "troll\n";
+        // }
       }
       return true;
     }
@@ -513,7 +522,11 @@ require_once __DIR__ . "/MailingService.php";
           throw new Exception("Permission Denied");
       }
 
-      $this->sendEmailToAllAssoc($inventory_id, "Inventory Deleted: " . $inventory_id, "The inventory with ID " . $inventory_id . " has been deleted by user " . $user['id'] . ".");
+      if ($this->sendEmailToAllAssoc($inventory_id, "Inventory Deleted: " . $inventory_id, "The inventory with ID " . $inventory_id . " has been deleted by user " . $user['id'] . ".")) {
+        // merge bine
+      } else {
+        return array('success' => false, 'message' => 'Failed to send deletion notice emails.');
+      }
       if ($this->inventoryModel->delete($inventory_id)) {
         return array('success' => true, 'message' => 'Inventory deleted.');
       }
@@ -653,12 +666,20 @@ require_once __DIR__ . "/MailingService.php";
     public function getTagsForResource($username, $resource_id) {
       $resource = $this->resurseModel->getResurseById($resource_id);
       if (!$resource) return $this->notFound('Resource not found.');
-      if (!$this->canRead($username, $resource['inventory_id'])) return $this->accessDenied();
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canRead($user['id'], $resource['inventory_id'])) return $this->accessDenied();
       return $this->resurseModel->getTagsForResource($resource_id);
     }
 
     public function getResourcesByTags($username, $inventory_id, $tag_ids) {
-      if (!$this->canRead($username, $inventory_id)) return $this->accessDenied();
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canRead($user['id'], $inventory_id)) return $this->accessDenied();
       return $this->resurseModel->getResourcesByTags($inventory_id, $tag_ids);
     }
 
