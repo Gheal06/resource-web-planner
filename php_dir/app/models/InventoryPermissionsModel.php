@@ -42,13 +42,13 @@
 
     public function getAllAssociatedUsers ($inventory_id) {
       // returneaza toti utilizatorii care au drepturi pe un tabel, impreuna cu drepturile lor
-      $res = pg_query_params($this->conn, "SELECT users.username, user_inventory_permission.permissions FROM user_inventory_permission JOIN users ON user_inventory_permission.user_id = users.id WHERE user_inventory_permission.inventory_id = $1", array($inventory_id));
+      $res = pg_query_params($this->conn, "SELECT users.id, user_inventory_permission.permissions FROM user_inventory_permission JOIN users ON user_inventory_permission.user_id = users.id WHERE user_inventory_permission.inventory_id = $1", array($inventory_id));
       if (!$res) {
         return array();
       }
       $users = array();
       while ($row = pg_fetch_assoc($res)) {
-        $users[] = array('username' => $row['username'], 'permissions' => $row['permissions']);
+        $users[] = array('user_id' => $row['id'], 'permissions' => $row['permissions']);
       }
       return $users;
     }
