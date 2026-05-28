@@ -55,6 +55,9 @@ class FonduriModel {
             return @pg_query_params($this->connection, "INSERT INTO fonduri (amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5)", array($amount, $currency_code, $inventory_id, $name, $description));
         }
     }
+    public function deleteFonduri($inventory_id, $currency_id) {
+        return pg_query_params($this->connection, "DELETE FROM fonduri WHERE inventory_id = $1 AND id = $2", array($inventory_id, $currency_id));
+    }
 
 }
 ?>
