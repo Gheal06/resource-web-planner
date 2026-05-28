@@ -2,8 +2,10 @@
 
 require_once "header.php";
 require_once "app/controllers/InventoryManagementController.php";
+require_once "app/services/InventoryManagementService.php";
 require_once "app/views/header_view.php";
 
+$inventoryService = new InventoryManagementService($connection);
 $inventoryController = new InventoryManagementController($connection);
 $inventoryId = $_GET['inventory_id'] ?? null;
 $inventory = $inventoryId ? $inventoryController->getUserInventoryById($inventoryId) : null;

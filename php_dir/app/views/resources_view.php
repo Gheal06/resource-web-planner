@@ -1,3 +1,4 @@
+
 <div>
 <script>
     <?php require_once "js/toggle_table_contents.js"; ?>
@@ -6,6 +7,7 @@
 <table id="resource-table">
     <thead onclick="toggleTableContents(event)">
         <tr>
+            <th style="width: 20%;">Tags</th>
             <th>Name</th>
             <th>Quantity</th>
             <th>Description</th>
@@ -19,6 +21,12 @@
         foreach ($rows as $row):
     ?>
     <tr>
+        <td>
+            <?php
+                $tags = $inventoryService -> getTagsForResource($currentUser, $row['id']);
+                require 'tags_view_for_resource.php'; // NU TREBUIE REQUIRE_ONCE
+            ?>
+        </td>
         <td><?php echo htmlspecialchars($row['name']); ?></td>
         <td><?php echo htmlspecialchars($row['quantity']); ?> <?php echo htmlspecialchars($row['unit']); ?></td>
         <td><?php echo htmlspecialchars($row['description']); ?></td>
@@ -31,7 +39,7 @@
     <?php endforeach; ?>
 
     <tr>
-        <td colspan="4"><a href="new_resource.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Create new resource</a></td>
+        <td colspan="5"><a href="new_resource.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Create new resource</a></td>
     </tr>
     </tbody>
 </table>
