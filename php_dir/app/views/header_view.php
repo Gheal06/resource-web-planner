@@ -15,7 +15,7 @@
     <div id="page">
     <div id="nav">
         <div id="nav-left">
-            <img src="favicon.ico">
+            <img src="favicon.ico" alt="">
             <a href="index.php">Home</a>
             <a href="exchange_rates.php">Exchange Rates</a>
         </div>
@@ -30,4 +30,3 @@
             <?php endif; ?>
         </div>
     </div>
-    <div>
