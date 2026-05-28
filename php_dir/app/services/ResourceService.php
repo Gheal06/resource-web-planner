@@ -14,6 +14,16 @@
             }
             return "";
         }
+        public function removeResource($inventoryId, $resourceId){
+            global $connection;
+            $model = new ResurseModel($connection);
+            try{
+                $retval = $model -> delete($inventoryId, $resourceId);
+            }catch(Exception $e){
+                header("Location: ../error.php");
+            }
+            header("Location: ../inventory.php?inventory_id=".$inventoryId);
+        }
         public function addTag($inventoryId, $tagName, $bgColor, $fgColor){
             global $connection;
             $model = new ResurseModel($connection);
