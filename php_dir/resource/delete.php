@@ -8,6 +8,6 @@ $username = $controller -> getCurrentUser();
 if(!isset($username)){
     header("Location: error.php");
 }
-$dashboardController = new ResourceController($connection); 
-$dashboardController -> removeResource($username);
+$resourceController = new ResourceController($connection); 
+$resourceController -> removeResource($username);
 ?>

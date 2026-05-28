@@ -23,7 +23,7 @@
         <td><?php echo htmlspecialchars($row['quantity']); ?> <?php echo htmlspecialchars($row['unit']); ?></td>
         <td><?php echo htmlspecialchars($row['description']); ?></td>
         <td>
-            <form onsubmit="return confirm('Are you sure you want to remove this resource?');" action="resource/delete.php?inventory_id=<?php echo urlencode($inv['inventory_id']);?>&resourceId=<?php echo urlencode($inv['id']);?>" method="post">
+            <form onsubmit="return confirm('Are you sure you want to remove this resource?');" action="resource/delete.php?inventory_id=<?php echo urlencode($row['inventory_id']);?>&resourceId=<?php echo urlencode($row['id']);?>" method="post">
                 <input name="submitRemoveResource" type="submit" value="Delete">
             </form>
         </td>
