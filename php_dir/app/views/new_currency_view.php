@@ -3,17 +3,22 @@
     $action = is_null($inventoryId) ? "new_currency.php" : ($createCurrencyAction . "?inventory_id=". $inventoryId);
 ?>
 <div class="container new-currency">
-    <h2 class="center-content">Create new currency</h2>
+    <h2 class="center-content">Create new fund</h2>
     <form action= "<?php echo $action; ?>"  method="post">
-        <label for="currencyName">Currency Name: </label>
-        <input type="text" name="currencyName" id="currencyName" required> <br>
+        <label for="fundName">Currency Name: </label>
+        <input type="text" name="fundName" id="fundName" required> <br>
         <label for="currencyCode">Currency Type: </label>
         <select name="currencyCode" id="currencyCode">
-            <option>EUR</option>
-            <option>RON</option>
-            <option>PLN</option>
+                <?php foreach ($currencies as $currency): ?>
+                    <?php
+                        $currencyCode = $currency['code'];
+                        if ($currencyCode === '') {
+                            continue;
+                        }
+                    ?>
+                    <option value=<?php echo htmlspecialchars($currencyCode); ?>><?php echo htmlspecialchars($currencyCode); ?></option>
+                <?php endforeach; ?>
         </select>
-        <h2> todo: de inclus currency-uri din currencycontroller sau ceva</h2>
         <label for="description">Description: </label>
         <textarea name="description" id="description" maxlength="255" rows="10"> </textarea>
         <?php if (!empty( $message ?? '')): ?>

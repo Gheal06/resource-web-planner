@@ -21,6 +21,7 @@ class AuthService {
         $res = $this->userModel->register($username, $email, $password);
         if (is_array($res) && isset($res['success']) && $res['success']) {
             $token = $this->create_token_for_user($username);
+            $this->mailingService->send_email($email, "Welcome to Resource Web Planner", "Hello $username,\n\nThank you for registering at Resource Web Planner! We're excited to have you on board.\n\nBest regards,\nThe Resource Web Planner Team (Trollbert si Dragutu)\n If you did not create this account, please contact the administrators at poparobert2012@gmail.com or alexandru.gheorghies@gmail.com, and / or the local authorities.");
             return array('success' => true, 'message' => $res['message'], 'token' => $token, 'user' => $username);
         }
         $msg = is_array($res) && isset($res['message']) ? $res['message'] : 'Registration failed.';
@@ -125,6 +126,13 @@ class AuthService {
         }
 
         return $payload['sub'];
+    }
+
+    public function getUserById($user_id){
+      return $this->userModel->findById($user_id);
+    }
+    public function getUserByUsername($username){
+      return $this->userModel->findByUsername($username);
     }
 }
 

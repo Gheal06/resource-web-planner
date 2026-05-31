@@ -1,37 +1,24 @@
 <?php
     require_once __DIR__ . "/../models/ResurseModel.php";
-    require_once __DIR__."/../../conn.php";
     class ResourceService{
-        public function __construct(){
+        private $resurseModel;
 
+        public function __construct($connection){
+            $this->resurseModel = new ResurseModel($connection);
         }
+
         public function addResource($inventoryId, $resourceName, $unit, $resourceDescription){
-            global $connection;
-            $model = new ResurseModel($connection);
-            $retval = $model -> create($resourceName, $resourceDescription, 0, $unit, $inventoryId);
-            if($retval === false){
-                return "Failed to create resource";
-            }
-            return "";
+            return $this->resurseModel->create($resourceName, $resourceDescription, 0, $unit, $inventoryId);
         }
         public function removeResource($inventoryId, $resourceId){
-            global $connection;
-            $model = new ResurseModel($connection);
             try{
-                $retval = $model -> delete($inventoryId, $resourceId);
+                return $this->resurseModel->delete($inventoryId, $resourceId);
             }catch(Exception $e){
-                header("Location: ../error.php");
+                return false;
             }
-            header("Location: ../inventory.php?inventory_id=".$inventoryId);
         }
         public function addTag($inventoryId, $tagName, $bgColor, $fgColor){
-            global $connection;
-            $model = new ResurseModel($connection);
-            $retval = $model -> createTag($inventoryId, $tagName, $fgColor, $bgColor);
-            if($retval === false){
-                return "Failed to create tag";
-            }
-            return "";
+            return $this->resurseModel->createTag($inventoryId, $tagName, $fgColor, $bgColor);
         }
     }
 ?>

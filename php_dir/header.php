@@ -11,6 +11,10 @@
     $message = '';
     $view = null;
     $inventoryTableIDs = array();
+    $css = "index.css";
+    if (isset($currentUser) && strtolower($currentUser) == "rares") {
+        $css = "rares.css";
+    }
     
     $gravatarService = new GravatarService($connection);
     if (!isset($currentUser)) {

@@ -102,6 +102,14 @@ class AuthController {
         return $this->authService->getCurrentUserFromToken($_COOKIE[$this->cookieName] ?? null);
     }
 
+    public function getUserByUsername($username) {
+        return $this->authService->getUserByUsername($username);
+    }
+
+    public function getUserById($id) {
+        return $this->authService->getUserById($id);
+    }
+
     private function setAuthCookie($token) {
         setcookie($this->cookieName, $token, array(
             'expires' => time() + 60 * 60 * 24,

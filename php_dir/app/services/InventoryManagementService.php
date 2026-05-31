@@ -5,6 +5,7 @@ require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/FonduriModel.php";
 require_once __DIR__ . "/../models/ResurseModel.php";
 require_once __DIR__ . "/../models/CurrencyModel.php";
+require_once __DIR__ . "/ResourceService.php";
 require_once __DIR__ . "/MailingService.php";
 
   class InventoryManagementService {
@@ -14,11 +15,12 @@ require_once __DIR__ . "/MailingService.php";
     private $fonduriModel;
     private $resurseModel;
     private $currencyModel;
+    private $resourceService;
 
     private $mailingService;
 
     private $readPermissionMask = 1;
-    private $insertPermissionMask = 2;
+    private $editPermissionMask = 2;
     private $updatePermissionMask = 4;
     private $deletePermissionMask = 8;
 
@@ -29,6 +31,7 @@ require_once __DIR__ . "/MailingService.php";
       $this->fonduriModel = new FonduriModel($connection);
       $this->resurseModel = new ResurseModel($connection);
       $this->currencyModel = new CurrencyModel($connection);
+      $this->resourceService = new ResourceService($connection);
       $this->mailingService = new MailingService();
     }
 
@@ -68,7 +71,7 @@ require_once __DIR__ . "/MailingService.php";
       if (!$inventory) {
         return false;
       }
-      $owner = $this->userModel->findById($inventory['owner_user_id']);
+      $owner = $this->userModel->findById($inventory['owner_id']);
       if (!$owner || !isset($owner['email'])) {
         return false;
       }
@@ -491,7 +494,7 @@ require_once __DIR__ . "/MailingService.php";
         throw new Exception('Failed to create inventory');
       }
 
-      $permRes = $this->inventoryPermissionsModel->setUserInventoryPermissions($owner_user_id, $i_id, $this->readPermissionMask | $this->insertPermissionMask | $this->updatePermissionMask | $this->deletePermissionMask);
+      $permRes = $this->inventoryPermissionsModel->setUserInventoryPermissions($owner_user_id, $i_id, $this->readPermissionMask | $this->editPermissionMask | $this->updatePermissionMask | $this->deletePermissionMask);
       if ($permRes === false) {
         throw new Exception('Failed to set inventory permissions');
       }
@@ -847,14 +850,8 @@ require_once __DIR__ . "/MailingService.php";
         return $this->notFound('User not found.');
       }
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
-      if ($fonduri) {
-        if (!$this->canEdit($user['id'], $inventory_id)) {
-          return $this->accessDenied();
-        }
-      } else {
-        if (!$this->canInsert($user['id'], $inventory_id)) {
-          return $this->accessDenied();
-        }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
       }
       $res = $this->fonduriModel->addFonduri($inventory_id, $amount, $currency_code, $name, $description);
       if ($res === false) {
@@ -870,11 +867,11 @@ require_once __DIR__ . "/MailingService.php";
       }
       $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
       if ($fonduri) {
-        if (!$this->canEdit($user['id'], $inventory_id)) {
+        if (!$this->canUpdate($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       } else {
-        if (!$this->canInsert($user['id'], $inventory_id)) {
+        if (!$this->canEdit($user['id'], $inventory_id)) {
           return $this->accessDenied();
         }
       }
@@ -885,19 +882,103 @@ require_once __DIR__ . "/MailingService.php";
       return array('success' => true, 'message' => 'Funds set.');
     }
 
+    public function createFonduri($username, $inventory_id, $currency_code, $name = null, $description = null) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+      $res = $this->fonduriModel->create($inventory_id, $currency_code, $name, $description);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to create fund.');
+      }
+      return array('success' => true, 'message' => 'Fund created.');
+    }
+
+    public function deleteFonduri($username, $inventory_id, $currency_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canDelete($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+
+      $fonduri = $this->getFonduriByInventoryId($inventory_id);
+      $target = null;
+      foreach ($fonduri as $f) {
+        if (isset($f['id']) && (string)$f['id'] === (string)$currency_id) {
+          $target = $f;
+          break;
+        }
+      }
+      if (!$target) {
+        return $this->notFound('Fund not found.');
+      }
+
+      $res = $this->fonduriModel->deleteFonduri($inventory_id, $currency_id);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to delete fund.');
+      }
+
+      $this->sendEmailToOwner($inventory_id, "Fund Deleted: " . ($target['name'] ?? $target['currency_code'] ?? ''), "The fund with ID " . $currency_id . " (" . ($target['name'] ?? $target['currency_code'] ?? '') . ") has been deleted from inventory " . ($this->inventoryModel->getInventoryById($inventory_id)['name'] ?? $inventory_id) . " by user " . $user['username'] . ".");
+
+      return array('success' => true, 'message' => 'Fund deleted.');
+    }
+
     public function createResurse($username, $name, $description, $quantity, $unit, $inventory_id) {
       $user = $this->userModel->findByUsername($username);
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
       }
-      if (!$this->canInsert($user['id'], $inventory_id)) {
+      if (!$this->canEdit($user['id'], $inventory_id)) {
         return $this->accessDenied();
       }
-      $res = $this->resurseModel->create($name, $description, $quantity, $unit, $inventory_id);
+      $res = $this->resourceService->addResource($inventory_id, $name, $unit, $description);
       if ($res === false) {
         return array('success' => false, 'message' => 'Failed to create resource.');
       }
       return array('success' => true, 'message' => 'Resource created.', 'id' => $res);
+    }
+
+    public function addResource($username, $inventory_id, $name, $unit, $description) {
+      return $this->createResurse($username, $name, $description, 0, $unit, $inventory_id);
+    }
+
+    public function removeResource($username, $inventory_id, $resource_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canDelete($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      $res = $this->resourceService->removeResource($inventory_id, $resource_id);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to delete resource.');
+      }
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+
+      $this->sendEmailToOwner($inventory_id, "Resource Deleted: " . $resource['name'], "The resource with ID " . $resource_id . " has been deleted from inventory " . $inventory['name'] . " by user " . $user['username'] . ".");
+      return array('success' => true, 'message' => 'Resource deleted.');
+    }
+
+    public function addTag($username, $inventory_id, $name, $bgColor, $fgColor) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+      $res = $this->resourceService->addTag($inventory_id, $name, $bgColor, $fgColor);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to create tag.');
+      }
+      return array('success' => true, 'message' => 'Tag created.', 'id' => $res);
     }
 
     public function moveResurse($username, $resource_id, $new_inventory_id) {
@@ -909,7 +990,7 @@ require_once __DIR__ . "/MailingService.php";
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
       }
-      if (!$this->canDelete($user['id'], $resource['inventory_id']) || !$this->canInsert($user['id'], $new_inventory_id)) {
+      if (!$this->canDelete($user['id'], $resource['inventory_id']) || !$this->canEdit($user['id'], $new_inventory_id)) {
         return $this->accessDenied();
       }
       $res = $this->resurseModel->move($resource_id, $new_inventory_id);
@@ -973,6 +1054,14 @@ require_once __DIR__ . "/MailingService.php";
       return array();
     }
 
+    public function removeResourceById($username, $resource_id) {
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      if (!$resource) {
+        return $this->notFound('Resource not found.');
+      }
+      return $this->removeResource($username, $resource['inventory_id'], $resource_id);
+    }
+
     public function getResourcesByTags($username, $inventory_id, $tag_ids) {
       $user = $this->userModel->findByUsername($username);
       if (!$user || !isset($user['id'])) {
@@ -1008,6 +1097,194 @@ require_once __DIR__ . "/MailingService.php";
         return array('success' => false, 'message' => 'Failed to update tag.', 'code' => 'db_error');
       }
       return array('success' => true, 'message' => 'Tag updated.');
+    }
+
+    public function getAccessManagementData($username, $inventory_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return $this->notFound('Inventory not found.');
+      }
+
+      // Only owner can manage access
+      if ($inventory['owner_id'] != $user['id']) {
+        return $this->accessDenied();
+      }
+
+      $associates = $this->inventoryPermissionsModel->getAllAssociatedUsers($inventory_id);
+      return array(
+        'success' => true,
+        'inventory' => $inventory,
+        'associates' => $associates,
+        'permission_masks' => array(
+          'read' => $this->readPermissionMask,
+          'edit' => $this->editPermissionMask,
+          'update' => $this->updatePermissionMask,
+          'delete' => $this->deletePermissionMask,
+        ),
+      );
+    }
+
+    public function updateUserInventoryAccess($username, $inventory_id, $target_user_id, $new_permissions) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return $this->notFound('Inventory not found.');
+      }
+
+      // Only owner can manage access
+      if ($inventory['owner_id'] != $user['id']) {
+        return $this->accessDenied();
+      }
+
+      $target_user = $this->userModel->findById($target_user_id);
+      if (!$target_user) {
+        return $this->notFound('Target user not found.');
+      }
+
+      $new_permissions = intval($new_permissions);
+      
+      // Begin transaction
+      $this->inventoryModel->beginTransaction();
+      
+      $res = $this->inventoryPermissionsModel->setUserInventoryPermissions($target_user_id, $inventory_id, $new_permissions);
+      if ($res === false) {
+        $this->inventoryModel->rollbackTransaction();
+        return array('success' => false, 'message' => 'Failed to update permissions.');
+      }
+
+      // Send email to target user
+      $permissionText = $this->getPermissionText($new_permissions);
+      $emailBody = "Your access permissions for inventory \"" . $inventory['name'] . "\" have been updated by " . $user['username'] . ".\n\n";
+      $emailBody .= "New permissions: " . $permissionText . "\n\n";
+      $emailBody .= "Inventory ID: " . $inventory_id;
+
+      $emailSent = true;
+      if (isset($target_user['email'])) {
+        $emailSent = $this->mailingService->send_email($target_user['email'], "Access Updated: " . $inventory['name'], $emailBody);
+      }
+
+      // Commit transaction
+      $this->inventoryModel->commitTransaction();
+
+      return array('success' => true, 'message' => 'Permissions updated and email sent.');
+    }
+
+    public function removeUserInventoryAccess($username, $inventory_id, $target_user_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return $this->notFound('Inventory not found.');
+      }
+
+      // Only owner can manage access
+      if ($inventory['owner_id'] != $user['id']) {
+        return $this->accessDenied();
+      }
+
+      $target_user = $this->userModel->findById($target_user_id);
+      if (!$target_user) {
+        return $this->notFound('Target user not found.');
+      }
+
+      // Begin transaction
+      $this->inventoryModel->beginTransaction();
+      
+      $res = $this->inventoryPermissionsModel->removeUserInventoryPermission($target_user_id, $inventory_id);
+      if (!$res) {
+        $this->inventoryModel->rollbackTransaction();
+        return array('success' => false, 'message' => 'Failed to remove user access.');
+      }
+
+      // Send email to target user
+      $emailBody = "Your access to inventory \"" . $inventory['name'] . "\" has been revoked by " . $user['username'] . ".\n\n";
+      $emailBody .= "Inventory ID: " . $inventory_id;
+
+      if (isset($target_user['email'])) {
+        $this->mailingService->send_email($target_user['email'], "Access Revoked: " . $inventory['name'], $emailBody);
+      }
+
+      // Commit transaction
+      $this->inventoryModel->commitTransaction();
+
+      return array('success' => true, 'message' => 'User access removed.');
+    }
+
+    public function addUserInventoryAccess($username, $inventory_id, $target_username, $initial_permissions) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+
+      $inventory = $this->inventoryModel->getInventoryById($inventory_id);
+      if (!$inventory) {
+        return $this->notFound('Inventory not found.');
+      }
+
+      // Only owner can manage access
+      if ($inventory['owner_id'] != $user['id']) {
+        return $this->accessDenied();
+      }
+
+      $target_user = $this->userModel->findByUsername($target_username);
+      if (!$target_user) {
+        return $this->notFound('Target user not found.');
+      }
+
+      $initial_permissions = intval($initial_permissions);
+
+      // Begin transaction
+      $this->inventoryModel->beginTransaction();
+      
+      $res = $this->inventoryPermissionsModel->setUserInventoryPermissions($target_user['id'], $inventory_id, $initial_permissions);
+      if ($res === false) {
+        $this->inventoryModel->rollbackTransaction();
+        return array('success' => false, 'message' => 'Failed to add user access.');
+      }
+
+      // Send email to target user
+      $permissionText = $this->getPermissionText($initial_permissions);
+      $emailBody = "You have been granted access to inventory \"" . $inventory['name'] . "\" by " . $user['username'] . ".\n\n";
+      $emailBody .= "Your permissions: " . $permissionText . "\n\n";
+      $emailBody .= "Inventory ID: " . $inventory_id;
+
+      if (isset($target_user['email'])) {
+        $this->mailingService->send_email($target_user['email'], "Access Granted: " . $inventory['name'], $emailBody);
+      }
+
+      // Commit transaction
+      $this->inventoryModel->commitTransaction();
+
+      return array('success' => true, 'message' => 'User access added.');
+    }
+
+    private function getPermissionText($permissions_mask) {
+      $perms = array();
+      if (($permissions_mask & $this->readPermissionMask) === $this->readPermissionMask) {
+        $perms[] = 'Read';
+      }
+      if (($permissions_mask & $this->editPermissionMask) === $this->editPermissionMask) {
+        $perms[] = 'Edit';
+      }
+      if (($permissions_mask & $this->updatePermissionMask) === $this->updatePermissionMask) {
+        $perms[] = 'Update';
+      }
+      if (($permissions_mask & $this->deletePermissionMask) === $this->deletePermissionMask) {
+        $perms[] = 'Delete';
+      }
+      return empty($perms) ? 'None' : implode(', ', $perms);
     }
 
 

@@ -42,23 +42,25 @@
 
     public function getAllAssociatedUsers ($inventory_id) {
       // returneaza toti utilizatorii care au drepturi pe un tabel, impreuna cu drepturile lor
-      $res = pg_query_params($this->conn, "SELECT users.id, user_inventory_permission.permissions FROM user_inventory_permission JOIN users ON user_inventory_permission.user_id = users.id WHERE user_inventory_permission.inventory_id = $1", array($inventory_id));
+      $res = pg_query_params($this->conn, "SELECT users.id, users.username, users.email, user_inventory_permission.permissions FROM user_inventory_permission JOIN users ON user_inventory_permission.user_id = users.id WHERE user_inventory_permission.inventory_id = $1 ORDER BY users.username", array($inventory_id));
       if (!$res) {
         return array();
       }
       $users = array();
       while ($row = pg_fetch_assoc($res)) {
-        $users[] = array('user_id' => $row['id'], 'permissions' => $row['permissions']);
+        $users[] = array('user_id' => $row['id'], 'username' => $row['username'], 'email' => $row['email'], 'permissions' => intval($row['permissions']));
       }
       return $users;
     }
 
     public function setUserInventoryPermissions($user_id, $inventory_id, $permissions_mask) {
 
-      pg_query_params($this->conn, "DELETE FROM user_inventory_permission WHERE user_id = $1 AND inventory_id = $2", array($user_id, $inventory_id));
+      @pg_query_params($this->conn, "DELETE FROM user_inventory_permission WHERE user_id = $1 AND inventory_id = $2", array($user_id, $inventory_id));
 
-      return pg_query_params($this->conn, "INSERT INTO user_inventory_permission (user_id, inventory_id, permissions) VALUES ($1, $2, $3)", array($user_id, $inventory_id, $permissions_mask));
+      return @pg_query_params($this->conn, "INSERT INTO user_inventory_permission (user_id, inventory_id, permissions) VALUES ($1, $2, $3)", array($user_id, $inventory_id, $permissions_mask));
     }
-  }
+    public function removeUserInventoryPermission($user_id, $inventory_id) {
+      return pg_query_params($this->conn, "DELETE FROM user_inventory_permission WHERE user_id = $1 AND inventory_id = $2", array($user_id, $inventory_id));
+    }  }
 
 ?>
