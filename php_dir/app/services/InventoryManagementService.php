@@ -182,8 +182,8 @@ require_once __DIR__ . "/MailingService.php";
             'id' => isset($tag['id']) ? $tag['id'] : null,
             'name' => isset($tag['name']) ? $tag['name'] : null,
             'description' => isset($tag['description']) ? $tag['description'] : null,
-            'foreground_color' => isset($tag['foreground_color']) ? $tag['foreground_color'] : null,
-            'background_color' => isset($tag['background_color']) ? $tag['background_color'] : null,
+            'foreground_color' => isset($tag['foreground_color']) ? $tag['foreground_color'] : (isset($tag['fgcolor']) ? $tag['fgcolor'] : null),
+            'background_color' => isset($tag['background_color']) ? $tag['background_color'] : (isset($tag['bgcolor']) ? $tag['bgcolor'] : null),
           );
         }
 
@@ -679,7 +679,7 @@ require_once __DIR__ . "/MailingService.php";
           throw new Exception('Failed to create inventory.');
         }
 
-        $fullPermissionMask = $this->readPermissionMask | $this->insertPermissionMask | $this->updatePermissionMask | $this->deletePermissionMask;
+        $fullPermissionMask = $this->readPermissionMask | $this->editPermissionMask | $this->updatePermissionMask | $this->deletePermissionMask;
         if ($this->inventoryPermissionsModel->setUserInventoryPermissions($user['id'], $newInventoryId, $fullPermissionMask) === false) {
           throw new Exception('Failed to set inventory permissions.');
         }
