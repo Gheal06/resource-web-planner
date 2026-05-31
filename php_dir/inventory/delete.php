@@ -7,6 +7,7 @@ $controller = new AuthController($connection);
 $username = $controller -> getCurrentUser();
 if(!isset($username)){
     header("Location: error.php");
+    exit();
 }
 $dashboardController = new InventoryManagementController($connection); 
 $dashboardController -> removeInventory($username);
