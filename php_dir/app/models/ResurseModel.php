@@ -143,6 +143,14 @@ class ResurseModel {
         return $row ? $row['id'] : false;
     }
 
+    public function addTagToResource($resource_id, $tag_id) {
+        return @pg_query_params(
+            $this->connection,
+            "INSERT INTO has_tag (resource_id, tag_id) VALUES ($1, $2)",
+            array($resource_id, $tag_id)
+        );
+    }
+
     public function updateTag($tag_id, $name = null, $description = null, $foreground_color = null, $background_color = null) {
         $updates = array();
         $params = array();

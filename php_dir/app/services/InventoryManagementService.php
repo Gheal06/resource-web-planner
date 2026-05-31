@@ -498,6 +498,290 @@ require_once __DIR__ . "/MailingService.php";
       $this->inventoryModel->commitTransaction();
       return $i_id;
     }
+
+    private function normalizeImportedTag($tag) {
+      return array(
+        'id' => isset($tag['id']) ? $tag['id'] : null,
+        'name' => isset($tag['name']) ? $tag['name'] : null,
+        'foreground_color' => isset($tag['foreground_color']) ? $tag['foreground_color'] : (isset($tag['fgcolor']) ? $tag['fgcolor'] : null),
+        'background_color' => isset($tag['background_color']) ? $tag['background_color'] : (isset($tag['bgcolor']) ? $tag['bgcolor'] : null),
+      );
+    }
+
+    private function getImportedTagSignature($tag) {
+      $normalizedTag = $this->normalizeImportedTag($tag);
+      return strtolower(trim((string)$normalizedTag['name'])) . '|' . strtolower(trim((string)$normalizedTag['foreground_color'])) . '|' . strtolower(trim((string)$normalizedTag['background_color']));
+    }
+
+    private function getUniqueImportedInventoryName($owner_user_id, $base_name) {
+      $cleanBaseName = trim((string)$base_name);
+      if ($cleanBaseName === '') {
+        $cleanBaseName = 'Imported inventory';
+      }
+
+      $candidate = $cleanBaseName;
+      $suffixIndex = 1;
+      while ($this->inventoryModel->getInventoryByOwnerAndName($owner_user_id, $candidate)) {
+        $suffixIndex += 1;
+        $candidate = $cleanBaseName . ' (imported ' . $suffixIndex . ')';
+      }
+
+      return $candidate;
+    }
+
+    private function parseInventoryImportCsv($file_path) {
+      $handle = fopen($file_path, 'r');
+      if ($handle === false) {
+        return array('success' => false, 'message' => 'Failed to open import file.');
+      }
+
+      $headers = fgetcsv($handle);
+      if ($headers === false || empty($headers)) {
+        fclose($handle);
+        return array('success' => false, 'message' => 'Import file is empty.');
+      }
+
+      $inventory = null;
+      $funds = array();
+      $resources = array();
+
+      while (($row = fgetcsv($handle)) !== false) {
+        if ($row === array(null) || count(array_filter($row, function ($value) { return $value !== null && $value !== ''; })) === 0) {
+          continue;
+        }
+
+        $record = array();
+        $columnCount = min(count($headers), count($row));
+        for ($index = 0; $index < $columnCount; $index++) {
+          $record[$headers[$index]] = $row[$index];
+        }
+
+        $recordType = isset($record['record_type']) ? strtolower(trim((string)$record['record_type'])) : '';
+        if ($recordType === 'inventory' && $inventory === null) {
+          $inventory = array(
+            'name' => isset($record['inventory_name']) ? $record['inventory_name'] : null,
+            'description' => isset($record['inventory_description']) ? $record['inventory_description'] : null,
+          );
+          continue;
+        }
+
+        if ($recordType === 'fund') {
+          $funds[] = array(
+            'currency_code' => isset($record['currency_code']) ? $record['currency_code'] : null,
+            'amount' => isset($record['amount']) ? $record['amount'] : 0,
+            'name' => isset($record['name']) ? $record['name'] : null,
+            'description' => isset($record['description']) ? $record['description'] : null,
+          );
+          continue;
+        }
+
+        if ($recordType === 'resource') {
+          $tags = array();
+          if (isset($record['tags_json']) && trim((string)$record['tags_json']) !== '') {
+            $decodedTags = json_decode($record['tags_json'], true);
+            if (is_array($decodedTags)) {
+              $tags = $decodedTags;
+            }
+          }
+
+          $resources[] = array(
+            'name' => isset($record['name']) ? $record['name'] : null,
+            'description' => isset($record['description']) ? $record['description'] : null,
+            'quantity' => isset($record['quantity']) ? $record['quantity'] : 0,
+            'unit' => isset($record['unit']) ? $record['unit'] : null,
+            'tags' => $tags,
+          );
+        }
+      }
+
+      fclose($handle);
+
+      if ($inventory === null) {
+        return array('success' => false, 'message' => 'Could not find inventory data in CSV file.');
+      }
+
+      return array(
+        'success' => true,
+        'inventory' => $inventory,
+        'funds' => $funds,
+        'resources' => $resources,
+      );
+    }
+
+    private function parseInventoryImportJson($file_path) {
+      $rawContent = file_get_contents($file_path);
+      if ($rawContent === false || trim($rawContent) === '') {
+        return array('success' => false, 'message' => 'Import file is empty.');
+      }
+
+      $decoded = json_decode($rawContent, true);
+      if (!is_array($decoded) || !isset($decoded['inventory'])) {
+        return array('success' => false, 'message' => 'Invalid JSON export format.');
+      }
+
+      $funds = isset($decoded['funds']) && is_array($decoded['funds']) ? $decoded['funds'] : array();
+      $resources = isset($decoded['resources']) && is_array($decoded['resources']) ? $decoded['resources'] : array();
+
+      return array(
+        'success' => true,
+        'inventory' => $decoded['inventory'],
+        'funds' => $funds,
+        'resources' => $resources,
+      );
+    }
+
+    private function parseInventoryImportFile($uploaded_file) {
+      if (!isset($uploaded_file['tmp_name']) || !is_string($uploaded_file['tmp_name']) || $uploaded_file['tmp_name'] === '') {
+        return array('success' => false, 'message' => 'No import file was uploaded.');
+      }
+
+      $filePath = $uploaded_file['tmp_name'];
+      $fileName = isset($uploaded_file['name']) ? strtolower((string)$uploaded_file['name']) : '';
+      $contentPrefix = '';
+      $fileHandle = fopen($filePath, 'r');
+      if ($fileHandle !== false) {
+        $contentPrefix = trim((string)fread($fileHandle, 32));
+        fclose($fileHandle);
+      }
+
+      if (preg_match('/\.json$/', $fileName) || (strlen($contentPrefix) > 0 && ($contentPrefix[0] === '{' || $contentPrefix[0] === '['))) {
+        return $this->parseInventoryImportJson($filePath);
+      }
+
+      return $this->parseInventoryImportCsv($filePath);
+    }
+
+    public function importInventory($username, $uploaded_file) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return array('success' => false, 'message' => 'User not found.');
+      }
+
+      $parsedImport = $this->parseInventoryImportFile($uploaded_file);
+      if (!empty($parsedImport['success']) && $parsedImport['success'] === false) {
+        return $parsedImport;
+      }
+
+      $inventoryData = $parsedImport['inventory'];
+      $fundsData = isset($parsedImport['funds']) && is_array($parsedImport['funds']) ? $parsedImport['funds'] : array();
+      $resourcesData = isset($parsedImport['resources']) && is_array($parsedImport['resources']) ? $parsedImport['resources'] : array();
+
+      $inventoryName = $this->getUniqueImportedInventoryName($user['id'], isset($inventoryData['name']) ? $inventoryData['name'] : 'Imported inventory');
+      $inventoryDescription = isset($inventoryData['description']) ? $inventoryData['description'] : null;
+
+      $this->inventoryModel->beginTransaction();
+      try {
+        $newInventoryId = $this->inventoryModel->create($inventoryName, $inventoryDescription, $user['id']);
+        if ($newInventoryId === false) {
+          throw new Exception('Failed to create inventory.');
+        }
+
+        $fullPermissionMask = $this->readPermissionMask | $this->insertPermissionMask | $this->updatePermissionMask | $this->deletePermissionMask;
+        if ($this->inventoryPermissionsModel->setUserInventoryPermissions($user['id'], $newInventoryId, $fullPermissionMask) === false) {
+          throw new Exception('Failed to set inventory permissions.');
+        }
+
+        $tagBySignature = array();
+        $tagById = array();
+
+        foreach ($resourcesData as $resourceData) {
+          $resourceTags = isset($resourceData['tags']) && is_array($resourceData['tags']) ? $resourceData['tags'] : array();
+          foreach ($resourceTags as $tagData) {
+            $normalizedTag = $this->normalizeImportedTag($tagData);
+            $tagSignature = $this->getImportedTagSignature($normalizedTag);
+            if (isset($tagBySignature[$tagSignature])) {
+              continue;
+            }
+
+            if (empty($normalizedTag['name']) || empty($normalizedTag['foreground_color']) || empty($normalizedTag['background_color'])) {
+              throw new Exception('Invalid tag data in import file.');
+            }
+
+            $newTagId = $this->resurseModel->createTag($newInventoryId, $normalizedTag['name'], $normalizedTag['foreground_color'], $normalizedTag['background_color']);
+            if ($newTagId === false) {
+              throw new Exception('Failed to create tag.');
+            }
+
+            $tagBySignature[$tagSignature] = $newTagId;
+            if (!empty($normalizedTag['id'])) {
+              $tagById[(string)$normalizedTag['id']] = $newTagId;
+            }
+          }
+        }
+
+        foreach ($fundsData as $fundData) {
+          if (!isset($fundData['currency_code']) || trim((string)$fundData['currency_code']) === '') {
+            throw new Exception('Invalid fund data in import file.');
+          }
+
+          $amount = isset($fundData['amount']) ? $fundData['amount'] : 0;
+          $fundResult = $this->fonduriModel->setFonduri(
+            $newInventoryId,
+            $amount,
+            $fundData['currency_code'],
+            isset($fundData['name']) ? $fundData['name'] : null,
+            isset($fundData['description']) ? $fundData['description'] : null
+          );
+          if ($fundResult === false) {
+            throw new Exception('Failed to create fund entry.');
+          }
+        }
+
+        foreach ($resourcesData as $resourceData) {
+          if (!isset($resourceData['name']) || trim((string)$resourceData['name']) === '') {
+            throw new Exception('Invalid resource data in import file.');
+          }
+          if (!isset($resourceData['unit']) || trim((string)$resourceData['unit']) === '') {
+            throw new Exception('Invalid resource unit in import file.');
+          }
+
+          $resourceId = $this->resurseModel->create(
+            $resourceData['name'],
+            isset($resourceData['description']) ? $resourceData['description'] : null,
+            isset($resourceData['quantity']) ? $resourceData['quantity'] : 0,
+            $resourceData['unit'],
+            $newInventoryId
+          );
+          if ($resourceId === false) {
+            throw new Exception('Failed to create resource.');
+          }
+
+          $seenTags = array();
+          $resourceTags = isset($resourceData['tags']) && is_array($resourceData['tags']) ? $resourceData['tags'] : array();
+          foreach ($resourceTags as $tagData) {
+            $normalizedTag = $this->normalizeImportedTag($tagData);
+            $tagSignature = $this->getImportedTagSignature($normalizedTag);
+
+            if (isset($seenTags[$tagSignature])) {
+              continue;
+            }
+            $seenTags[$tagSignature] = true;
+
+            $tagId = null;
+            if (!empty($normalizedTag['id']) && isset($tagById[(string)$normalizedTag['id']])) {
+              $tagId = $tagById[(string)$normalizedTag['id']];
+            } elseif (isset($tagBySignature[$tagSignature])) {
+              $tagId = $tagBySignature[$tagSignature];
+            }
+
+            if ($tagId === null) {
+              throw new Exception('Tag mapping failed during import.');
+            }
+
+            if ($this->resurseModel->addTagToResource($resourceId, $tagId) === false) {
+              throw new Exception('Failed to attach tag to resource.');
+            }
+          }
+        }
+
+        $this->inventoryModel->commitTransaction();
+        return array('success' => true, 'message' => 'Inventory imported.', 'inventory_id' => $newInventoryId);
+      } catch (Exception $e) {
+        $this->inventoryModel->rollbackTransaction();
+        return array('success' => false, 'message' => $e->getMessage(), 'code' => 'import_error');
+      }
+    }
+
     public function updateInventory($username, $id, $name, $description) {
       $user = $this->userModel->findByUsername($username);
       if (!$user || !isset($user['id'])) {

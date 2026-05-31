@@ -11,6 +11,12 @@
         return pg_fetch_assoc($res);
     }
 
+    public function getInventoryByOwnerAndName($owner_user_id, $name) {
+        $res = pg_query_params($this->conn, "SELECT * FROM inventories WHERE owner_id = $1 AND name = $2", array($owner_user_id, $name));
+        if (!$res) return null;
+        return pg_fetch_assoc($res);
+    }
+
     public function create($name, $description, $owner_user_id) {
         $res = pg_query_params($this->conn, "INSERT INTO inventories (name, description, owner_id) VALUES ($1, $2, $3) RETURNING id", array($name, $description, $owner_user_id));
         if (!$res) return false;
