@@ -5,6 +5,17 @@
     <h2><?php echo htmlspecialchars($inventory['name'] ?? 'Inventory'); ?> <span style="font-size: 0.8em; color: #666;">(Owner: <?php echo htmlspecialchars($inventoryOwnerUsername ?? 'Unknown'); ?>)</span></h2>
     <p><?php echo htmlspecialchars($inventory['description'] ?? ''); ?></p>
     <div class="sep"></div>
+    <div class="inventory-actions">
+        <form action="inventory/export.php?inventory_id=<?php echo urlencode($inventory['id'] ?? ''); ?>" method="post">
+            <input type="hidden" name="type" value="csv">
+            <input type="submit" value="Export CSV">
+        </form>
+        <form action="inventory/export.php?inventory_id=<?php echo urlencode($inventory['id'] ?? ''); ?>" method="post">
+            <input type="hidden" name="type" value="json">
+            <input type="submit" value="Export JSON">
+        </form>
+    </div>
+    <div class="sep"></div>
 
     <?php
 

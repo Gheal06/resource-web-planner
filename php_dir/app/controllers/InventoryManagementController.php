@@ -58,6 +58,48 @@ class InventoryManagementController {
             return "";
         }
     }
+    public function exportInventory($username, $inventory_id, $type){
+        if($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($inventory_id) || !isset($type)){
+            header('Location: ../error.php');
+            exit();
+        }
+
+        try{
+            $export = $this->inventoryManagementService->exportInventory($username, $inventory_id, $type);
+            if (!isset($export['success']) || !$export['success']) {
+                header('Location: ../error.php');
+                exit();
+            }
+
+            header('Content-Type: ' . $export['mime']);
+            header('Content-Disposition: attachment; filename="' . $export['filename'] . '"');
+            echo $export['content'];
+            exit();
+        }catch(Exception $e){
+            header('Location: ../error.php');
+            exit();
+        }
+    }
+    public function importInventory($username, $uploaded_file){
+        if($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($uploaded_file)){
+            header('Location: ../error.php');
+            exit();
+        }
+
+        try{
+            $import = $this->inventoryManagementService->importInventory($username, $uploaded_file);
+            if (!isset($import['success']) || !$import['success']) {
+                header('Location: ../error.php');
+                exit();
+            }
+
+            header('Location: ../inventory.php?inventory_id=' . urlencode($import['inventory_id']));
+            exit();
+        }catch(Exception $e){
+            header('Location: ../error.php');
+            exit();
+        }
+    }
     public function removeInventory($username){
         if($_SERVER['REQUEST_METHOD']=='POST' && isset($_GET["inventory_id"])){
             $msg = '';
