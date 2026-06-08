@@ -1062,6 +1062,82 @@ require_once __DIR__ . "/MailingService.php";
       return $this->removeResource($username, $resource['inventory_id'], $resource_id);
     }
 
+    public function addTagToResource($username, $inventory_id, $resource_id, $tag_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      if (!$resource || (string)$resource['inventory_id'] !== (string)$inventory_id) {
+        return $this->notFound('Resource not found.');
+      }
+
+      $tag = $this->resurseModel->getTagById($tag_id);
+      if (!$tag || (string)$tag['inventory_id'] !== (string)$inventory_id) {
+        return $this->notFound('Tag not found.');
+      }
+
+      $res = $this->resurseModel->addTagToResource($resource_id, $tag_id);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to attach tag.');
+      }
+
+      return array('success' => true, 'message' => 'Tag attached.');
+    }
+
+    public function removeTagFromResource($username, $inventory_id, $resource_id, $tag_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      if (!$resource || (string)$resource['inventory_id'] !== (string)$inventory_id) {
+        return $this->notFound('Resource not found.');
+      }
+
+      $tag = $this->resurseModel->getTagById($tag_id);
+      if (!$tag || (string)$tag['inventory_id'] !== (string)$inventory_id) {
+        return $this->notFound('Tag not found.');
+      }
+
+      $res = $this->resurseModel->removeTagFromResource($resource_id, $tag_id);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to remove tag from resource.');
+      }
+
+      return array('success' => true, 'message' => 'Tag removed from resource.');
+    }
+
+    public function removeTag($username, $inventory_id, $tag_id) {
+      $user = $this->userModel->findByUsername($username);
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canEdit($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+
+      $tag = $this->resurseModel->getTagById($tag_id);
+      if (!$tag || (string)$tag['inventory_id'] !== (string)$inventory_id) {
+        return $this->notFound('Tag not found.');
+      }
+
+      $res = $this->resurseModel->deleteTag($inventory_id, $tag_id);
+      if ($res === false) {
+        return array('success' => false, 'message' => 'Failed to delete tag.');
+      }
+
+      return array('success' => true, 'message' => 'Tag deleted.');
+    }
+
     public function getResourcesByTags($username, $inventory_id, $tag_ids) {
       $user = $this->userModel->findByUsername($username);
       if (!$user || !isset($user['id'])) {

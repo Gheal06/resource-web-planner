@@ -16,6 +16,7 @@ if(!isset($inventory) || !isset($inventory['id'])){
 else{
     $resourceModel = new ResurseModel($connection);
     $tags = $resourceModel -> getAllTags($inventoryId);
+    $selectedTagId = $_GET['tag_id'] ?? null;
 
     // Get owner info
     $owner = $authController->getUserById($inventory['owner_id']);

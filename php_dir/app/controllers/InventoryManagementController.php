@@ -37,13 +37,16 @@ class InventoryManagementController {
         return $this->inventoryManagementService->getFonduriByInventoryId($inventory_id);
     }
 
-    public function getResourcesForInventory($username, $inventory_id) {
+    public function getResourcesForInventory($username, $inventory_id, $tag_id = null) {
         $user = $this->inventoryManagementService->getUserByUsername($username);
         if (!$user || !isset($user['id'])) {
           return array();
         }
         if (!$this->inventoryManagementService->canRead($user['id'], $inventory_id)) {
             return array();
+        }
+        if ($tag_id !== null && trim((string)$tag_id) !== '') {
+            return $this->inventoryManagementService->getResourcesByTags($username, $inventory_id, array($tag_id));
         }
         return $this->inventoryManagementService->getResourcesByInventoryId($inventory_id);
     }

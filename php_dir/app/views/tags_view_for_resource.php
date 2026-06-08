@@ -3,7 +3,7 @@
 </script>
 <?php $divId='tag-wrapper'.$row['id']; ?>
 <div id="<?php echo $divId?>" class="tag-container">
-<?php foreach($tags as $tag): ?>
+<?php foreach(($resourceTags ?? array()) as $tag): ?>
     <script>
         makeTag('<?php echo $divId?>', 
                 '<?php echo $tag['name']?>', 
@@ -12,7 +12,16 @@
                 'delete_tag_for_resource.php?inventory_id=<?php echo $inventory['id']?>&resourceId=<?php echo $row['id']; ?>&id=<?php echo $tag['id']; ?>');
     </script>
 <?php endforeach; ?>
-<script>
-    makeLinkTag('<?php echo $divId?>', 'Add tag', '<?php echo "new_tag.php?inventory_id=".urlencode($inventoryId); ?>', '#000000', '#FFFFFF00');
-</script>
+<form action="new_tag_for_resource.php?inventory_id=<?php echo urlencode($inventory['id']); ?>&resourceId=<?php echo urlencode($row['id']); ?>" method="post" style="margin-top: 8px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+    <select name="tag_id" required>
+        <option value="" disabled selected>Attach existing tag</option>
+        <?php foreach (($inventoryTags ?? array()) as $availableTag): ?>
+            <option value="<?php echo htmlspecialchars($availableTag['id']); ?>"><?php echo htmlspecialchars($availableTag['name']); ?></option>
+        <?php endforeach; ?>
+    </select>
+    <input type="submit" name="submitAddTagToResource" value="Add tag">
+</form>
+<div style="margin-top: 6px;">
+    <a href="new_tag.php?inventory_id=<?php echo urlencode($inventoryId); ?>">Create new tag</a>
+</div>
 </div>
