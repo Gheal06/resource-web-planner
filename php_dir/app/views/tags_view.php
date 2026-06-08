@@ -10,7 +10,7 @@
                     '<?php echo $tag['name']?>', 
                     '<?php echo $tag['fgcolor']?>', 
                     '<?php echo $tag['bgcolor']?>', 
-                    'delete_tag.php?inventory_id=<?php echo $inventory['id']?>&id=<?php echo $tag['id']; ?>', 
+                        'delete_tag.php?inventory_id=<?php echo $inventory['id']?>&id=<?php echo $tag['id']; ?>', 
                     'submitDeleteTag');
         </script>
     <?php endforeach; ?>

@@ -60,5 +60,29 @@
                 return is_array($msg) ? ($msg['message'] ?? 'Failed to create tag.') : $msg;
             }
         }
+
+        public function addTagToResource($username){
+            if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitAddTagToResource']) && isset($_GET['inventory_id']) && isset($_GET['resourceId']) && isset($_POST['tag_id'])){
+                $this -> inventoryManagementService -> addTagToResource($username, $_GET['inventory_id'], $_GET['resourceId'], $_POST['tag_id']);
+                header('Location: inventory.php?inventory_id='.$_GET['inventory_id']);
+                return '';
+            }
+        }
+
+        public function removeTagFromResource($username){
+            if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['inventory_id']) && isset($_GET['resourceId']) && isset($_GET['id'])){
+                $this -> inventoryManagementService -> removeTagFromResource($username, $_GET['inventory_id'], $_GET['resourceId'], $_GET['id']);
+                header('Location: inventory.php?inventory_id='.$_GET['inventory_id']);
+                return '';
+            }
+        }
+
+        public function removeTag($username){
+            if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['inventory_id']) && isset($_GET['id'])){
+                $this -> inventoryManagementService -> removeTag($username, $_GET['inventory_id'], $_GET['id']);
+                header('Location: inventory.php?inventory_id='.$_GET['inventory_id']);
+                return '';
+            }
+        }
     }
 ?>

@@ -151,6 +151,22 @@ class ResurseModel {
         );
     }
 
+    public function removeTagFromResource($resource_id, $tag_id) {
+        return @pg_query_params(
+            $this->connection,
+            "DELETE FROM has_tag WHERE resource_id = $1 AND tag_id = $2",
+            array($resource_id, $tag_id)
+        );
+    }
+
+    public function deleteTag($inventory_id, $tag_id) {
+        return @pg_query_params(
+            $this->connection,
+            "DELETE FROM tags WHERE id = $1 AND inventory_id = $2",
+            array($tag_id, $inventory_id)
+        );
+    }
+
     public function updateTag($tag_id, $name = null, $description = null, $foreground_color = null, $background_color = null) {
         $updates = array();
         $params = array();
