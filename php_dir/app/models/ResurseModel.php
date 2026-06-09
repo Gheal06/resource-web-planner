@@ -114,7 +114,7 @@ class ResurseModel {
     }
 
     public function getAllTags($inventory_id) {
-        $res = @pg_query_params($this->connection, "SELECT * FROM tags where inventory_id=".$inventory_id." ORDER BY name", array());
+        $res = @pg_query_params($this->connection, "SELECT * FROM tags WHERE inventory_id = $1 ORDER BY name", array($inventory_id));
 
         if (!$res) return array();
         $rows = array();

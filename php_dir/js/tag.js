@@ -24,6 +24,7 @@ function makeTag(parentId, tagText, fgColor, bgColor, deleteAction = "", deleteN
     var submit = document.createElement('input');
     submit.value = 'x';
     submit.type='submit';
+    submit.name = deleteName;
     submit.classList.add('tag-delete-btn');
     
     form.appendChild(submit);
