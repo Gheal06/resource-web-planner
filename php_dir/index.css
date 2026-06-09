@@ -300,3 +300,17 @@ input[type="submit"].tag-delete-btn{
 input[type="submit"].tag-delete-btn:hover{
     background-color: #FFFFFF99;
 }
+
+.notification-table tbody tr:nth-child(even) {
+  background-color: #FFDDDD;
+}
+.notification-table tbody tr:nth-child(odd) {
+  background-color: #FFF;
+}
+.notification-table thead tr{
+    background-color: #DD5555;
+    color: white;
+}
+.notification-table{
+    border: 1px #DD0000 solid;
+}
