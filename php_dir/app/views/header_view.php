@@ -26,6 +26,7 @@
             <?php else: ?>
               <img class="gravatar-image centerY" src="<?php echo $gravatarService->getGravatarUrl($currentUser); ?>" alt="">
               <a href="account.php" class="centerY"><?php echo htmlspecialchars($currentUser);?></a>
+              <a href="notifications.php">🔔</a>
             <a href="logout.php" class="centerY">Logout</a>
             <?php endif; ?>
         </div>
