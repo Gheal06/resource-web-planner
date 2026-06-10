@@ -45,9 +45,11 @@
         <td><?php echo htmlspecialchars($row['name']); ?></td>
         <td><?php echo htmlspecialchars($row['quantity']); ?> <?php echo htmlspecialchars($row['unit']); ?></td>
         <td><?php echo htmlspecialchars($row['description']); ?></td>
-        <td>
+        <td style="display: flex; gap: 5px; flex-wrap: wrap;">
+            <a href="resource/transaction.php?inventory_id=<?php echo urlencode($row['inventory_id']);?>&resource_id=<?php echo urlencode($row['id']);?>&operation=add" style="padding: 4px 8px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 3px; font-size: 0.85em;">+</a>
+            <a href="resource/transaction.php?inventory_id=<?php echo urlencode($row['inventory_id']);?>&resource_id=<?php echo urlencode($row['id']);?>&operation=subtract" style="padding: 4px 8px; background-color: #ff9800; color: white; text-decoration: none; border-radius: 3px; font-size: 0.85em;">−</a>
             <form onsubmit="return confirm('Are you sure you want to remove this resource?');" action="resource/delete.php?inventory_id=<?php echo urlencode($row['inventory_id']);?>&resourceId=<?php echo urlencode($row['id']);?>" method="post">
-                <input name="submitRemoveResource" type="submit" value="Delete">
+                <input name="submitRemoveResource" type="submit" value="Delete" style="padding: 4px 8px; background-color: #f44336; color: white; border: none; border-radius: 3px; font-size: 0.85em; cursor: pointer;">
             </form>
         </td>
     </tr>
