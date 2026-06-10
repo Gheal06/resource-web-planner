@@ -22,6 +22,13 @@ class FonduriModel {
         if (!$res) return null;
         return @pg_fetch_assoc($res);
     }
+
+    public function getById($fonduri_id) {
+        $res = @pg_query_params($this->connection, "SELECT * FROM fonduri WHERE id = $1", array($fonduri_id));
+        if (!$res) return null;
+        return @pg_fetch_assoc($res);
+    }
+
     public function create($inventory_id, $currency_code, $name = null, $description = null) {
         
         return pg_query_params($this->connection,

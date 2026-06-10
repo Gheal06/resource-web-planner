@@ -13,6 +13,10 @@ class ResurseModel {
         return pg_fetch_assoc($res);
     }
 
+    public function getById($resource_id) {
+        return $this->getResurseById($resource_id);
+    }
+
     public function getResourcesByInventoryId($inventory_id) {
         $res = @pg_query_params($this->connection, "SELECT * FROM resources WHERE inventory_id = $1", array($inventory_id));
         if (!$res) return array();

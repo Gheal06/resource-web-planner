@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS resource_transaction_history;
+DROP TABLE IF EXISTS fonduri_transaction_history;
 DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS has_tag;
 DROP TABLE IF EXISTS tags;
@@ -90,4 +92,33 @@ CREATE TABLE transactions (
     end_timestamp          TIMESTAMPTZ, -- NULL daca tranzactia e one time
     frequency              INTERVAL, -- NULL daca tranzactia e one time
     description            TEXT
+);
+
+CREATE TABLE resource_transaction_history (
+    id                     BIGSERIAL PRIMARY KEY,
+    resource_id            BIGINT NOT NULL REFERENCES resources(id) ON DELETE CASCADE,
+    resource_name          VARCHAR(255) NOT NULL,
+    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
+    operation_type         VARCHAR(50) NOT NULL, -- 'add' or 'subtract'
+    quantity_change        DOUBLE PRECISION NOT NULL,
+    old_quantity           DOUBLE PRECISION,
+    new_quantity           DOUBLE PRECISION,
+    description            TEXT,
+    created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by             BIGINT REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE fonduri_transaction_history (
+    id                     BIGSERIAL PRIMARY KEY,
+    fonduri_id             BIGINT NOT NULL REFERENCES fonduri(id) ON DELETE CASCADE,
+    fonduri_name           VARCHAR(255),
+    currency_code          VARCHAR(3) NOT NULL,
+    inventory_id           BIGINT NOT NULL REFERENCES inventories(id) ON DELETE CASCADE,
+    operation_type         VARCHAR(50) NOT NULL, -- 'add' or 'subtract'
+    amount_change          DOUBLE PRECISION NOT NULL,
+    old_amount             DOUBLE PRECISION,
+    new_amount             DOUBLE PRECISION,
+    description            TEXT,
+    created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by             BIGINT REFERENCES users(id) ON DELETE SET NULL
 );
