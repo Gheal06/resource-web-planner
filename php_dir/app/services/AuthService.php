@@ -134,6 +134,16 @@ class AuthService {
     public function getUserByUsername($username){
       return $this->userModel->findByUsername($username);
     }
+
+    public function isAdminById($user_id){
+        $adminModel = new AdminModel($this->userModel->conn);
+        return $adminModel->isAdmin($user_id);
+    }
+    public function isAdmin($username){
+        $user = $this->userModel->findByUsername($username);
+        if (!$user) return false;
+        return $this->isAdminById($user['id']);
+    }
 }
 
 ?>

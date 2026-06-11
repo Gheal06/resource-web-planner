@@ -9,12 +9,19 @@ DROP TABLE IF EXISTS resources;
 DROP TABLE IF EXISTS user_inventory_permission;
 DROP TABLE IF EXISTS inventories;
 DROP TABLE IF EXISTS password_recovery_codes;
+DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id                    BIGSERIAL PRIMARY KEY,
     username              VARCHAR(255) UNIQUE NOT NULL,
     email                 VARCHAR(255) UNIQUE NOT NULL, 
     password_hash         VARCHAR(64) NOT NULL
+);
+
+CREATE TABLE admins (
+    id                    BIGSERIAL PRIMARY KEY,
+    user_id               BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(user_id)
 );
 
 CREATE TABLE password_recovery_codes (
