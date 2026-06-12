@@ -21,7 +21,4 @@
     </select>
     <input type="submit" name="submitAddTagToResource" value="Add tag">
 </form>
-<div style="margin-top: 6px;">
-    <a href="new_tag.php?inventory_id=<?php echo urlencode($inventoryId); ?>">Create new tag</a>
-</div>
 </div>

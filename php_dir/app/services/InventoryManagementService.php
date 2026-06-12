@@ -11,6 +11,7 @@ require_once __DIR__ . "/../models/ResourceTransactionHistoryModel.php";
 require_once __DIR__ . "/ResourceService.php";
 require_once __DIR__ . "/MailingService.php";
 require_once __DIR__ . "/NotificationService.php";
+require_once __DIR__ . "/../controllers/AuthController.php";
 
   class InventoryManagementService {
     private $inventoryModel;
@@ -22,6 +23,7 @@ require_once __DIR__ . "/NotificationService.php";
     private $resourceService;
     private $currencyTransactionHistoryModel;
     private $resourceTransactionHistoryModel;
+    private $authController;
 
 
     private $notificationService;
@@ -42,6 +44,7 @@ require_once __DIR__ . "/NotificationService.php";
       $this->notificationService = new NotificationService($connection);
       $this->currencyTransactionHistoryModel = new FonduriTransactionHistoryModel($connection);
       $this->resourceTransactionHistoryModel = new ResourceTransactionHistoryModel($connection);
+      $this->authController = new AuthController($connection);
     }
 
     public function getUserByUsername($username) {
@@ -1345,23 +1348,18 @@ require_once __DIR__ . "/NotificationService.php";
     }
 
     public function statisticiFond($inventory_id, $fond_id, $start_date, $end_date) {
-      $user = $this->userModel->findById($this->getCurrentUserId());
+      $user = $this->userModel->findByUsername($this->authController->getCurrentUser());
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
       }
       if (!$this->canRead($user['id'], $inventory_id)) {
         return $this->accessDenied();
       }
-
-      $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $fond_id);
-      if (!$fonduri) {
-        return $this->notFound('Fund not found.');
-      }
       return $this->currencyTransactionHistoryModel->getStatistics($fond_id, $start_date, $end_date);
     }
 
     public function statisticiResursa($inventory_id, $resource_id, $start_date, $end_date) {
-      $user = $this->userModel->findById($this->getCurrentUserId());
+      $user = $this->userModel->findByUsername($this->authController->getCurrentUser());
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
       }
@@ -1373,7 +1371,8 @@ require_once __DIR__ . "/NotificationService.php";
       if (!$resource) {
         return $this->notFound('Resource not found.');
       }
-
+      //echo $start_date ?? 'here';
+      //echo $end_date ?? 'here';
       return $this->resourceTransactionHistoryModel->getStatistics($resource_id, $start_date, $end_date);
     }
 
@@ -1382,14 +1381,14 @@ require_once __DIR__ . "/NotificationService.php";
       if (!$resource) {
         return $this->notFound('Resource not found.');
       }
-      $transactions = $this->resourceTransactionHistoryModel->getByResourceId($resource_id);
+      $transactions = $this->resourceTransactionHistoryModel->getStatistics($resource_id, '-infinity', $timestamp);
       $current_quantity = $resource['quantity'];
       foreach($transactions as $transaction){
-        if(strtotime($transaction['timestamp']) > strtotime($timestamp)){
-          if($transaction['type'] === 'Add'){
-            $current_quantity -= $transaction['amount'];
-          }elseif($transaction['type'] === 'Subtract'){
-            $current_quantity += $transaction['amount'];
+        if(strtotime($transaction['created_at']) > strtotime($timestamp)){
+          if($transaction['operation_type'] === 'Add'){
+            $current_quantity -= $transaction['amount_change'];
+          }elseif($transaction['operation_type'] === 'Subtract'){
+            $current_quantity += $transaction['amount_change'];
           }
         }
       }
@@ -1397,21 +1396,22 @@ require_once __DIR__ . "/NotificationService.php";
     }
 
     public function fundWayback($fond_id, $timestamp){
-      $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency(null, $fond_id);
+
+      $fonduri = $this->fonduriModel->getById($fond_id);
       if (!$fonduri) {
         return $this->notFound('Fund not found.');
       }
-      $transactions = $this->currencyTransactionHistoryModel->getByFondId($fond_id);
+
+      $transactions = $this->currencyTransactionHistoryModel->getStatistics($fond_id, '-infinity', $timestamp);
       $current_amount = $fonduri['amount'];
       foreach($transactions as $transaction){
-        if(strtotime($transaction['timestamp']) > strtotime($timestamp)){
           if($transaction['type'] === 'Add'){
-            $current_amount -= $transaction['amount'];
+            $current_amount -= $transaction['amount_change'];
           }elseif($transaction['type'] === 'Subtract'){
-            $current_amount += $transaction['amount'];
+            $current_amount += $transaction['amount_change'];
           }
-        }
       }
       return $current_amount;
   }
+}
 ?>
