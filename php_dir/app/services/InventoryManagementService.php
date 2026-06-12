@@ -204,11 +204,20 @@ require_once __DIR__ . "/NotificationService.php";
         );
       }
 
+      // $tags = $this->resurseModel->getTagsByInventoryId($inventory_id);
+      // usort($tags, function ($left, $right) {
+      //   return strcmp((string)($left['name'] ?? ''), (string)($right['name'] ?? ''));
+      // });
+
+      // $exportTags = array();
+
+
       return array(
         'success' => true,
         'inventory' => $exportInventory,
         'funds' => $exportFunds,
         'resources' => $exportResources,
+        // 'tags' => $exportTags,
       );
     }
 
@@ -229,8 +238,7 @@ require_once __DIR__ . "/NotificationService.php";
       if ($handle === false) {
         return false;
       }
-
-      fputcsv($handle, array('record_type', 'inventory_id', 'inventory_name', 'inventory_description', 'record_id', 'name', 'description', 'quantity', 'unit', 'currency_code', 'amount', 'tags_json'));
+      fputcsv($handle, array('record_type', 'inventory_id', 'inventory_name', 'inventory_description', 'record_id', 'name', 'description', 'quantity', 'threshold_quantity', 'unit', 'currency_code', 'amount', 'threshold_amount', 'tags_json'), ",", '"', "\\");
 
       $inventory = $exportData['inventory'];
       fputcsv($handle, array(
@@ -245,8 +253,11 @@ require_once __DIR__ . "/NotificationService.php";
         '',
         '',
         '',
+        '',
+        '',
         $this->jsonEncodeInline(array()),
-      ));
+      ),
+        ",", '"', "\\");
 
       foreach ($exportData['funds'] as $fund) {
         fputcsv($handle, array(
@@ -259,10 +270,13 @@ require_once __DIR__ . "/NotificationService.php";
           $fund['description'],
           '',
           '',
+          '',
           $fund['currency_code'],
           $fund['amount'],
+          $fund['threshold_amount'],
           $this->jsonEncodeInline(array()),
-        ));
+        ),
+          ",", '"', "\\");
       }
 
       foreach ($exportData['resources'] as $resource) {
@@ -275,159 +289,20 @@ require_once __DIR__ . "/NotificationService.php";
           $resource['name'],
           $resource['description'],
           $resource['quantity'],
+          $resource['threshold_quantity'],
           $resource['unit'],
           '',
           '',
+          '',
           $this->jsonEncodeInline($resource['tags']),
-        ));
+        ),
+          ",", '"', "\\");
       }
 
       rewind($handle);
       $content = stream_get_contents($handle);
       fclose($handle);
       return $content;
-    }
-
-    private function buildInventorySummaryLines($exportData) {
-      $lines = array();
-      $inventory = $exportData['inventory'];
-
-      $lines[] = array('type' => 'title', 'text' => 'Inventory export: ' . $inventory['name']);
-      $lines[] = array('type' => 'body', 'text' => 'Inventory ID: ' . $inventory['id']);
-      if (!empty($inventory['description'])) {
-        $lines[] = array('type' => 'body', 'text' => 'Description: ' . $inventory['description']);
-      }
-
-      $lines[] = array('type' => 'section', 'text' => 'Funds');
-      if (empty($exportData['funds'])) {
-        $lines[] = array('type' => 'body', 'text' => 'No funds recorded.');
-      } else {
-        foreach ($exportData['funds'] as $fund) {
-          $fundLabel = trim(($fund['currency_code'] ?? '') . ' ' . ($fund['amount'] ?? ''));
-          $fundName = !empty($fund['name']) ? ' - ' . $fund['name'] : '';
-          $lines[] = array('type' => 'body', 'text' => '- ' . $fundLabel . $fundName);
-          if (!empty($fund['description'])) {
-            $lines[] = array('type' => 'body', 'text' => '  Description: ' . $fund['description']);
-          }
-        }
-      }
-
-      $lines[] = array('type' => 'section', 'text' => 'Resources');
-      if (empty($exportData['resources'])) {
-        $lines[] = array('type' => 'body', 'text' => 'No resources recorded.');
-      } else {
-        foreach ($exportData['resources'] as $resource) {
-          $lines[] = array('type' => 'body', 'text' => '- ' . $resource['name'] . ' (' . $resource['quantity'] . ' ' . $resource['unit'] . ')');
-          if (!empty($resource['description'])) {
-            $lines[] = array('type' => 'body', 'text' => '  Description: ' . $resource['description']);
-          }
-
-          $tagNames = array();
-          foreach ($resource['tags'] as $tag) {
-            $tagNames[] = $tag['name'];
-          }
-
-          $lines[] = array('type' => 'body', 'text' => '  Tags: ' . (empty($tagNames) ? 'none' : implode(', ', $tagNames)));
-        }
-      }
-
-      return $lines;
-    }
-
-    private function renderInventoryImage($exportData, $format) {
-      if (!function_exists('imagecreatetruecolor')) {
-        return false;
-      }
-
-      $lines = $this->buildInventorySummaryLines($exportData);
-      $bodyFont = 3;
-      $titleFont = 5;
-      $sectionFont = 4;
-      $width = 1400;
-      $leftMargin = 40;
-      $rightMargin = 40;
-      $topMargin = 30;
-      $bottomMargin = 30;
-      $lineGap = 6;
-      $bodyLineHeight = imagefontheight($bodyFont) + $lineGap;
-      $titleLineHeight = imagefontheight($titleFont) + 14;
-      $sectionLineHeight = imagefontheight($sectionFont) + 12;
-
-      $wrappedLines = array();
-      foreach ($lines as $line) {
-        $text = isset($line['text']) ? (string)$line['text'] : '';
-        $chunks = explode("\n", wordwrap($text, 120, "\n", true));
-        foreach ($chunks as $chunk) {
-          $wrappedLines[] = array(
-            'type' => $line['type'],
-            'text' => $chunk,
-          );
-        }
-      }
-
-      $height = $topMargin + $bottomMargin + 90;
-      foreach ($wrappedLines as $line) {
-        if ($line['type'] === 'title') {
-          $height += $titleLineHeight + 6;
-        } elseif ($line['type'] === 'section') {
-          $height += $sectionLineHeight + 8;
-        } else {
-          $height += $bodyLineHeight;
-        }
-      }
-
-      $image = imagecreatetruecolor($width, $height);
-      if ($image === false) {
-        return false;
-      }
-
-      $background = imagecolorallocate($image, 246, 248, 252);
-      $titleBackground = imagecolorallocate($image, 15, 23, 42);
-      $sectionBackground = imagecolorallocate($image, 31, 111, 139);
-      $bodyText = imagecolorallocate($image, 17, 24, 39);
-      $mutedText = imagecolorallocate($image, 75, 85, 99);
-      $white = imagecolorallocate($image, 255, 255, 255);
-      $border = imagecolorallocate($image, 209, 213, 219);
-
-      imagefilledrectangle($image, 0, 0, $width - 1, $height - 1, $background);
-      imagerectangle($image, 0, 0, $width - 1, $height - 1, $border);
-
-      imagefilledrectangle($image, 0, 0, $width - 1, 72, $titleBackground);
-      imagestring($image, $titleFont, $leftMargin, 20, 'Inventory export: ' . $exportData['inventory']['name'], $white);
-      imagestring($image, $bodyFont, $leftMargin, 46, 'Inventory ID: ' . $exportData['inventory']['id'], $white);
-
-      $currentY = 96;
-      foreach ($wrappedLines as $line) {
-        if ($line['type'] === 'title') {
-          continue;
-        }
-
-        if ($line['type'] === 'section') {
-          imagefilledrectangle($image, $leftMargin - 12, $currentY - 4, $width - $rightMargin + 12, $currentY + $sectionLineHeight + 2, $sectionBackground);
-          imagestring($image, $sectionFont, $leftMargin, $currentY + 2, $line['text'], $white);
-          $currentY += $sectionLineHeight + 10;
-          continue;
-        }
-
-        imagestring($image, $bodyFont, $leftMargin, $currentY, $line['text'], $bodyText);
-        $currentY += $bodyLineHeight;
-      }
-
-      imagestring($image, $bodyFont, $leftMargin, $height - 20, 'Generated from inventory export', $mutedText);
-
-      ob_start();
-      if ($format === 'png') {
-        imagepng($image);
-      } elseif ($format === 'webp' && function_exists('imagewebp')) {
-        imagewebp($image, null, 85);
-      } else {
-        imagedestroy($image);
-        ob_end_clean();
-        return false;
-      }
-      $binary = ob_get_clean();
-      imagedestroy($image);
-      return $binary;
     }
 
     public function exportInventoryAsCsv($user_id, $inventory_id) {
@@ -544,7 +419,7 @@ require_once __DIR__ . "/NotificationService.php";
         return array('success' => false, 'message' => 'Failed to open import file.');
       }
 
-      $headers = fgetcsv($handle);
+      $headers = fgetcsv($handle, 0, ",", '"', "\\");
       if ($headers === false || empty($headers)) {
         fclose($handle);
         return array('success' => false, 'message' => 'Import file is empty.');
@@ -554,7 +429,7 @@ require_once __DIR__ . "/NotificationService.php";
       $funds = array();
       $resources = array();
 
-      while (($row = fgetcsv($handle)) !== false) {
+      while (($row = fgetcsv($handle, 0, ",", '"', "\\")) !== false) {
         if ($row === array(null) || count(array_filter($row, function ($value) { return $value !== null && $value !== ''; })) === 0) {
           continue;
         }
@@ -578,7 +453,8 @@ require_once __DIR__ . "/NotificationService.php";
           $funds[] = array(
             'currency_code' => isset($record['currency_code']) ? $record['currency_code'] : null,
             'amount' => isset($record['amount']) ? $record['amount'] : 0,
-            'name' => isset($record['name']) ? $record['name'] : null,
+            'threshold_amount' => isset($record['threshold_amount']) ? $record['threshold_amount'] : 0,
+            'name' => $record['name'] == '' ? null : $record['name'],
             'description' => isset($record['description']) ? $record['description'] : null,
           );
           continue;
@@ -597,6 +473,7 @@ require_once __DIR__ . "/NotificationService.php";
             'name' => isset($record['name']) ? $record['name'] : null,
             'description' => isset($record['description']) ? $record['description'] : null,
             'quantity' => isset($record['quantity']) ? $record['quantity'] : 0,
+            'threshold_quantity' => isset($record['threshold_quantity']) ? $record['threshold_quantity'] : 0,
             'unit' => isset($record['unit']) ? $record['unit'] : null,
             'tags' => $tags,
           );
@@ -722,12 +599,16 @@ require_once __DIR__ . "/NotificationService.php";
           if (!isset($fundData['currency_code']) || trim((string)$fundData['currency_code']) === '') {
             throw new Exception('Invalid fund data in import file.');
           }
+          if (isset($fundData['threshold_amount']) && (!is_numeric($fundData['threshold_amount']) || $fundData['threshold_amount'] < 0)) {
+            throw new Exception('Invalid fund threshold amount in import file.');
+          }
 
           $amount = isset($fundData['amount']) ? $fundData['amount'] : 0;
-          $fundResult = $this->fonduriModel->setFonduri(
+          $fundResult = $this->fonduriModel->import(
             $newInventoryId,
-            $amount,
             $fundData['currency_code'],
+            $amount,
+            $fundData['threshold_amount'] ?? null,
             isset($fundData['name']) ? $fundData['name'] : null,
             isset($fundData['description']) ? $fundData['description'] : null
           );
@@ -748,6 +629,7 @@ require_once __DIR__ . "/NotificationService.php";
             $resourceData['name'],
             isset($resourceData['description']) ? $resourceData['description'] : null,
             isset($resourceData['quantity']) ? $resourceData['quantity'] : 0,
+            isset($resourceData['threshold_quantity']) ? $resourceData['threshold_quantity'] : null,
             $resourceData['unit'],
             $newInventoryId
           );
