@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . "/../models/ResourceTransactionHistoryModel.php";
-require_once __DIR__ . "/../models/CurrencyTransactionHistoryModel.php";
+require_once __DIR__ . "/../models/FonduriTransactionHistoryModel.php";
 
 $inventory_id = $inventory['id'] ?? null;
 if (!$inventory_id) {
@@ -9,7 +9,7 @@ if (!$inventory_id) {
 }
 
 $resourceHistoryModel = new ResourceTransactionHistoryModel($connection);
-$currencyHistoryModel = new CurrencyTransactionHistoryModel($connection);
+$currencyHistoryModel = new FonduriTransactionHistoryModel($connection);
 
 $resourceHistory = $resourceHistoryModel->getByInventoryId($inventory_id, 100);
 $currencyHistory = $currencyHistoryModel->getByInventoryId($inventory_id, 100);

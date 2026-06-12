@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . "/../models/InventoryModel.php";
+require_once __DIR__ . "/../models/FonduriTransactionHistoryModel.php";
+require_once __DIR__ . "/../models/ResourceTransactionHistoryModel.php";
 require_once __DIR__ . "/../models/InventoryPermissionsModel.php";
 require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/FonduriModel.php";
