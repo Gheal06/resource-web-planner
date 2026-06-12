@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/../services/AdminService.php";
 require_once __DIR__ . "/../services/AuthService.php";
+require_once __DIR__ . "/AuthController.php";
 class AdminController {
     private $adminService;
     private $authService;
