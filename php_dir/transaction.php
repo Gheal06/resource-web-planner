@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         <h2><?php echo htmlspecialchars($operationLabel); ?> Amount for <?php echo htmlspecialchars($fonduri['name'] ?? $fonduri['currency_code']); ?></h2>
         <p>Current Amount: <?php echo htmlspecialchars($fonduri['amount']); ?> <?php echo htmlspecialchars($fonduri['currency_code']); ?></p>
         
-        <form method="POST" onsubmit="return confirm('Are you sure?');">
+        <form method="POST">
             <input type="hidden" name="inventory_id" value="<?php echo htmlspecialchars($inventory_id); ?>">
             <input type="hidden" name="fonduri_id" value="<?php echo htmlspecialchars($fonduri_id); ?>">
             <input type="hidden" name="operation" value="<?php echo htmlspecialchars($operation); ?>">

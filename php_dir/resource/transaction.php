@@ -7,7 +7,7 @@ require_once __DIR__ . "/../app/controllers/InventoryManagementController.php";
 require_once __DIR__ . "/../app/controllers/AuthController.php";
 require_once __DIR__ . "/../app/services/InventoryManagementService.php";
 
-$css = __DIR__ . "/../index.css";
+$css = __DIR__ . "/../style/index.css";
 
 $inventory_id = $_GET['inventory_id'] ?? $_POST['inventory_id'] ?? null;
 $resource_id = $_GET['resource_id'] ?? $_POST['resource_id'] ?? null;
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         <h2><?php echo htmlspecialchars($operationLabel); ?> Quantity for <?php echo htmlspecialchars($resource['name']); ?></h2>
         <p>Current Quantity: <?php echo htmlspecialchars($resource['quantity']); ?> <?php echo htmlspecialchars($resource['unit']); ?></p>
         
-        <form method="POST" onsubmit="return confirm('Are you sure?');">
+        <form method="POST">
             <input type="hidden" name="inventory_id" value="<?php echo htmlspecialchars($inventory_id); ?>">
             <input type="hidden" name="resource_id" value="<?php echo htmlspecialchars($resource_id); ?>">
             <input type="hidden" name="operation" value="<?php echo htmlspecialchars($operation); ?>">

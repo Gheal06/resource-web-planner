@@ -59,11 +59,11 @@ class FonduriTransactionHistoryModel {
     }
 
     public function getStatistics($fonduri_id, $start_date, $end_date) {
-        $sql = "SELECT  *FROM fonduri_transaction_history
-                WHERE fonduri_id = $1 AND created_at >= $2 AND created_at <= $3";
+        $sql = "SELECT * FROM fonduri_transaction_history
+                WHERE fonduri_id = $1 AND created_at >= $2 AND created_at <= $3 ORDER BY created_at ASC";
         $res = @pg_query_params($this->connection, $sql, array($fonduri_id, $start_date, $end_date));
         if (!$res) return null;
-        return pg_fetch_assoc($res);
+        return pg_fetch_all($res);
     }
 }
 
