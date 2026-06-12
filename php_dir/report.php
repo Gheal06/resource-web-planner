@@ -11,7 +11,7 @@
     }
     function str_to_ts($str, $fallback){
         $str = $str ?? '';
-        return strlen($str) ? strtotime($str)*1000000 : $fallback;
+        return strlen($str) ? $str : $fallback;
     }
     $authController = new AuthController($connection);
     $inventoryPermissionsModel = new InventoryPermissionsModel($connection);
@@ -30,6 +30,8 @@
         $resourceId = $_POST['asset_id'];
         $startDate = str_to_ts($_POST['start_date'], '-infinity');
         $endDate = str_to_ts($_POST['end_date'], 'infinity');
+        if($endDate!='infinity')
+            $endDate=date('Y-m-d', strtotime($endDate.' +1 day'));
         if(!isset($_POST['submit_generate_html']) || !isset($inventoryId) || !isset($resourceId))
             error();
         if(strlen($resourceId)==0) error();

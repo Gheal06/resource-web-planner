@@ -1,3 +1,25 @@
 body{
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
+td, th{
+    padding: 10px;
+    /*background-color: #0000FF;*/
+}
+table{
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px #0000FF solid;
+}
+td{
+    text-align: center;
+}
+tbody tr:nth-child(even) {
+  background-color: #DDDDFF;
+}
+tbody tr:nth-child(odd) {
+  background-color: #FFF;
+}
+thead tr{
+    background-color: #5555FF;
+    color: white;
+}
