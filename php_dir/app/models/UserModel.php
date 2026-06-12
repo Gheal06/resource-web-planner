@@ -1,11 +1,12 @@
 <?php
 class UserModel {
     private $conn;
-
     public function __construct($connection) {
         $this->conn = $connection;
     }
-
+    public function getConnection(){
+        return $this->conn;
+    }
     public function findAll() {
         $res = @pg_query($this->conn, "SELECT id, username, email FROM users");
         if (!$res) return array();

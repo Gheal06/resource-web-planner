@@ -5,6 +5,10 @@ body{
 }
 .flex{
     display: flex;
+    flex-wrap: wrap;
+}
+.flex-gap{
+    gap: 5px;
 }
 #page{
     left: 0;

@@ -140,7 +140,7 @@ class AuthService {
     }
 
     public function isAdminById($user_id){
-        $adminModel = new AdminModel($this->userModel->conn);
+        $adminModel = new AdminModel($this->userModel->getConnection());
         return $adminModel->isAdmin($user_id);
     }
     public function isAdmin($username){

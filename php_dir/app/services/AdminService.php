@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/../models/AdminModel.php";
 require_once __DIR__ . "/../models/UserModel.php";
-public class AdminService {
+class AdminService {
     private $adminModel;
     private $userModel;
 
@@ -34,6 +34,10 @@ public class AdminService {
     public function reset_database() {
       shell_exec('../../admin_scripts/initdb.sh defarg');
       return array('success' => true, 'message' => 'Database reset successfully.');
+    }
+    public function reset_functions() {
+      shell_exec('../../admin_scripts/initdb.sh');
+      return array('success' => true, 'message' => 'Functions reset successfully.');
     }
 }
 
