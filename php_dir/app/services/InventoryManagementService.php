@@ -7,7 +7,6 @@ require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/FonduriModel.php";
 require_once __DIR__ . "/../models/ResurseModel.php";
 require_once __DIR__ . "/../models/CurrencyModel.php";
-require_once __DIR__ . "/../models/CurrencyTransactionHistoryModel.php";
 require_once __DIR__ . "/../models/ResourceTransactionHistoryModel.php";
 require_once __DIR__ . "/ResourceService.php";
 require_once __DIR__ . "/MailingService.php";
@@ -41,7 +40,7 @@ require_once __DIR__ . "/NotificationService.php";
       $this->currencyModel = new CurrencyModel($connection);
       $this->resourceService = new ResourceService($connection);
       $this->notificationService = new NotificationService($connection);
-      $this->currencyTransactionHistoryModel = new CurrencyTransactionHistoryModel($connection);
+      $this->currencyTransactionHistoryModel = new FonduriTransactionHistoryModel($connection);
       $this->resourceTransactionHistoryModel = new ResourceTransactionHistoryModel($connection);
     }
 
