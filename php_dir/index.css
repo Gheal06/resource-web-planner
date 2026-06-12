@@ -10,6 +10,9 @@ body{
 .flex-gap{
     gap: 5px;
 }
+.flex-gap10{
+    gap: 10px;
+}
 #page{
     left: 0;
     right: 0;
