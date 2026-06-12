@@ -227,6 +227,9 @@ thead tr{
     margin-left: auto;
     margin-right: auto;
 }
+.center-content{
+    justify-content: center;
+}
 .split-container3-l{
     padding-right:10px;
 }
