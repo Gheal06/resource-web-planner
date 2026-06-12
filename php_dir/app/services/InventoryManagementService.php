@@ -343,6 +343,42 @@ require_once __DIR__ . "/NotificationService.php";
       );
     }
 
+    public function arrayToXml($array, &$xml) {
+      foreach ($array as $key => $value) {
+        if (is_array($value)) {
+            if (is_numeric($key)) {
+                $key = 'item'; 
+            }
+            $subnode = $xml->addChild($key);
+            $this->arrayToXml($value, $subnode);
+        } else {
+            $xml->addChild("$key", htmlspecialchars("$value"));
+        }
+      }
+    }
+
+
+    public function exportInventoryAsXml($user_id, $inventory_id) {
+      $exportData = $this->getInventoryExportData($user_id, $inventory_id);
+      if (!empty($exportData['success']) && $exportData['success'] === false) {
+        return $exportData;
+      }
+
+      $xml = new SimpleXMLElement('<inventory_export/>');
+      $this->arrayToXml($exportData, $xml);
+      $content = $xml->asXML();
+      if ($content === false) {
+        return array('success' => false, 'message' => 'Failed to build XML export.', 'code' => 'export_error');
+      }
+
+      return array(
+        'success' => true,
+        'filename' => $this->getExportFilename($inventory_id, 'xml'),
+        'mime' => 'application/xml',
+        'content' => $content,
+      );
+    }
+
     public function exportInventory($username, $inventory_id, $type) {
       $normalizedType = strtolower(trim((string)$type));
 
@@ -356,6 +392,10 @@ require_once __DIR__ . "/NotificationService.php";
 
       if ($normalizedType === 'json') {
         return $this->exportInventoryAsJson($user['id'], $inventory_id);
+      }
+      
+      if ($normalizedType === 'xml') {
+        return $this->exportInventoryAsXml($user['id'], $inventory_id);
       }
 
 
@@ -516,6 +556,55 @@ require_once __DIR__ . "/NotificationService.php";
       );
     }
 
+    private function parseInventoryImportXml($file_path) {
+      libxml_use_internal_errors(true);
+      $xmlContent = simplexml_load_file($file_path, 'SimpleXMLElement', LIBXML_NOCDATA);
+      if ($xmlContent === false) {
+        return array('success' => false, 'message' => 'Failed to parse XML import file.');
+      }
+
+      $jsonContent = json_encode($xmlContent);
+      if ($jsonContent === false) {
+        return array('success' => false, 'message' => 'Failed to convert XML content to JSON.');
+      }
+
+      $decoded = json_decode($jsonContent, true);
+      if (!is_array($decoded) || !isset($decoded['inventory'])) {
+        return array('success' => false, 'message' => 'Invalid XML export format.');
+      }
+
+      $funds = isset($decoded['funds']) && is_array($decoded['funds']) ? $decoded['funds'] : array();
+      $resources = isset($decoded['resources']) && is_array($decoded['resources']) ? $decoded['resources'] : array();
+
+      $parsedFunds = array();
+      foreach ($funds['item'] ?? array() as $fund) {
+        $parsedFund = $fund;
+        foreach ($fund as $key => $value) {
+          if (is_array($value) && empty($value)) {
+            $parsedFund[$key] = null;
+          }
+        }
+
+        $parsedFunds[] = $parsedFund;
+      }
+      $parsedResources = array();
+      foreach ($resources['item'] ?? array() as $resource) {
+        $parsedResource = $resource;
+        if (isset($resource['tags']) && isset($resource['tags']['item'])) {
+          $parsedResource['tags'] = is_array($resource['tags']['item']) ? $resource['tags']['item'] : array($resource['tags']['item']);
+        } else {
+          $parsedResource['tags'] = array();
+        }
+        $parsedResources[] = $parsedResource;
+      }
+      return array(
+        'success' => true,
+        'inventory' => $decoded['inventory'],
+        'funds' => $parsedFunds,
+        'resources' => $parsedResources,
+      );
+    }
+
     private function parseInventoryImportFile($uploaded_file) {
       if (!isset($uploaded_file['tmp_name']) || !is_string($uploaded_file['tmp_name']) || $uploaded_file['tmp_name'] === '') {
         return array('success' => false, 'message' => 'No import file was uploaded.');
@@ -532,9 +621,10 @@ require_once __DIR__ . "/NotificationService.php";
 
       if (preg_match('/\.json$/', $fileName) || (strlen($contentPrefix) > 0 && ($contentPrefix[0] === '{' || $contentPrefix[0] === '['))) {
         return $this->parseInventoryImportJson($filePath);
+      } elseif (preg_match('/\.csv$/', $fileName) || (strlen($contentPrefix) > 0 && strpos($contentPrefix, 'record_type') !== false)) {
+        return $this->parseInventoryImportCsv($filePath);
       }
-
-      return $this->parseInventoryImportCsv($filePath);
+      return $this->parseInventoryImportXml($filePath);
     }
 
     public function importInventory($username, $uploaded_file) {
@@ -547,14 +637,13 @@ require_once __DIR__ . "/NotificationService.php";
       if (!empty($parsedImport['success']) && $parsedImport['success'] === false) {
         return $parsedImport;
       }
-
       $inventoryData = $parsedImport['inventory'];
       $fundsData = isset($parsedImport['funds']) && is_array($parsedImport['funds']) ? $parsedImport['funds'] : array();
       $resourcesData = isset($parsedImport['resources']) && is_array($parsedImport['resources']) ? $parsedImport['resources'] : array();
-
+      
       $inventoryName = $this->getUniqueImportedInventoryName($user['id'], isset($inventoryData['name']) ? $inventoryData['name'] : 'Imported inventory');
       $inventoryDescription = isset($inventoryData['description']) ? $inventoryData['description'] : null;
-
+      
       $this->inventoryModel->beginTransaction();
       try {
         $newInventoryId = $this->inventoryModel->create($inventoryName, $inventoryDescription, $user['id']);
@@ -594,7 +683,6 @@ require_once __DIR__ . "/NotificationService.php";
             }
           }
         }
-
         foreach ($fundsData as $fundData) {
           if (!isset($fundData['currency_code']) || trim((string)$fundData['currency_code']) === '') {
             throw new Exception('Invalid fund data in import file.');
@@ -602,7 +690,6 @@ require_once __DIR__ . "/NotificationService.php";
           if (isset($fundData['threshold_amount']) && (!is_numeric($fundData['threshold_amount']) || $fundData['threshold_amount'] < 0)) {
             throw new Exception('Invalid fund threshold amount in import file.');
           }
-
           $amount = isset($fundData['amount']) ? $fundData['amount'] : 0;
           $fundResult = $this->fonduriModel->import(
             $newInventoryId,
@@ -612,9 +699,11 @@ require_once __DIR__ . "/NotificationService.php";
             isset($fundData['name']) ? $fundData['name'] : null,
             isset($fundData['description']) ? $fundData['description'] : null
           );
+          
           if ($fundResult === false) {
             throw new Exception('Failed to create fund entry.');
           }
+          
         }
 
         foreach ($resourcesData as $resourceData) {

@@ -32,7 +32,7 @@
     <center>
     <form action="inventory/import.php" method="post" enctype="multipart/form-data" style="margin-bottom: 16px;">
         <label for="inventoryFile">Import inventory from file:</label>
-        <input type="file" name="inventoryFile" id="inventoryFile" accept=".json,.csv,application/json,text/csv" required>
+        <input type="file" name="inventoryFile" id="inventoryFile" accept=".json,.csv,application/json,text/csv,.xml" required>
         <br>
         <br>
         <input type="submit" value="Import">
