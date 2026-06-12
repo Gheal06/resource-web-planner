@@ -7,8 +7,8 @@
             $this->resurseModel = new ResurseModel($connection);
         }
 
-        public function addResource($inventoryId, $resourceName, $unit, $resourceDescription){
-            return $this->resurseModel->create($resourceName, $resourceDescription, 0, $unit, $inventoryId);
+        public function addResource($inventoryId, $resourceName, $unit, $threshold_quantity, $resourceDescription){
+            return $this->resurseModel->create($resourceName, $resourceDescription, 0, $threshold_quantity, $unit, $inventoryId);
         }
         public function removeResource($inventoryId, $resourceId){
             try{

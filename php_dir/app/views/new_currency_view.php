@@ -19,6 +19,9 @@
                     <option value=<?php echo htmlspecialchars($currencyCode); ?>><?php echo htmlspecialchars($currencyCode); ?></option>
                 <?php endforeach; ?>
         </select>
+          <br>
+          <label for="threshold-quantity">Threshold Amount: </label>
+        <input type="number" name="threshold-quantity" id="threshold-quantity" min="0" step="any"> <br>
         <label for="description">Description: </label>
         <textarea name="description" id="description" maxlength="255" rows="10"> </textarea>
         <?php if (!empty( $message ?? '')): ?>

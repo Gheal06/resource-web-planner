@@ -12,10 +12,10 @@ begin
     INSERT INTO user_inventory_permission(user_id, inventory_id, permissions) VALUES(1, 2, 15);
     INSERT INTO user_inventory_permission(user_id, inventory_id, permissions) VALUES(2, 1, 15);
     INSERT INTO user_inventory_permission(user_id, inventory_id, permissions) VALUES(2, 2, 15);
-    INSERT INTO fonduri(amount, currency_code, inventory_id) VALUES(1000, 'USD', 1);
-    INSERT INTO fonduri(amount, currency_code, inventory_id) VALUES(10000, 'RON', 1);
-    INSERT INTO resources(name, description, quantity, unit, inventory_id) VALUES('Resursa 1', 'Prima resursa', 10, 'bucati', 1);
-    INSERT INTO resources(name, description, quantity, unit, inventory_id) VALUES('Resursa 2', 'A doua resursa', 20, 'bucati', 1);
+    INSERT INTO fonduri(name, amount, currency_code, inventory_id, threshold_amount) VALUES('Bani de la matusa', 1000, 'USD', 1, 500);
+    INSERT INTO fonduri(name, amount, currency_code, inventory_id, threshold_amount) VALUES('Bani de la bunicu', 10000, 'RON', 1, 5000);
+    INSERT INTO resources(name, description, quantity, unit, inventory_id, threshold_quantity) VALUES('Resursa 1', 'Prima resursa', 10, 'bucati', 1, 5);
+    INSERT INTO resources(name, description, quantity, unit, inventory_id, threshold_quantity) VALUES('Resursa 2', 'A doua resursa', 20, 'bucati', 1, 10);
     INSERT INTO tags(name, bgcolor, fgcolor, inventory_id) VALUES('Dedeman', '#DDDDFF', '#000000', 1);
     INSERT INTO tags(name, bgcolor, fgcolor, inventory_id) VALUES('Evil Dedeman', '#2222FF', '#FFFFFF', 1);
     INSERT INTO has_tag VALUES (1, 1);

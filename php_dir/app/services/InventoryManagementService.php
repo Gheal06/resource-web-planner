@@ -5,6 +5,8 @@ require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/../models/FonduriModel.php";
 require_once __DIR__ . "/../models/ResurseModel.php";
 require_once __DIR__ . "/../models/CurrencyModel.php";
+require_once __DIR__ . "/../models/CurrencyTransactionHistoryModel.php";
+require_once __DIR__ . "/../models/ResourceTransactionHistoryModel.php";
 require_once __DIR__ . "/ResourceService.php";
 require_once __DIR__ . "/MailingService.php";
 require_once __DIR__ . "/NotificationService.php";
@@ -17,7 +19,7 @@ require_once __DIR__ . "/NotificationService.php";
     private $resurseModel;
     private $currencyModel;
     private $resourceService;
-    private $fonduriTransactionHistoryModel;
+    private $currencyTransactionHistoryModel;
     private $resourceTransactionHistoryModel;
 
 
@@ -37,7 +39,7 @@ require_once __DIR__ . "/NotificationService.php";
       $this->currencyModel = new CurrencyModel($connection);
       $this->resourceService = new ResourceService($connection);
       $this->notificationService = new NotificationService($connection);
-      $this->fonduriTransactionHistoryModel = new FonduriTransactionHistoryModel($connection);
+      $this->currencyTransactionHistoryModel = new CurrencyTransactionHistoryModel($connection);
       $this->resourceTransactionHistoryModel = new ResourceTransactionHistoryModel($connection);
     }
 
@@ -95,12 +97,7 @@ require_once __DIR__ . "/NotificationService.php";
         $user = $this->userModel->findById($associate['user_id']);
         if (isset($user['id'])) {
           $to = $user['id'];
-          if ($this->notificationService->createNotification($to, $inventory_id, $subject, $body)) {
-            // echo $user['email'] . " - email sent\n";
-          } else {
-            return false;
-          }
-          // echo $user['email'] . "\n";
+          $this->notificationService->createNotification($to, $inventory_id, $subject, $body);
         }
         // else{
         //   echo "troll\n";
@@ -165,6 +162,7 @@ require_once __DIR__ . "/NotificationService.php";
           'id' => isset($fund['id']) ? $fund['id'] : null,
           'inventory_id' => isset($fund['inventory_id']) ? $fund['inventory_id'] : null,
           'amount' => isset($fund['amount']) ? $fund['amount'] : null,
+          'threshold_amount' => isset($fund['threshold_amount']) ? $fund['threshold_amount'] : null,
           'currency_code' => isset($fund['currency_code']) ? $fund['currency_code'] : null,
           'name' => isset($fund['name']) ? $fund['name'] : null,
           'description' => isset($fund['description']) ? $fund['description'] : null,
@@ -200,6 +198,7 @@ require_once __DIR__ . "/NotificationService.php";
           'name' => isset($resource['name']) ? $resource['name'] : null,
           'description' => isset($resource['description']) ? $resource['description'] : null,
           'quantity' => isset($resource['quantity']) ? $resource['quantity'] : null,
+          'threshold_quantity' => isset($resource['threshold_quantity']) ? $resource['threshold_quantity'] : null,
           'unit' => isset($resource['unit']) ? $resource['unit'] : null,
           'tags' => $exportTags,
         );
@@ -883,13 +882,18 @@ require_once __DIR__ . "/NotificationService.php";
         }
       }
       $res = $this->fonduriModel->setFonduri($inventory_id, $amount, $currency_code, $name, $description);
-      if ($res === false) {
+      if ($res === false) { 
         return array('success' => false, 'message' => 'Failed to set funds.');
       }
+      $new_fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $currency_code);
+      if ($fonduri['amount'] > $fonduri['threshold_amount'] && $new_fonduri['amount'] <= $fonduri['threshold_amount']) {
+        $this->notifyAllAssoc($inventory_id, "Fund Threshold Alert: " . ($new_fonduri['name'] ?? $new_fonduri['currency_code'] ?? ''), "The fund " . ($new_fonduri['name'] ?? $new_fonduri['currency_code'] ?? '') . " (" . ($new_fonduri['currency_code'] ?? '') . ") has dropped below the threshold amount in inventory " . ($this->inventoryModel->getInventoryById($inventory_id)['name'] ?? $inventory_id) . ". Current amount: " . $new_fonduri['amount']);
+      }
+      $this->currencyTransactionHistoryModel->addTransaction($inventory_id, $new_fonduri['name'], $new_fonduri['currency_code'], $inventory_id, ($new_fonduri['amount'] < $fonduri['amount']  ? 'Subtract' : 'Add'), abs($new_fonduri['amount'] - $fonduri['amount']), $fonduri['amount'], $new_fonduri['amount'], (!empty($description) ? $description : 'Fund update'));
       return array('success' => true, 'message' => 'Funds set.');
     }
 
-    public function createFonduri($username, $inventory_id, $currency_code, $name = null, $description = null) {
+    public function createFonduri($username, $inventory_id, $currency_code, $threshold_quantity, $name = null, $description = null) {
       $user = $this->userModel->findByUsername($username);
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
@@ -897,7 +901,7 @@ require_once __DIR__ . "/NotificationService.php";
       if (!$this->canEdit($user['id'], $inventory_id)) {
         return $this->accessDenied();
       }
-      $res = $this->fonduriModel->create($inventory_id, $currency_code, $name, $description);
+      $res = $this->fonduriModel->create($inventory_id, $currency_code, $threshold_quantity, $name, $description);
       if ($res === false) {
         return array('success' => false, 'message' => 'Failed to create fund.');
       }
@@ -935,7 +939,7 @@ require_once __DIR__ . "/NotificationService.php";
       return array('success' => true, 'message' => 'Fund deleted.');
     }
 
-    public function createResurse($username, $name, $description, $quantity, $unit, $inventory_id) {
+    public function createResource($username, $name, $description, $quantity, $threshold_quantity, $unit, $inventory_id) {
       $user = $this->userModel->findByUsername($username);
       if (!$user || !isset($user['id'])) {
         return $this->notFound('User not found.');
@@ -943,15 +947,15 @@ require_once __DIR__ . "/NotificationService.php";
       if (!$this->canEdit($user['id'], $inventory_id)) {
         return $this->accessDenied();
       }
-      $res = $this->resourceService->addResource($inventory_id, $name, $unit, $description);
+      $res = $this->resourceService->addResource($inventory_id, $name, $unit, $threshold_quantity,  $description);
       if ($res === false) {
-        return array('success' => false, 'message' => 'Failed to create resource.');
+        return array('success' => false, 'message' => 'Coult not create resource.');
       }
       return array('success' => true, 'message' => 'Resource created.', 'id' => $res);
     }
 
-    public function addResource($username, $inventory_id, $name, $unit, $description) {
-      return $this->createResurse($username, $name, $description, 0, $unit, $inventory_id);
+    public function addResource($username, $inventory_id, $name, $threshold_quantity, $unit, $description) {
+      return $this->createResource($username, $name, $description, 0, $threshold_quantity, $unit, $inventory_id);
     }
 
     public function removeResource($username, $inventory_id, $resource_id) {
@@ -1026,7 +1030,7 @@ require_once __DIR__ . "/NotificationService.php";
       return array('success' => true, 'message' => 'Amount added.');
     }
 
-    public function setResurseAmount($username, $resource_id, $amount) {
+    public function setResurseAmount($username, $inventory_id, $resource_id, $amount, $description = null) {
       $resource = $this->resurseModel->getResurseById($resource_id);
       if (!$resource) {
         return $this->notFound('Resource not found.');
@@ -1039,9 +1043,14 @@ require_once __DIR__ . "/NotificationService.php";
         return $this->accessDenied();
       }
       $res = $this->resurseModel->set_ammount($resource_id, $amount);
-      if (is_array($res)) {
+      if (is_array($res) && $res['success'] === false) {
         return $res;
       }
+      $new_resource = $this->resurseModel->getResurseById($resource_id);
+      if ($resource['quantity'] > $resource['threshold_quantity'] && $new_resource['quantity'] <= $resource['threshold_quantity']) {
+        $this->notifyAllAssoc($resource['inventory_id'], "Resource Threshold Alert: " . $new_resource['name'], "The resource with ID " . $resource_id . " (" . $new_resource['name'] . ") has dropped below the threshold quantity in inventory " . ($this->inventoryModel->getInventoryById($resource['inventory_id'])['name'] ?? $resource['inventory_id']) . ". Current quantity: " . $new_resource['quantity']);
+      }
+      $this->resourceTransactionHistoryModel->addTransaction($resource['inventory_id'], $new_resource['name'], $resource_id, ($new_resource['quantity'] < $resource['quantity']  ? 'Subtract' : 'Add'), abs($new_resource['quantity'] - $resource['quantity']), $resource['quantity'], $new_resource['quantity'], $description ?? 'Resource quantity update');
       return array('success' => true, 'message' => 'Amount set.');
     }
 
@@ -1376,7 +1385,7 @@ require_once __DIR__ . "/NotificationService.php";
       if (!$fonduri) {
         return $this->notFound('Fund not found.');
       }
-      return $this->fonduriTransactionHistoryModel->getStatistics($fond_id, $start_date, $end_date);
+      return $this->currencyTransactionHistoryModel->getStatistics($fond_id, $start_date, $end_date);
     }
 
     public function statisticiResursa($inventory_id, $resource_id, $start_date, $end_date) {

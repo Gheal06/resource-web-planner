@@ -1,10 +1,4 @@
 -- PL/pgSQL helper functions for scheduled transactions
--- Functions:
---  - check_transaction_applicable(tx_id) RETURNS BOOLEAN
---  - apply_transaction(tx_id) -> applies the transaction (modifies resource quantity),
---      advances start_timestamp by frequency and deletes if past end_timestamp,
---      raises an error if not applicable
---  - skip_transaction(tx_id) -> advances start_timestamp by frequency, deletes if past end_timestamp
 
 CREATE OR REPLACE FUNCTION check_transaction_applicable(p_tx_id BIGINT)
 RETURNS BOOLEAN LANGUAGE plpgsql AS $$
