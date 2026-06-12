@@ -1,6 +1,6 @@
 <?php
 
-class CurrencyTransactionHistoryModel {
+class FonduriTransactionHistoryModel {
     private $connection;
 
     public function __construct($connection) {
