@@ -60,7 +60,7 @@ class ResourceTransactionHistoryModel {
 
     public function getStatistics($resource_id, $start_date, $end_date) {
         $sql = "SELECT * FROM resource_transaction_history
-                WHERE resource_id = $1 AND created_at >= $2 AND created_at <= $3 ORDER BY created_at ASC";
+                WHERE resource_id = $1 AND created_at >= $2 AND created_at < $3 ORDER BY created_at ASC";
         $res = @pg_query_params($this->connection, $sql, array($resource_id, $start_date, $end_date));
         
         if (!$res) return null;

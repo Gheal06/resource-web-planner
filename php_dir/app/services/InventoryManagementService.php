@@ -1396,20 +1396,20 @@ require_once __DIR__ . "/../controllers/AuthController.php";
     }
 
     public function fundWayback($fond_id, $timestamp){
-      $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency(null, $fond_id);
+
+      $fonduri = $this->fonduriModel->getById($fond_id);
       if (!$fonduri) {
         return $this->notFound('Fund not found.');
       }
-      $transactions = $this->fundTransactionHistoryModel->getStatistics($resource_id, 0, $timestamp);
+
+      $transactions = $this->currencyTransactionHistoryModel->getStatistics($fond_id, '-infinity', $timestamp);
       $current_amount = $fonduri['amount'];
       foreach($transactions as $transaction){
-        if(strtotime($transaction['created_at']) > strtotime($timestamp)){
           if($transaction['type'] === 'Add'){
-            $current_amount -= $transaction['amount'];
+            $current_amount -= $transaction['amount_change'];
           }elseif($transaction['type'] === 'Subtract'){
-            $current_amount += $transaction['amount'];
+            $current_amount += $transaction['amount_change'];
           }
-        }
       }
       return $current_amount;
   }
