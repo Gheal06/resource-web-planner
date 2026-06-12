@@ -825,7 +825,7 @@ require_once __DIR__ . "/NotificationService.php";
         return $this->notFound('Inventory not found.');
       }
 
-      if ($this->sendEmailToAllAssoc($inventory_id, "Inventory Deleted: " . $inventory['name'], "The inventory with ID " . $inventory_id . " has been deleted by user " . $user['username'] . ".")) {
+      if ($this->notifyAllAssoc($inventory_id, "Inventory Deleted: " . $inventory['name'], "The inventory with ID " . $inventory_id . " has been deleted by user " . $user['username'] . ".")) {
         // merge bine
       } else {
         return array('success' => false, 'message' => 'Failed to send deletion notice emails.');
@@ -934,7 +934,7 @@ require_once __DIR__ . "/NotificationService.php";
         return array('success' => false, 'message' => 'Failed to delete fund.');
       }
 
-      $this->sendEmailToOwner($inventory_id, "Fund Deleted: " . ($target['name'] ?? $target['currency_code'] ?? ''), "The fund with ID " . $currency_id . " (" . ($target['name'] ?? $target['currency_code'] ?? '') . ") has been deleted from inventory " . ($this->inventoryModel->getInventoryById($inventory_id)['name'] ?? $inventory_id) . " by user " . $user['username'] . ".");
+      $this->notifyOwner($inventory_id, "Fund Deleted: " . ($target['name'] ?? $target['currency_code'] ?? ''), "The fund with ID " . $currency_id . " (" . ($target['name'] ?? $target['currency_code'] ?? '') . ") has been deleted from inventory " . ($this->inventoryModel->getInventoryById($inventory_id)['name'] ?? $inventory_id) . " by user " . $user['username'] . ".");
 
       return array('success' => true, 'message' => 'Fund deleted.');
     }
@@ -973,7 +973,7 @@ require_once __DIR__ . "/NotificationService.php";
       }
       $inventory = $this->inventoryModel->getInventoryById($inventory_id);
 
-      $this->sendEmailToOwner($inventory_id, "Resource Deleted: " . $resource['name'], "The resource with ID " . $resource_id . " has been deleted from inventory " . $inventory['name'] . " by user " . $user['username'] . ".");
+      $this->notifyOwner($inventory_id, "Resource Deleted: " . $resource['name'], "The resource with ID " . $resource_id . " has been deleted from inventory " . $inventory['name'] . " by user " . $user['username'] . ".");
       return array('success' => true, 'message' => 'Resource deleted.');
     }
 
