@@ -1377,5 +1377,41 @@ require_once __DIR__ . "/NotificationService.php";
       return $this->resourceTransactionHistoryModel->getStatistics($resource_id, $start_date, $end_date);
     }
 
+    public function resourceWayback($resource_id, $timestamp){
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      if (!$resource) {
+        return $this->notFound('Resource not found.');
+      }
+      $transactions = $this->resourceTransactionHistoryModel->getByResourceId($resource_id);
+      $current_quantity = $resource['quantity'];
+      foreach($transactions as $transaction){
+        if(strtotime($transaction['timestamp']) > strtotime($timestamp)){
+          if($transaction['type'] === 'Add'){
+            $current_quantity -= $transaction['amount'];
+          }elseif($transaction['type'] === 'Subtract'){
+            $current_quantity += $transaction['amount'];
+          }
+        }
+      }
+      return $current_quantity;
+    }
+
+    public function fundWayback($fond_id, $timestamp){
+      $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency(null, $fond_id);
+      if (!$fonduri) {
+        return $this->notFound('Fund not found.');
+      }
+      $transactions = $this->currencyTransactionHistoryModel->getByFondId($fond_id);
+      $current_amount = $fonduri['amount'];
+      foreach($transactions as $transaction){
+        if(strtotime($transaction['timestamp']) > strtotime($timestamp)){
+          if($transaction['type'] === 'Add'){
+            $current_amount -= $transaction['amount'];
+          }elseif($transaction['type'] === 'Subtract'){
+            $current_amount += $transaction['amount'];
+          }
+        }
+      }
+      return $current_amount;
   }
 ?>
