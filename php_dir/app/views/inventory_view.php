@@ -33,6 +33,10 @@
                 <input type="hidden" name="type" value="json">
                 <input type="submit" value="Export JSON">
             </form>
+            <form action="inventory/export.php?inventory_id=<?php echo urlencode($inventory['id'] ?? ''); ?>" method="post">
+                <input type="hidden" name="type" value="xml">
+                <input type="submit" value="Export XML">
+            </form>
         </div>
         <div class="sep"></div>
 
