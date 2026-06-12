@@ -1,10 +1,12 @@
 <?php
     require_once "conn.php";
     require_once "app/controllers/AuthController.php";
+    require_once "app/services/AuthService.php";
     require_once "app/controllers/InventoryManagementController.php";
     require_once "app/services/GravatarService.php";
     
     $authController = new AuthController($connection);
+    $authService = new AuthService($connection);
     $inventoryController = new InventoryManagementController($connection);
     $action = $_GET['action'] ?? '';
     $currentUser = $authController->getCurrentUser();

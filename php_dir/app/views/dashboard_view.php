@@ -3,11 +3,6 @@
     <h2>Dashboard</h2>
     <p>Welcome, <?php echo htmlspecialchars($currentUser ?? ''); ?>!</p>
     <p>You have acces to <?php echo count($inventoryTableIDs); ?> inventories:</p>
-    <form action="inventory/import.php" method="post" enctype="multipart/form-data" style="margin-bottom: 16px;">
-        <label for="inventoryFile">Import inventory:</label>
-        <input type="file" name="inventoryFile" id="inventoryFile" accept=".json,.csv,application/json,text/csv" required>
-        <input type="submit" value="Import">
-    </form>
     <table id="inventory-table">
         <thead>
             <tr>
@@ -33,6 +28,16 @@
         </tr>
         </tbody>
     </table>
+    <br>
+    <center>
+    <form action="inventory/import.php" method="post" enctype="multipart/form-data" style="margin-bottom: 16px;">
+        <label for="inventoryFile">Import inventory from file:</label>
+        <input type="file" name="inventoryFile" id="inventoryFile" accept=".json,.csv,application/json,text/csv" required>
+        <br>
+        <br>
+        <input type="submit" value="Import">
+    </form>
+    </center>
     <!-- <p><a href="index.php?action=logout">Logout</a></p> -->
 </div>
 <?php require_once __DIR__ . '/../../footer.php'; ?>

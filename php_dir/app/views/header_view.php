@@ -18,6 +18,9 @@
             <img src="favicon.ico" alt="">
             <a href="index.php">Home</a>
             <a href="exchange_rates.php">Exchange Rates</a>
+            <?php if(isset($currentUser) && $authService->isAdmin($currentUser)): ?>
+                <a href="admin_panel.php" class="centerY">Admin Dashboard</a>
+            <?php endif; ?>
         </div>
         <div id="nav-right">
             <?php if(!$currentUser): ?>
