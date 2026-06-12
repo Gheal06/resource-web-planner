@@ -1,14 +1,21 @@
 <?php
 require_once __DIR__ . "/../services/AdminService.php";
-
+require_once __DIR__ . "/../services/AuthService.php";
 class AdminController {
     private $adminService;
-
+    private $authService;
+    private $authController;
     public function __construct($connection) {
         $this->adminService = new AdminService($connection);
+        $this->authService = new AuthService($connection);
+        $this->authController = new AuthController($connection);
     }
 
     public function adminAction() {
+      if (!$this->authService->isAdmin($this->authController->getCurrentUser())) {
+          header('Location: error.php');
+          exit();
+      }
       if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           if (isset($_POST['reset-db'])) {
               return $this->adminService->resetDatabase();

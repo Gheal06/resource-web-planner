@@ -119,6 +119,7 @@ class AuthService {
         ));
     }
 
+    
     public function getCurrentUserFromToken($token) {
         if (!$token) {
             return null;
@@ -131,7 +132,7 @@ class AuthService {
 
         return $payload['sub'];
     }
-
+    
     public function getUserById($user_id){
       return $this->userModel->findById($user_id);
     }
