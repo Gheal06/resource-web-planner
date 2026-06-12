@@ -9,7 +9,7 @@
         }
         public function addResource($username){
             if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitNewResource']) && isset($_GET['inventory_id'])){
-                $msg = $this -> inventoryManagementService -> addResource($username, $_GET['inventory_id'], $_POST['resource-name'], $_POST['unit'], $_POST['description']);
+                $msg = $this -> inventoryManagementService -> createResource($username, $_POST['resource-name'], $_POST['description'], 0, $_POST['threshold-quantity'], $_POST['unit'], $_GET['inventory_id']);
                 if(is_array($msg) && !empty($msg['success'])){
                     header('Location: inventory.php?inventory_id='.$_GET['inventory_id']);
                     return '';
@@ -27,7 +27,7 @@
         public function addFund($username){
             if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitNewCurrency']) && isset($_GET['inventory_id'])){
                 try{
-                  $msg = $this->inventoryManagementService->createFonduri($username, $_GET['inventory_id'], $_POST['currencyCode'], $_POST['fundName'], $_POST['description']);
+                  $msg = $this->inventoryManagementService->createFonduri($username, $_GET['inventory_id'], $_POST['currencyCode'], $_POST['threshold-quantity'], $_POST['fundName'], $_POST['description']);
                     // echo $msg['message'];
                     header('Location: inventory.php?inventory_id='.$_GET['inventory_id']);
                     return '';

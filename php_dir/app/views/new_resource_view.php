@@ -9,6 +9,8 @@
         <input type="text" name="resource-name" id="resource-name" required> <br>
         <label for="unit">Unit: </label>
         <input type="text" name="unit" id="unit" placeholder="(e.g. kg, pcs)"> <br>
+        <label for="threshold-quantity">Threshold Quantity: </label>
+        <input type="number" name="threshold-quantity" id="threshold-quantity" min="0" step="any"> <br>
         <label for="description">Description: </label>
         <textarea name="description" id="description" maxlength="255" rows="10"> </textarea>
         <?php if (!empty( $message ?? '')): ?>

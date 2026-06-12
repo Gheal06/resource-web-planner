@@ -5,7 +5,6 @@ require_once __DIR__ . "/app/models/FonduriModel.php";
 require_once __DIR__ . "/app/models/CurrencyTransactionHistoryModel.php";
 require_once __DIR__ . "/app/controllers/InventoryManagementController.php";
 require_once __DIR__ . "/app/services/InventoryManagementService.php";
-
 $inventory_id = $_GET['inventory_id'] ?? $_POST['inventory_id'] ?? null;
 $fonduri_id = $_GET['fonduri_id'] ?? $_POST['fonduri_id'] ?? null;
 $operation = $_GET['operation'] ?? $_POST['operation'] ?? null; // 'add' or 'subtract'
@@ -93,7 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         die('Fund not found');
     }
 
-    // Check if user has access
     $inventoryController = new InventoryManagementController($connection);
     $inventory = $inventoryController->getUserInventoryById($inventory_id);
     
@@ -101,51 +99,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         die('You don\'t have access to this inventory');
     }
 
+
+
     $amount = floatval($amount);
+
     
-    // Validate operation
     if ($operation !== 'add' && $operation !== 'subtract') {
         die('Invalid operation');
     }
 
-    // Calculate new amount
     $old_amount = floatval($fonduri['amount']);
     $amount_change = $operation === 'add' ? $amount : -$amount;
     $new_amount = $old_amount + $amount_change;
 
-    // Check if new amount would be negative
     if ($new_amount < 0) {
         die('Operation would result in negative amount');
     }
 
-    // Update fonduri amount
-    $updateSql = "UPDATE fonduri SET amount = $1 WHERE id = $2";
-    $updateRes = @pg_query_params($connection, $updateSql, array($new_amount, $fonduri_id));
-    
-    if ($updateRes === false) {
-        die('Error updating fund: ' . pg_last_error($connection));
-    }
-
-    // Record transaction
-    $currencyHistoryModel = new CurrencyTransactionHistoryModel($connection);
-    $txResult = $currencyHistoryModel->addTransaction(
-        $fonduri_id,
-        $fonduri['name'] ?? $fonduri['currency_code'],
-        $fonduri['currency_code'],
-        $inventory_id,
-        $operation,
-        $amount_change,
-        $old_amount,
-        $new_amount,
-        $description,
-        $currentUser ? $authController->getUserByUsername($currentUser)['id'] ?? null : null
-    );
-
-    if ($txResult['success']) {
-        header('Location: inventory.php?inventory_id=' . urlencode($inventory_id) . '&success=' . urlencode($operation === 'add' ? 'Added' : 'Subtracted') . ' amount');
-    } else {
-        die('Error recording transaction: ' . $txResult['message']);
-    }
+    $inventoryService = new InventoryManagementService($connection);
+    $authController = new AuthController($connection);
+    $currentUser = $authController->getCurrentUser();
+    $inventoryService->setFonduri($currentUser, $inventory_id, $new_amount, $fonduri['currency_code'], $fonduri['name'] ?? null, $description ?? null);
+    header('Location: inventory.php?inventory_id=' . urlencode($inventory_id));
     exit;
 }
 

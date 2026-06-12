@@ -4,6 +4,7 @@ require_once __DIR__ . "/../header.php";
 require_once __DIR__ . "/../app/models/ResurseModel.php";
 require_once __DIR__ . "/../app/models/ResourceTransactionHistoryModel.php";
 require_once __DIR__ . "/../app/controllers/InventoryManagementController.php";
+require_once __DIR__ . "/../app/controllers/AuthController.php";
 require_once __DIR__ . "/../app/services/InventoryManagementService.php";
 
 $css = __DIR__ . "/../index.css";
@@ -18,7 +19,6 @@ $success = false;
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Display form for add/subtract operation
     if (!$resource_id || !$inventory_id || !$operation) {
         header('Location: ../inventory.php?inventory_id=' . urlencode($inventory_id));
         exit;
@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         exit;
     }
 
-    // Check if user has access
     $inventoryController = new InventoryManagementController($connection);
     $inventory = $inventoryController->getUserInventoryById($inventory_id);
     
@@ -80,7 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     <?php
 
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Process the add/subtract operation
     
     if (!$resource_id || !$inventory_id || !$operation || $quantity === null) {
         header('Location: ../inventory.php?inventory_id=' . urlencode($inventory_id));
@@ -94,7 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         die('Resource not found');
     }
 
-    // Check if user has access
     $inventoryController = new InventoryManagementController($connection);
     $inventory = $inventoryController->getUserInventoryById($inventory_id);
     
@@ -104,48 +101,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     $quantity = floatval($quantity);
     
-    // Validate operation
     if ($operation !== 'add' && $operation !== 'subtract') {
         die('Invalid operation');
     }
 
-    // Calculate new quantity
     $old_quantity = floatval($resource['quantity']);
     $quantity_change = $operation === 'add' ? $quantity : -$quantity;
     $new_quantity = $old_quantity + $quantity_change;
 
-    // Check if new quantity would be negative
     if ($new_quantity < 0) {
         die('Operation would result in negative quantity');
     }
-
-    // Update resource quantity
-    $updateSql = "UPDATE resources SET quantity = $1 WHERE id = $2";
-    $updateRes = @pg_query_params($connection, $updateSql, array($new_quantity, $resource_id));
-    
-    if ($updateRes === false) {
-        die('Error updating resource: ' . pg_last_error($connection));
+    $inventoryService = new InventoryManagementService($connection);
+    $authController = new AuthController($connection);
+    $currentUser = $authController->getCurrentUser();
+    $res = $inventoryService->setResurseAmount($currentUser, $inventory_id, $resource_id, $new_quantity, $description);
+    if (is_array($res) && $res['success'] === false) {
+        die('Failed to update resource quantity: ' . ($res['message'] ?? 'Unknown error'));
     }
-
-    // Record transaction
-    $resourceHistoryModel = new ResourceTransactionHistoryModel($connection);
-    $txResult = $resourceHistoryModel->addTransaction(
-        $resource_id,
-        $resource['name'],
-        $inventory_id,
-        $operation,
-        $quantity_change,
-        $old_quantity,
-        $new_quantity,
-        $description,
-        $currentUser ? $authController->getUserByUsername($currentUser)['id'] ?? null : null
-    );
-
-    if ($txResult['success']) {
-        header('Location: ../inventory.php?inventory_id=' . urlencode($inventory_id) . '&success=' . urlencode($operation === 'add' ? 'Added' : 'Subtracted') . ' quantity');
-    } else {
-        die('Error recording transaction: ' . $txResult['message']);
-    }
+    header('Location: ../inventory.php?inventory_id=' . urlencode($inventory_id));
     exit;
 }
 

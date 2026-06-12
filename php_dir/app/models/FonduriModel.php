@@ -29,26 +29,11 @@ class FonduriModel {
         return @pg_fetch_assoc($res);
     }
 
-    public function create($inventory_id, $currency_code, $name = null, $description = null) {
+    public function create($inventory_id, $currency_code, $threshold_amount, $name = null, $description = null) {
         
         return pg_query_params($this->connection,
-            "INSERT INTO fonduri (amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-            array(0, $currency_code, $inventory_id, $name, $description)
-        );
-    }
-    public function addFonduri($inventory_id, $amount, $currency_code, $name = null, $description = null) {
-        $res = @pg_query_params($this->connection,
-            "UPDATE fonduri SET amount = amount + $1 WHERE inventory_id = $2 AND currency_code = $3",
-            array($amount, $inventory_id, $currency_code)
-        );
-
-        if ($res && pg_affected_rows($res) > 0) {
-            return $res;
-        }
-
-        return @pg_query_params($this->connection,
-            "INSERT INTO fonduri (amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5)",
-            array($amount, $currency_code, $inventory_id, $name, $description)
+            "INSERT INTO fonduri (amount, threshold_amount, currency_code, inventory_id, name, description) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+            array(0, $threshold_amount  , $currency_code, $inventory_id, $name, $description)
         );
     }
 

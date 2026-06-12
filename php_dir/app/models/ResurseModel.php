@@ -27,10 +27,10 @@ class ResurseModel {
         return $rows;
     }
 
-    public function create($name, $description, $quantity, $unit, $inventory_id) {
+    public function create($name, $description, $quantity, $threshold_quantity, $unit, $inventory_id) {
         $res = @pg_query_params($this->connection,
-            "INSERT INTO resources (name, description, quantity, unit, inventory_id) VALUES ($1, $2, $3, $4, $5) RETURNING id",
-            array($name, $description, $quantity, $unit, $inventory_id)
+            "INSERT INTO resources (name, description, quantity, threshold_quantity, unit, inventory_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+            array($name, $description, $quantity, $threshold_quantity, $unit, $inventory_id)
         );
         if ($res === false) return false;
         $row = pg_fetch_assoc($res);
