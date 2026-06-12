@@ -10,7 +10,6 @@ class AdminController {
 
     public function adminAction() {
       if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
           if (isset($_POST['reset-db'])) {
               return $this->adminService->resetDatabase();
           }
@@ -29,6 +28,36 @@ class AdminController {
                   return $this->adminService->deleteAdmin($user_id);
               }
           }
+          elseif (isset($_POST['submit-send-email'])) {
+              $user_id = $_POST['user_id'] ?? '';
+              $subject = $_POST['email_subject'] ?? 'Default Subject';
+              $message = $_POST['email_message'] ?? 'Default Message';
+              return $this->adminService->sendEmailToUser($user_id, $subject, $message);
+          } 
+          elseif (isset($_POST['submit-send-notification'])) {
+              $user_id = $_POST['user_id'] ?? '';
+              $subject = $_POST['notification_subject'] ?? 'Default Subject';
+              $message = $_POST['notification_message'] ?? 'Default Message';
+              return $this->adminService->sendNotificationToUser($user_id, $subject, $message);
+          }
+      }
+    }
+
+    public function sendEmail() {
+      if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit-email'])) {
+          $user_id = $_POST['user_id'] ?? '';
+          $subject = $_POST['email_subject'] ?? '';
+          $message = $_POST['email_message'] ?? '';
+          return $this->adminService->sendEmailToUser($user_id, $subject, $message);
+      }
+    }
+
+    public function sendNotification() {
+      if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit-notification'])) {
+          $user_id = $_POST['user_id'] ?? '';
+          $subject = $_POST['notification_subject'] ?? '';
+          $message = $_POST['notification_message'] ?? '';
+          return $this->adminService->sendNotificationToUser($user_id, $subject, $message);
       }
     }
 }

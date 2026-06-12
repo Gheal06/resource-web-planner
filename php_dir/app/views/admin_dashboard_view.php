@@ -53,6 +53,8 @@
                         <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($userId); ?>">
                         <input type="submit" name="submit-update-role" value="Update Role">
                         <input type="submit" name="submit-delete-user" value="Delete User">
+                        <input type="submit" name="submit-send-email" value="Send Email">
+                        <input type="submit" name="submit-send-notification" value="Send Notification">
                     </form>
                 </td>
                 
