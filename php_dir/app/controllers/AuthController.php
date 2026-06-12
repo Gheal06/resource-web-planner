@@ -50,6 +50,11 @@ class AuthController {
             if (!$currentUser) {
                 return 'You must be logged in to change your password.';
             }
+            $old_password = $_POST['old-password'] ?? '';
+            $authResult = $this->authService->login($currentUser, $old_password);
+            if (is_array($authResult) && isset($authResult['success']) && !$authResult['success']) {
+                return 'Error authenticating user: ' . $authResult['message'];
+            }
             $new_password = $_POST['new-password'] ?? '';
             $repeated_password = $_POST['repeat-password'] ?? '';
             if ($new_password !== $repeated_password) {
