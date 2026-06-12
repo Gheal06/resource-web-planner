@@ -50,6 +50,9 @@
             }
             header('Location: error.php');
         }
+        public function removeCurrency($username){
+          $this->removeFund($username);
+        }
         public function addTag($username){
             if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitNewTag']) && isset($_GET['inventory_id'])){
                 $msg = $this -> inventoryManagementService -> addTag($username, $_GET['inventory_id'], $_POST['tag-name'], $_POST['bgcolor'], $_POST['fgcolor']);
