@@ -7,6 +7,7 @@ require_once __DIR__ . "/../models/ResurseModel.php";
 require_once __DIR__ . "/../models/CurrencyModel.php";
 require_once __DIR__ . "/ResourceService.php";
 require_once __DIR__ . "/MailingService.php";
+require_once __DIR__ . "/NotificationService.php";
 
   class InventoryManagementService {
     private $inventoryModel;
@@ -17,7 +18,7 @@ require_once __DIR__ . "/MailingService.php";
     private $currencyModel;
     private $resourceService;
 
-    private $mailingService;
+    private $notificationService;
 
     private $readPermissionMask = 1;
     private $editPermissionMask = 2;
@@ -32,7 +33,7 @@ require_once __DIR__ . "/MailingService.php";
       $this->resurseModel = new ResurseModel($connection);
       $this->currencyModel = new CurrencyModel($connection);
       $this->resourceService = new ResourceService($connection);
-      $this->mailingService = new MailingService();
+      $this->notificationService = new NotificationService($connection);
     }
 
     public function getUserByUsername($username) {
@@ -66,7 +67,7 @@ require_once __DIR__ . "/MailingService.php";
     }
 
     
-    public function sendEmailToOwner($inventory_id, $subject, $body) {
+    public function notifyOwner($inventory_id, $subject, $body) {
       $inventory = $this->inventoryModel->getInventoryById($inventory_id);
       if (!$inventory) {
         return false;
@@ -76,10 +77,10 @@ require_once __DIR__ . "/MailingService.php";
         return false;
       }
       $to = $owner['email'];
-      return $this->mailingService->send_email($to, $subject, $body);
+      return $this->notificationService->createNotification($owner['id'], $inventory_id, $subject, $body);
     }
 
-    public function sendEmailToAllAssoc($inventory_id, $subject, $body) {
+    public function notifyAllAssoc($inventory_id, $subject, $body) {
       $inventory = $this->inventoryModel->getInventoryById($inventory_id);
       if (!$inventory) {
         return false;
@@ -87,9 +88,9 @@ require_once __DIR__ . "/MailingService.php";
       $associates = $this->inventoryPermissionsModel->getAllAssociatedUsers($inventory_id);
       foreach ($associates as $associate) {
         $user = $this->userModel->findById($associate['user_id']);
-        if (isset($user['email'])) {
-          $to = $user['email'];
-          if ($this->mailingService->send_email($to, $subject, $body)) {
+        if (isset($user['id'])) {
+          $to = $user['id'];
+          if ($this->notificationService->createNotification($to, $inventory_id, $subject, $body)) {
             // echo $user['email'] . " - email sent\n";
           } else {
             return false;
@@ -102,6 +103,7 @@ require_once __DIR__ . "/MailingService.php";
       }
       return true;
     }
+
 
     public function canUserAccessInventory($user_id, $inventory_id, $permission_mask) {
         return $this->inventoryPermissionsModel->canUserAccessInventory($user_id, $inventory_id, $permission_mask);
@@ -1243,10 +1245,7 @@ require_once __DIR__ . "/MailingService.php";
       $emailBody .= "New permissions: " . $permissionText . "\n\n";
       $emailBody .= "Inventory ID: " . $inventory_id;
 
-      $emailSent = true;
-      if (isset($target_user['email'])) {
-        $emailSent = $this->mailingService->send_email($target_user['email'], "Access Updated: " . $inventory['name'], $emailBody);
-      }
+      $emailSent = $this->notificationService->createNotification($target_user_id, $inventory_id, "Access Updated: " . $inventory['name'], $emailBody);
 
       // Commit transaction
       $this->inventoryModel->commitTransaction();
@@ -1288,9 +1287,7 @@ require_once __DIR__ . "/MailingService.php";
       $emailBody = "Your access to inventory \"" . $inventory['name'] . "\" has been revoked by " . $user['username'] . ".\n\n";
       $emailBody .= "Inventory ID: " . $inventory_id;
 
-      if (isset($target_user['email'])) {
-        $this->mailingService->send_email($target_user['email'], "Access Revoked: " . $inventory['name'], $emailBody);
-      }
+      $this->notificationService->createNotification($target_user_id, $inventory_id, "Access Revoked: " . $inventory['name'], $emailBody);
 
       // Commit transaction
       $this->inventoryModel->commitTransaction();
@@ -1336,9 +1333,7 @@ require_once __DIR__ . "/MailingService.php";
       $emailBody .= "Your permissions: " . $permissionText . "\n\n";
       $emailBody .= "Inventory ID: " . $inventory_id;
 
-      if (isset($target_user['email'])) {
-        $this->mailingService->send_email($target_user['email'], "Access Granted: " . $inventory['name'], $emailBody);
-      }
+      $this->notificationService->createNotification($target_user['id'], $inventory_id, "Access Granted: " . $inventory['name'], $emailBody);
 
       // Commit transaction
       $this->inventoryModel->commitTransaction();

@@ -6,6 +6,15 @@ class UserModel {
         $this->conn = $connection;
     }
 
+    public function findAll() {
+        $res = @pg_query($this->conn, "SELECT id, username, email FROM users");
+        if (!$res) return array();
+        $users = array();
+        while ($row = pg_fetch_assoc($res)) {
+            $users[] = $row;
+        }
+        return $users;
+    }
     public function findByUsername($username) {
         $res = @pg_query_params($this->conn, "SELECT * FROM users WHERE username = $1", array($username));
         if (!$res) return null;

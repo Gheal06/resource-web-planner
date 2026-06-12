@@ -40,7 +40,7 @@ services:
     depends_on:
       - postgres
     ports:
-      - "8081:80"
+      - "0.0.0.0:8081:80"
     dns:
       - 1.1.1.1
       - 8.8.8.8

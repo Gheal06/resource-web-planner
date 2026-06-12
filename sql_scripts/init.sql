@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS fonduri;
 DROP TABLE IF EXISTS currencies;
 DROP TABLE IF EXISTS resources;
 DROP TABLE IF EXISTS user_inventory_permission;
+DROP TABLE IF EXISTS notifications;
 DROP TABLE IF EXISTS inventories;
 DROP TABLE IF EXISTS password_recovery_codes;
 DROP TABLE IF EXISTS admins;
@@ -38,6 +39,15 @@ CREATE TABLE inventories (
     description            TEXT,
     owner_id               BIGINT REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE(name, owner_id)
+);
+
+CREATE TABLE notifications (
+    id                     BIGSERIAL PRIMARY KEY,
+    user_id                BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    inventory_id           BIGINT REFERENCES inventories(id) ON DELETE CASCADE,
+    title                  TEXT,
+    message                TEXT NOT NULL,
+    created_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE user_inventory_permission (

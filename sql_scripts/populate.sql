@@ -2,6 +2,8 @@ do $$
 begin
     CALL register_user('gheal', 'alexandru.gheorghies@gmail.com','gheal');
     CALL register_user('gruia', 'poparobert2012@gmail.com','gruia');
+    INSERT INTO notifications(user_id, title, message) VALUES(1, 'Test Account', 'Your account has been artificially inserted into the DB as a test account');
+    INSERT INTO notifications(user_id, title, message) VALUES(2, 'Test Account', 'Your account has been artificially inserted into the DB as a test account');
     INSERT INTO inventories(name, description, owner_id) VALUES('Inventar 1', 'Primul inventar', 1);
     INSERT INTO inventories(name, description, owner_id) VALUES('Inventar 2', 'Al doilea inventar', 2);
     INSERT INTO admins(user_id) VALUES(1);

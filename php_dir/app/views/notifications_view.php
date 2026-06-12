@@ -12,7 +12,14 @@
         </tr>
     </thead>
     <tbody>
-    <tr>
+    <?php foreach ($notifications as $not): ?>
+        <tr>
+            <td><?php echo htmlspecialchars(date("M d Y", strtotime($not['created_at']))); ?></td>
+            <td><?php echo isset($not['inventory_id']) ? '<a href="inventory.php?inventory_id=' . urlencode($not['inventory_id']) . '">Inventory ' . htmlspecialchars($not['inventory_id']) . '</a>' : 'General'; ?></td>
+            <td><?php echo nl2br(htmlspecialchars($not['message'])); ?></td>
+        </tr>
+    <?php endforeach; ?>
+    <!-- <tr>
         <td>Dec 25 2025</td>
         <td><a href="inventory.php?inventory_id=1">Inventar 1</a></td>
         <td>Ramanem iminent fara lemne</td>
@@ -31,7 +38,7 @@
         <td>Dec 25 2025</td>
         <td><a href="inventory.php?inventory_id=1">Inventar 1</a></td>
         <td>Ramanem iminent fara lemne</td>
-    </tr>
+    </tr> -->
     </tbody>
 </table>
 </div>

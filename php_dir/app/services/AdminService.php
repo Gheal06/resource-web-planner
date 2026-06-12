@@ -1,5 +1,6 @@
 <?php
-
+require_once __DIR__ . "/../models/AdminModel.php";
+require_once __DIR__ . "/../models/UserModel.php";
 public class AdminService {
     private $adminModel;
     private $userModel;
@@ -11,6 +12,10 @@ public class AdminService {
 
     public function getAllAdmins() {
         return $this->adminModel->getAllAdmins();
+    }
+
+    public function getAllUsers() {
+        return $this->userModel->findAll();
     }
 
     public function deleteAdmin($user_id) {
@@ -30,5 +35,6 @@ public class AdminService {
       shell_exec('../../admin_scripts/initdb.sh defarg');
       return array('success' => true, 'message' => 'Database reset successfully.');
     }
+}
 
 ?>

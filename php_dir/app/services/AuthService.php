@@ -2,18 +2,21 @@
 require_once __DIR__ . "/../models/UserModel.php";
 require_once __DIR__ . "/JwtService.php";
 require_once __DIR__ . "/MailingService.php";
+require_once __DIR__ . "/NotificationService.php";
 require_once __DIR__ . "/../models/PasswordRecoveryTokenModel.php";
 
 class AuthService {
     private $userModel;
     private $jwtService;
     private $mailingService;
+    private $notificationService;
     private $passwordRecoveryTokenModel;
 
     public function __construct($connection) {
         $this->userModel = new UserModel($connection);
         $this->jwtService = new JwtService();
         $this->mailingService = new MailingService();
+        $this->notificationService = new NotificationService($connection);
         $this->passwordRecoveryTokenModel = new PasswordRecoveryTokenModel($connection);
     }
 
@@ -21,7 +24,8 @@ class AuthService {
         $res = $this->userModel->register($username, $email, $password);
         if (is_array($res) && isset($res['success']) && $res['success']) {
             $token = $this->create_token_for_user($username);
-            $this->mailingService->send_email($email, "Welcome to Resource Web Planner", "Hello $username,\n\nThank you for registering at Resource Web Planner! We're excited to have you on board.\n\nBest regards,\nThe Resource Web Planner Team (Trollbert si Dragutu)\n If you did not create this account, please contact the administrators at poparobert2012@gmail.com or alexandru.gheorghies@gmail.com, and / or the local authorities.");
+            $user = $this->userModel->findByUsername($username);
+            $this->notificationService->createNotification($user['id'], null, "Welcome to Resource Web Planner", "Hello $username,\n\nThank you for registering at Resource Web Planner! We're excited to have you on board.\n\nBest regards,\nThe Resource Web Planner Team (Trollbert si Dragutu)\n If you did not create this account, please contact the administrators at poparobert2012@gmail.com or alexandru.gheorghies@gmail.com, and / or the local authorities.");
             return array('success' => true, 'message' => $res['message'], 'token' => $token, 'user' => $username);
         }
         $msg = is_array($res) && isset($res['message']) ? $res['message'] : 'Registration failed.';
