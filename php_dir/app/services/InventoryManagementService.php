@@ -17,6 +17,9 @@ require_once __DIR__ . "/NotificationService.php";
     private $resurseModel;
     private $currencyModel;
     private $resourceService;
+    private $fonduriTransactionHistoryModel;
+    private $resourceTransactionHistoryModel;
+
 
     private $notificationService;
 
@@ -34,6 +37,8 @@ require_once __DIR__ . "/NotificationService.php";
       $this->currencyModel = new CurrencyModel($connection);
       $this->resourceService = new ResourceService($connection);
       $this->notificationService = new NotificationService($connection);
+      $this->fonduriTransactionHistoryModel = new FonduriTransactionHistoryModel($connection);
+      $this->resourceTransactionHistoryModel = new ResourceTransactionHistoryModel($connection);
     }
 
     public function getUserByUsername($username) {
@@ -1358,7 +1363,38 @@ require_once __DIR__ . "/NotificationService.php";
       return empty($perms) ? 'None' : implode(', ', $perms);
     }
 
+    public function statisticiFond($inventory_id, $fond_id, $start_date, $end_date) {
+      $user = $this->userModel->findById($this->getCurrentUserId());
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canRead($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
 
+      $fonduri = $this->fonduriModel->getFonduriByInventoryIdAndCurrency($inventory_id, $fond_id);
+      if (!$fonduri) {
+        return $this->notFound('Fund not found.');
+      }
+      return $this->fonduriTransactionHistoryModel->getStatistics($fond_id, $start_date, $end_date);
+    }
+
+    public function statisticiResursa($inventory_id, $resource_id, $start_date, $end_date) {
+      $user = $this->userModel->findById($this->getCurrentUserId());
+      if (!$user || !isset($user['id'])) {
+        return $this->notFound('User not found.');
+      }
+      if (!$this->canRead($user['id'], $inventory_id)) {
+        return $this->accessDenied();
+      }
+
+      $resource = $this->resurseModel->getResurseById($resource_id);
+      if (!$resource) {
+        return $this->notFound('Resource not found.');
+      }
+
+      return $this->resourceTransactionHistoryModel->getStatistics($resource_id, $start_date, $end_date);
+    }
 
   }
 ?>

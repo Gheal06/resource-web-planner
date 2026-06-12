@@ -59,7 +59,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             <input type="hidden" name="operation" value="<?php echo htmlspecialchars($operation); ?>">
             
             <label for="amount">Amount to <?php echo htmlspecialchars($operation); ?>:</label>
-            <input type="number" name="amount" id="amount" step="0.01" required>
+            <?php if ($operation === 'subtract'): ?>
+              <p style="color: red;">Note: You cannot subtract more than the current amount.</p>
+              <input type="number" name="amount" id="amount" step="0.01" min="0.00" max="<?php echo htmlspecialchars($fonduri['amount']); ?>" required>
+            <?php else: ?>
+              <input type="number" name="amount" id="amount" step="0.01" min="0.00" required>
+            <?php endif; ?>
             
             <label for="description">Description (optional):</label>
             <input type="text" name="description" id="description" placeholder="e.g., Donation, Expense, Budget allocation, etc.">
