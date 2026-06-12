@@ -5,9 +5,9 @@
 ?>
 <div class="container full">
     <h2>Database operations</h2>
-    <form action="" method="post">
+    <form action="<?php echo htmlspecialchars($adminUpdateAction); ?>" method="post">
         <input name="reset-db" type="submit" value="Reset Database">
-        <input name="update-db-procedures" type="submit" value="Update Database Procedures">
+        <input name="reset-functions" type="submit" value="Reset Procedures">
     </form>
     
     <div class="sep"></div>
@@ -47,9 +47,10 @@
                 <td><?php echo htmlspecialchars($username); ?></td>
                 <td><?php echo htmlspecialchars($email); ?></td>
                 <td>
-                    <form method="post" action="">
+                    <form method="post" action="<?php echo htmlspecialchars($adminUpdateAction); ?>">
                         <label for="is-admin">Admin: </label>
                         <input type="checkbox" name="is-admin" id="is-admin" <?php if($isAdmin){echo 'checked';} ?>>
+                        <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($userId); ?>">
                         <input type="submit" name="submit-update-role" value="Update Role">
                         <input type="submit" name="submit-delete-user" value="Delete User">
                     </form>

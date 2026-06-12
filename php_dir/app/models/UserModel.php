@@ -62,6 +62,16 @@ class UserModel {
         }
         return array('success' => true, 'message' => 'Password updated.');
     }
+    public function deleteUser($user_id) {
+        $res = @pg_query_params($this->conn, "DELETE FROM users WHERE id = $1", array($user_id));
+        if ($res === false) {
+            return array('success' => false, 'message' => pg_last_error($this->conn), 'code' => 'db_error');
+        }
+        if (pg_affected_rows($res) === 0) {
+            return array('success' => false, 'message' => 'User not found.', 'code' => 'not_found');
+        }
+        return array('success' => true, 'message' => 'User deleted.');
+    }
 }
 
 ?>

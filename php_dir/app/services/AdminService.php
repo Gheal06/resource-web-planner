@@ -1,13 +1,19 @@
 <?php
 require_once __DIR__ . "/../models/AdminModel.php";
 require_once __DIR__ . "/../models/UserModel.php";
+require_once __DIR__ . "/MailingService.php";
+require_once __DIR__ . "/NotificationService.php";
 class AdminService {
     private $adminModel;
     private $userModel;
+    private $mailingService;
+    private $notificationService;
 
     public function __construct($connection) {
         $this->adminModel = new AdminModel($connection);
         $this->userModel = new UserModel($connection);
+        $this->notificationService = new NotificationService($connection);
+        $this->mailingService = new MailingService();
     }
 
     public function getAllAdmins() {
@@ -18,6 +24,9 @@ class AdminService {
         return $this->userModel->findAll();
     }
 
+    public function deleteUser($user_id) {
+      return $this->userModel->deleteUser($user_id);
+    }
     public function deleteAdmin($user_id) {
         return $this->adminModel->deleteAdmin($user_id);
     }
@@ -26,18 +35,37 @@ class AdminService {
         return $this->adminModel->addAdmin($user_id);
     }
 
-    public function send_OTC_to_email($user_email){
-        $user = $this->userModel->findByEmail($user_email);
-        if (!$user) return array('success' => false, 'message' => 'No account with this email.');
+    public function sendEmailToUser($user_id, $subject, $message) {
+        $user = $this->userModel->findById($user_id);
+        if (!$user || !isset($user['email'])) {
+            return array('success' => false, 'message' => 'User not found or has no email.', 'code' => 'not_found');
+        }
+        $this->mailingService->send_email($user['email'], $subject, $message);
+        return array('success' => true, 'message' => 'Email sent to ' . $user['email']);
     }
 
-    public function reset_database() {
-      shell_exec('../../admin_scripts/initdb.sh defarg');
-      return array('success' => true, 'message' => 'Database reset successfully.');
+    public function sendNotificationToUser($user_id, $subject, $message) {
+        $user = $this->userModel->findById($user_id);
+        if (!$user) {
+            return array('success' => false, 'message' => 'User not found.', 'code' => 'not_found');
+        }
+        $this->notificationService->createNotification($user_id, null, $subject, $message);
+        return array('success' => true, 'message' => 'Notification sent to user ID ' . $user_id);
     }
-    public function reset_functions() {
-      shell_exec('../../admin_scripts/initdb.sh');
-      return array('success' => true, 'message' => 'Functions reset successfully.');
+
+    public function resetDatabase() {
+      $oldpath = getcwd();
+      chdir('/var/www/html/admin_scripts');
+      $message = shell_exec('bash initdb.sh defarg 2>&1');
+      chdir($oldpath);
+      return array('success' => true, 'message' => $message);
+    }
+    public function resetFunctions() {
+      $oldpath = getcwd();
+      chdir('/var/www/html/admin_scripts');
+      $message = shell_exec('bash initdb.sh 2>&1');
+      chdir($oldpath);
+      return array('success' => true, 'message' => $message);
     }
 }
 
