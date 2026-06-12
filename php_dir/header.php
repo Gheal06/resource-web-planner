@@ -13,7 +13,7 @@
     $message = '';
     $view = null;
     $inventoryTableIDs = array();
-    $css = "index.css";
+    $css = "style/index.css";
     if (isset($currentUser) && strtolower($currentUser) == "rares") {
         $css = "rares.css";
     }

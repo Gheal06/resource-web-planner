@@ -14,7 +14,7 @@ require_once __DIR__ . '/app/views/header_view.php';
 if ($view) {
     require $view;
 } else {
-    echo '<div class="container"><p>Welcome. Please <a href="login.php">login</a> or <a href="register.php">register</a>.</p></div>';
+    require 'app/views/logged_out_view.php';
 }
 
 require_once "footer.php";

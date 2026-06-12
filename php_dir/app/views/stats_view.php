@@ -1,15 +1,16 @@
 <?php
     $inventoryManagementService = new InventoryManagementService($connection);
-    $allResources = $inventoryManagementService -> getResourcesByInventoryId($_GET['inventory_id'] ?? -1);
-    $allFunds = $inventoryManagementService -> getFonduriByInventoryId($_GET['inventory_id'] ?? -1);
+    $inventoryId = $_GET['inventory_id'] ?? -1;
+    $allResources = $inventoryManagementService -> getResourcesByInventoryId($inventoryId);
+    $allFunds = $inventoryManagementService -> getFonduriByInventoryId($inventoryId);
 ?>
 <div>
     <h2>Stats</h2>
     <div class="sep"></div>
     <h3>Generate Report</h3>
-    <form action="generate_stats.php" method="post">
+    <form action="report.php" method="post">
         <label for="asset-name"> Asset Name: </label>
-        <select id="asset-name" name="asset-name" required>
+        <select id="asset-id" name="asset_id" required>
             <option value="">-- Select Asset --</option>
             <?php 
                 foreach($allFunds as $fund){
@@ -35,11 +36,12 @@
                 }
             ?>
         </select> <br>
+        <input type="text" name="inventory_id" value="<?php echo $inventoryId?>" style="display:none">
         <label for="start-date">Start Date:</label>
         <input type="date" name="start_date" id="start-date"> <br>
         <label for="end-date">End Date:</label>
         <input type="date" name="end_date" id="end-date"> <br> <br>
-        <input type="submit" name="submit_generate_html" value="Generate HTML">
-        <input type="submit" name="submit_download_pdf" value="Download PDF">
+        <input type="submit" name="submit_generate_html" value="Generate HTML" onclick="window.open(url, '_blank')">
+        <input type="submit" name="submit_download_pdf" value="Download PDF" onclick="window.open(url, '_blank')">
     </form>
 </div>
