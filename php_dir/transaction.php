@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/header.php";
 require_once __DIR__ . "/app/models/FonduriModel.php";
-require_once __DIR__ . "/app/models/CurrencyTransactionHistoryModel.php";
+require_once __DIR__ . "/app/models/FonduriTransactionHistoryModel.php";
 require_once __DIR__ . "/app/controllers/InventoryManagementController.php";
 require_once __DIR__ . "/app/services/InventoryManagementService.php";
 $inventory_id = $_GET['inventory_id'] ?? $_POST['inventory_id'] ?? null;
