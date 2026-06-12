@@ -19,6 +19,7 @@
         <a href="<?php echo makeTabUrl('tags')?>">Tags</a>
         <a href="<?php echo makeTabUrl('funds')?>">Funds</a>
         <a href="<?php echo makeTabUrl('resources')?>">Resources</a>
+        <a href="<?php echo makeTabUrl('stats')?>">Stats</a>
         <a href="<?php echo makeTabUrl('transactions')?>">Transactions</a>
     </div>
     <div class="sep"></div>
@@ -49,6 +50,9 @@
     <?php endif; ?>
     <?php if($tab == 'all' || $tab == 'resources'): ?>
     <?php require_once __DIR__ . '/resources_view.php'; ?>
+    <?php endif; ?>
+    <?php if($tab == 'all' || $tab == 'stats'): ?>
+    <?php require_once __DIR__ . '/stats_view.php'; ?>
     <?php endif; ?>
     <?php if($tab == 'all' || $tab == 'transactions'): ?>
     <?php require_once __DIR__ . '/transaction_history_view.php'; ?>
