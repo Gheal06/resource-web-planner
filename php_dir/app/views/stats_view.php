@@ -42,6 +42,6 @@
         <label for="end-date">End Date:</label>
         <input type="date" name="end_date" id="end-date"> <br> <br>
         <input type="submit" name="submit_generate_html" value="Generate HTML" onclick="window.open(url, '_blank')">
-        <input type="submit" name="submit_download_pdf" value="Download PDF" onclick="window.open(url, '_blank')" formaction = "pdf_report.php">
+        <input type="submit" name="submit_download_pdf" value="Download PDF" onclick="window.open(url, '_blank')">
     </form>
 </div>
