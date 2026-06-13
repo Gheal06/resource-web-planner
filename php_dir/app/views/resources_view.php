@@ -24,6 +24,7 @@
             <th style="width: 20%;">Tags</th>
             <th>Name</th>
             <th>Quantity</th>
+            <th>Alert Threshold</th>
             <th>Description</th>
             <th>Actions</th>
         </tr>
@@ -44,6 +45,7 @@
         </td>
         <td><?php echo htmlspecialchars($row['name']); ?></td>
         <td><?php echo htmlspecialchars($row['quantity']); ?> <?php echo htmlspecialchars($row['unit']); ?></td>
+        <td><?php echo htmlspecialchars($row['threshold_quantity']); ?></td>
         <td><?php echo htmlspecialchars($row['description']); ?></td>
         <td>
             <div class="centerY flex flex-gap center-content">
