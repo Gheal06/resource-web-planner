@@ -86,24 +86,23 @@ class InventoryManagementController {
     public function importInventory($username, $uploaded_file){
         if($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($uploaded_file)){
             header('Location: ../error.php');
-            echo "trollezi";
             exit();
         }
 
         try{
             $import = $this->inventoryManagementService->importInventory($username, $uploaded_file);
+            /*foreach ($import as $key => $val ){
+                echo $key.' => '.$val.PHP_EOL;
+            }*/
             if (!isset($import['success']) || !$import['success']) {
                 header('Location: ../error.php');
-                echo "milsugi";
                 exit();
             }
 
             header('Location: ../inventory.php?inventory_id=' . urlencode($import['inventory_id']));
-            echo "yoloo";
             exit();
         }catch(Exception $e){
             header('Location: ../error.php');
-            echo "pulamea";
             exit();
         }
     }

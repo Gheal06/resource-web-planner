@@ -673,6 +673,9 @@ require_once __DIR__ . "/../controllers/AuthController.php";
             }
 
             if (empty($normalizedTag['name']) || empty($normalizedTag['foreground_color']) || empty($normalizedTag['background_color'])) {
+              /*foreach($normalizedTag as $key => $val){
+                echo $key. ' => '.($val ?? 'N/A');
+              }*/
               throw new Exception('Invalid tag data in import file.');
             }
 
@@ -714,7 +717,7 @@ require_once __DIR__ . "/../controllers/AuthController.php";
           if (!isset($resourceData['name']) || trim((string)$resourceData['name']) === '') {
             throw new Exception('Invalid resource data in import file.');
           }
-          if (!isset($resourceData['unit']) || trim((string)$resourceData['unit']) === '') {
+          if (!isset($resourceData['unit'])) {
             throw new Exception('Invalid resource unit in import file.');
           }
 

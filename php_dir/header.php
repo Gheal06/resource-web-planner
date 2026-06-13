@@ -15,20 +15,24 @@
     $action = $_GET['action'] ?? '';
     $currentUser = $authController->getCurrentUser();
     $currentUserId = $authService->getUserByUsername($currentUser);
-    if(isset($currentUserId))
+    if(isset($currentUserId) && $currentUserId)
         $currentUserId = $currentUserId['id'];
     define("READ", $inventoryService->readPermissionMask);
     define("EDIT", $inventoryService->editPermissionMask);
     define("UPDATE", $inventoryService->updatePermissionMask);
     define("DELETE", $inventoryService->deletePermissionMask);
+    
+    $errorLink = 'error.php';
+
     function verifyAccess($inventoryId, $msk){
+        global $errorLink;
         global $inventoryService;
         global $currentUserId;
         if(!isset($currentUserId) || !isset($inventoryId))
-          header("Location: error.php");
+          header("Location: ".$errorLink);
         if(!$inventoryService -> canUserAccessInventory($currentUserId, $inventoryId, $msk)){
-            die($currentUserId.'|'.$inventoryId.'|'.$msk);
-            header("Location: error.php");
+            //die($currentUserId.'|'.$inventoryId.'|'.$msk);
+            header("Location: ".$errorLink);
         }
     }
     $message = '';

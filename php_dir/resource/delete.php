@@ -1,5 +1,5 @@
 <?php
-require_once "../conn.php";
+require_once "../header.php";
 require_once "../app/controllers/AuthController.php";
 require_once "../app/controllers/ResourceController.php";
 
