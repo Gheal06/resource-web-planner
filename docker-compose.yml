@@ -35,6 +35,7 @@ services:
     user: "1000:1000"
     volumes:
       - ./php_dir:/var/www/html
+      - /var/www/html/vendor
     networks: 
       - rwp-net
     depends_on:

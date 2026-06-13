@@ -9,9 +9,6 @@
     function error(){
         header("Location: error.php");
     }
-    function errorer(){
-      header("Location: errorer.php");
-    }
     function str_to_ts($str, $fallback){
         $str = $str ?? '';
         return strlen($str) ? $str : $fallback;
@@ -35,7 +32,7 @@
         $endDate = str_to_ts($_POST['end_date'], 'infinity');
         if($endDate!='infinity')
             $endDate=date('Y-m-d', strtotime($endDate.' +1 day'));
-        if(!isset($inventoryId) || !isset($resourceId))
+        if(!isset($_POST['submit_generate_html']) || !isset($inventoryId) || !isset($resourceId))
             error();
         if(strlen($resourceId)==0) error();
         $tp = $resourceId[0];
