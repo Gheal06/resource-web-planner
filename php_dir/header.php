@@ -25,9 +25,11 @@
         global $inventoryService;
         global $currentUserId;
         if(!isset($currentUserId) || !isset($inventoryId))
+          header("Location: error.php");
+        if(!$inventoryService -> canUserAccessInventory($currentUserId, $inventoryId, $msk)){
+            die($currentUserId.'|'.$inventoryId.'|'.$msk);
             header("Location: error.php");
-        if(!$inventoryService -> canUserAccessInventory($currentUserId, $inventoryId, $msk))
-            header("Location: error.php");
+        }
     }
     $message = '';
     $view = null;
