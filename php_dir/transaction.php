@@ -5,6 +5,9 @@ require_once __DIR__ . "/app/models/FonduriModel.php";
 require_once __DIR__ . "/app/models/FonduriTransactionHistoryModel.php";
 require_once __DIR__ . "/app/controllers/InventoryManagementController.php";
 require_once __DIR__ . "/app/services/InventoryManagementService.php";
+
+verifyAccess($inventoryId, UPDATE);
+
 $inventory_id = $_GET['inventory_id'] ?? $_POST['inventory_id'] ?? null;
 $fonduri_id = $_GET['fonduri_id'] ?? $_POST['fonduri_id'] ?? null;
 $operation = $_GET['operation'] ?? $_POST['operation'] ?? null; // 'add' or 'subtract'

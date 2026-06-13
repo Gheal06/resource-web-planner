@@ -2,6 +2,9 @@
 require_once "header.php";
 require_once "app/controllers/ResourceController.php";
 require_once "conn.php";
+
+verifyAccess($inventoryId, EDIT);
+
 $createTagAction = 'new_tag.php';
 $resourceController = new ResourceController($connection);
 $message = $resourceController -> addTag($currentUser);

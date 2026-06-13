@@ -6,8 +6,9 @@ require_once __DIR__ . "/../app/models/ResourceTransactionHistoryModel.php";
 require_once __DIR__ . "/../app/controllers/InventoryManagementController.php";
 require_once __DIR__ . "/../app/controllers/AuthController.php";
 require_once __DIR__ . "/../app/services/InventoryManagementService.php";
-
 $css = __DIR__ . "/../style/index.css";
+
+verifyAccess($inventoryId, UPDATE);
 
 $inventory_id = $_GET['inventory_id'] ?? $_POST['inventory_id'] ?? null;
 $resource_id = $_GET['resource_id'] ?? $_POST['resource_id'] ?? null;

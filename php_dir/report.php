@@ -6,6 +6,9 @@
     require_once "app/models/TransactionModel.php";
     require_once "app/models/ResurseModel.php";
     require_once "app/models/FonduriModel.php";
+
+    verifyAccess($inventoryId, VIEW);
+
     function error(){
         header("Location: error.php");
     }

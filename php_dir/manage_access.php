@@ -7,6 +7,8 @@ $inventoryController = new InventoryManagementController($connection);
 $inventoryId = $_GET['inventory_id'] ?? null;
 $message = '';
 
+verifyAccess($inventoryId, EDIT);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submitUpdateAccess']) && isset($_GET['user_id'])) {
     $target_user_id = $_GET['user_id'];
     $newPerms = 0;

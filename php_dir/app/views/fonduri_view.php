@@ -23,8 +23,8 @@
     <tr>
         <td><?php echo htmlspecialchars($row['name'] ?? '-'); ?></td>
         <td><?php echo htmlspecialchars($row['currency_code']); ?></td>
-        <td><?php echo htmlspecialchars($row['amount']); ?></td>
-        <td><?php echo htmlspecialchars($row['threshold_amount']); ?></td>
+        <td><?php echo htmlspecialchars($row['amount']); ?> <?php echo htmlspecialchars($row['currency_code']); ?></td>
+        <td><?php echo htmlspecialchars($row['threshold_amount']); ?> <?php echo htmlspecialchars($row['currency_code']); ?></td>
         <td><?php echo htmlspecialchars($row['description'] ?? '-'); ?></td>
         <td>
             <div class="centerY flex flex-gap center-content">
