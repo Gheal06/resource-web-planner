@@ -7,8 +7,6 @@
     require_once "app/models/ResurseModel.php";
     require_once "app/models/FonduriModel.php";
 
-    verifyAccess($inventoryId, VIEW);
-
     function error(){
         header("Location: error.php");
     }
@@ -28,6 +26,7 @@
     $userId = $user['id'];
     if($_SERVER['REQUEST_METHOD']=='POST'){
         $inventoryId = $_POST['inventory_id'];
+        verifyAccess($inventoryId, READ);
         if(!isset($userId) || !$inventoryPermissionsModel->canUserAccessInventory($userId, $inventoryId, 1))
             error();
         $resourceId = $_POST['asset_id'];
