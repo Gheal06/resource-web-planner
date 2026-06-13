@@ -5,6 +5,9 @@
     $startDate = ($startDate == '-infinity' ? '-∞' : date('d-m-y h:i A', strtotime($startDate)));
     $endDate = ($endDate == 'infinity' ? '+∞' : date('d-m-y h:i A', strtotime($endDate.'-1 second')));
     $thresholdAmount = $resource['threshold_amount'] ?? 0;
+    /*foreach($resource as $key => $val){
+        echo $key . ' => '. $val;
+    }*/
 ?>
 <h2>Report (<?php echo htmlspecialchars($startDate.' -> '.$endDate); ?>)</h2>
 <h3><?php echo htmlspecialchars($inventory['name']);?></h3>

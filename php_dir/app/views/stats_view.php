@@ -21,6 +21,7 @@
                     $id = $fund['id'] ?? '';
                     $code = $fund['currency_code'] ?? '';
                     $name = $fund['name'];
+                    //echo '<option>'.$id.'</option>';
                     echo '<option value="f'.htmlspecialchars($id).'"> Currency: '.htmlspecialchars($code).(isset($name) ? '('.$name.')' : '').'</option>';
                 }
             ?>
