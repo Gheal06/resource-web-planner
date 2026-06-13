@@ -2,6 +2,8 @@
 require_once "header.php";
 require_once "app/controllers/ResourceController.php";
 
+verifyAccess($inventoryId, EDIT);
+
 $createResourceAction = 'new_resource.php';
 $resourceController = new ResourceController($connection);
 $message = $resourceController -> addResource($currentUser); 

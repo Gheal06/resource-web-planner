@@ -2,6 +2,7 @@
         <div id="nav-left">
             <img src="favicon.ico" alt="">
             <a href="index.php" class="centerY">Home</a>
+            <a href="docs.html" class="centerY">Docs</a>
             <a href="exchange_rates.php" class="centerY">Exchange Rates</a>
             <?php if(isset($currentUser) && $authService->isAdmin($currentUser)): ?>
                 <a href="admin_panel.php" class="centerY">Admin Dashboard</a>

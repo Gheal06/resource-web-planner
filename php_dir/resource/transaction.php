@@ -8,6 +8,7 @@ require_once __DIR__ . "/../app/controllers/AuthController.php";
 require_once __DIR__ . "/../app/services/InventoryManagementService.php";
 $css = __DIR__ . "/../style/index.css";
 
+$errorLink = '../error.php';
 verifyAccess($inventoryId, UPDATE);
 
 $inventory_id = $_GET['inventory_id'] ?? $_POST['inventory_id'] ?? null;
