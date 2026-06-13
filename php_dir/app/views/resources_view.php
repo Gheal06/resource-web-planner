@@ -60,7 +60,7 @@
     <?php endforeach; ?>
 
     <tr>
-        <td colspan="5"><a href="new_resource.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Create new resource</a></td>
+        <td colspan="6"><a href="new_resource.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Create new resource</a></td>
     </tr>
     </tbody>
 </table>

@@ -1,5 +1,3 @@
--- PL/pgSQL helper functions for scheduled transactions
-
 CREATE OR REPLACE FUNCTION check_transaction_applicable(p_tx_id BIGINT)
 RETURNS BOOLEAN LANGUAGE plpgsql AS $$
 DECLARE
@@ -29,7 +27,6 @@ DECLARE
 	new_start TIMESTAMPTZ;
 	applicable BOOLEAN;
 BEGIN
-	-- lock the transaction row to avoid races
 	SELECT * INTO t FROM transactions WHERE id = p_tx_id FOR UPDATE;
 	IF NOT FOUND THEN
 		RAISE EXCEPTION 'Transaction % not found', p_tx_id;
@@ -40,22 +37,18 @@ BEGIN
 		RAISE EXCEPTION 'Transaction % is not applicable (insufficient resource quantity)', p_tx_id;
 	END IF;
 
-	-- apply quantity change
 	UPDATE resources
 	SET quantity = quantity + t.quantity_change
 	WHERE id = t.resource_id;
 
-	-- if one-time (no frequency) remove the transaction
 	IF t.frequency IS NULL THEN
 		DELETE FROM transactions WHERE id = p_tx_id;
 		RETURN;
 	END IF;
 
-	-- otherwise advance start_timestamp by frequency
 	new_start := t.start_timestamp + t.frequency;
 
 	IF t.end_timestamp IS NOT NULL AND new_start > t.end_timestamp THEN
-		-- next occurrence would be past end -> remove
 		DELETE FROM transactions WHERE id = p_tx_id;
 	ELSE
 		UPDATE transactions SET start_timestamp = new_start WHERE id = p_tx_id;
@@ -74,7 +67,6 @@ BEGIN
 		RAISE EXCEPTION 'Transaction % not found', p_tx_id;
 	END IF;
 
-	-- if one-time, removing it is equivalent to skipping
 	IF t.frequency IS NULL THEN
 		DELETE FROM transactions WHERE id = p_tx_id;
 		RETURN;
