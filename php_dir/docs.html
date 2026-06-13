@@ -18,26 +18,151 @@
     <h1>Resource Web Planner</h1>
     <ol role="directory">
         <li><a href="#abstract">1. Abstract</a></li>
-        <li><a href="#tehnologii">2. Tehnologii folosite</a></li>
-        <li><a href="#utilizare">3. Exemple de utilizare</a></li>
-        <li><a href="#structura">4. Structura internă a aplicației</a></li>
-        <li><a href="#livrabile">5. Livrabile</a></li>
-        <li><a href="#concluzii">6. Concluzii</a></li>
+        <li>
+            <a href="#intro">2. Introducere</a>
+            <ul>
+                <li><a href="#cerinta">2.1. Cerința</a></li>
+                <li><a href="#obiective">2.2. Obiective</a></li>
+            </ul>
+        </li>
+        <li><a href="#tehnologii">3. Tehnologii folosite</a></li>
+        <li><a href="#utilizare">4. Exemple de utilizare</a></li>
+        <li><a href="#structura">5. Structura internă a aplicației</a></li>
+        <li><a href="#livrabile">6. Livrabile</a></li>
+        <li><a href="#concluzii">7. Concluzii</a></li>
     </ol>
     <section role="doc-abstract" id="abstract">
         <h2>1. Abstract</h2>
+        <p>
+            Resource Web Planner este o aplicație web care permite utilizatorilor să își administreze mai multe inventare, fiecare inventar conținând mai multe resurse și fonduri.
+        </p>
+        <p>
+            Acest raport tehnic va descrie obiectivele proiectului, tehnologiile folosite în cadrul acestui proiect, exemple de utilizare ale aplicației
+            structura internă a aplicației și îmbunătățiri posibile.
+        </p>
     </section>
+    <section id="intro">
+        <h2>2. Introducere</h2>
+        <h3 id="cerinta">2.1. Cerința</h3>
+        <p>
+            Să se dezvolte o aplicație Web care permite gestionarea pe categorii a articolelor esentiale și consumabilelor (e.g., becuri, lemne pentru foc, condimente, toner, cosmetice, pahare de unică folosință, pioneze, medicamente de uz general,…), plus a pieselor de schimb pentru diverse dispozitive – de exemplu, aparate electr(on)ice, automobile, ascensoare etc. – dintr-o gospodărie, organizație sau întreprindere. Instrumentul va fi capabil să notifice, periodic sau la date fixe (eventual, prestabilite), utilizatorul sau un grup de utilizatori în ceea ce privește epuizarea iminentă a unor materiale sau verificarea anumitor echipamente și angrenaje. Aceste notificări vor fi semnalate atât direct în cadrul interfeței aplicației, cât și prin poșta electronică. Se vor oferi posibilități de importare/exportare a datelor în formatele CSV, JSON si XML, iar diversele statistici generate vor putea fi consultate sub forma de documente HTML și PDF. <a href="https://rebeja.eu/tehnologii-web/#rep">Link</a>
+        </p>
+
+        <p>Alte cerințe implicite: <a href="https://edu.info.uaic.ro/web-technologies/web-projects.html">Link</a></p>
+        <p>Cele mai importante aspecte pentru fiecare proiect &icirc;n parte sunt:</p>
+
+<ul>
+<li><p>Rezolvarea integral&#259; a problemei &ndash; conform cerin&#355;elor specifice fiec&#259;rui proiect propus.</p></li>
+		
+<li><p>Proiectele vor putea fi implementate pe partea de server folosind serverul de aplica&#355;ii &#351;i limbajul de programare <a href="web-film.html#:~:text=PHP" title="Detalii despre PHP">PHP</a>.</p></li>
+
+<li class="info"><p><strong>Nu se permite utilizarea de <em>framework</em>-uri la nivel de client (<em>front-end</em>) &#351;i/sau server (<em>back-end</em>) Web</strong>.</p></li>
+
+<li><p>Architectura aplica&#355;iei Web realizate va fi <strong>obligatoriu</strong> bazat&#259; pe <a href="web-film.html#:~:text=Servicii%20Web" title="Detalii despre servicii Web">servicii Web</a>. Invocarea unui serviciu/API Web va fi efectuat&#259; &icirc;n manier&#259; asincron&#259; via suita de tehnologii <a href="web-film.html#:~:text=Ajax" title="Detalii despre Ajax">Ajax</a>.</p>
+</li>
+
+<li><p>Pentru partea de client, interfa&#355;a aplica&#355;iei Web va fi marcat&#259; <strong>obligatoriu</strong> &icirc;n <a href="web-film.html#:~:text=HTML" title="Detalii despre HTML">HTML</a> &ndash; codul trebuind s&#259; fie <a href="https://validator.w3.org/" title="Spre validatorul W3C referitor la HTML">valid conform specifica&#355;iilor Consor&#355;iului Web</a>. Se vor utiliza <a href="https://jigsaw.w3.org/css-validator/" title="Spre validatorul W3C privitoare la CSS">foi de stiluri CSS valide</a> &ndash; pentru verificare, se poate recurge la instrumente dedicate precum <a href="https://stylelint.io/" title="Detalii">Stylelint</a>.</p></li>
+
+<li><p>Pentru stocarea &#351;i managementul datelor, se vor putea utiliza servere de baze de date rela&#355;ionale, interogate via SQL &ndash; minimal, a se considera <a href="https://github.com/planetopendata/awesome-sqlite" title="Resurse despre SQLite">SQLite</a>. Complementar, se poate recurge la servere de baze de date aliniate <a href="https://github.com/erictleung/awesome-nosql-guides" title="Detalii despre NoSQL">paradigmei NoSQL</a>.</p></li>
+
+<li><p>Se vor folosi pe c&acirc;t posibil machete (<em>template</em>-uri) de prezentare &#351;i metode de configurare &#351;i administrare a aplica&#355;iei.</p></li>
+
+<li><p>Alte cerin&#355;e obligatorii:</p>
+
+<ul>
+<li><p>Adoptarea principiilor <a href="web-film.html#:~:text=responsive%20design" title="Detalii">designului Web responsiv</a>.</p></li>
+
+<li><p>Recurgerea la tehnici de prevenire a atacurilor (minimal, <a href="https://owasp.org/www-community/attacks/SQL_Injection" title="Detalii despre SQL injection">SQL injection</a> &#351;i <a href="https://owasp.org/www-community/attacks/xss/" title="Detalii privind Cross Site Scripting (XSS)">Cross Site Scripting</a>).</p></li>
+
+<li><p>Import/export de date folosind formate deschise &ndash; minim, <a href="https://datatracker.ietf.org/doc/html/rfc7111" title="Detalii despre formatul CSV">CSV (Comma Separated Values)</a> &#351;i <a href="https://www.json.org/json-en.html" title="Detalii privind formatul JSON">JSON (JavaScript Object Notation)</a>.</p></li>
+
+<li><p>Existen&#355;a unui modul propriu de administrare a aplica&#355;iei Web.</p></li>
+<li><aside class="menu"><a href="https://education.github.com/pack" title="Detalii">GitHub Student<br>Developer Pack</a></aside><p>Respectarea cerin&#355;elor de baz&#259; ale ingineriei software &ndash; <em>e.g.</em>, comentarea &#351;i modularizarea codului-surs&#259;, utilizarea unui sistem de stocare &#351;i management online al codului-surs&#259; (<em>e.g.</em>, <a href="https://support.atlassian.com/bitbucket-cloud/" title="Detalii despre Bitbucket">Bitbucket</a>, <a href="https://docs.gitlab.com/" title="Resurse privind GitLab">GitLab</a>, <a href="https://guides.github.com/" title="Spre situl GitHub">GitHub</a> etc.).</p></li>
+</ul>
+</li> 
+</ul>
+<h3 id="obiective">2.2. Obiective</h3>
+<p>
+    Noi am interpretat această cerință în felul următor:
+</p>
+<p>
+    Se dorește o aplicație web care să permită utilizatorilor să își administreze mai multe inventare, fiecare inventar conținând mai multe resurse și fonduri. Pe baza acestor date, se pot exporta diverse statistici în HTML și PDF, iar inventarele să poată fi importate/exportate în formatele CSV, XML și JSON.
+</p>
+<p>
+    Resursele ar trebui să poată fi organizate după tipul lor, ceea ce ne-a dus cu gândul la a avea tag-uri create de către utilizator.
+</p>
+<p>
+    Aplicația să poată trimite notificări utilizatorilor (și în interfață și prin mail) în cazul unei epuizări iminente a unei anumite resurse. Noi am implementat această cerință în felul următor:
+    fiecare resursă din cadrul fiecărui inventar are un threshold critic (by default 0). Când cantitatea acestei resurse este mai mică sau egală cu threshold-ul, se generează o notificare.
+</p>
+<p>
+    Pe lângă aceste obiective identificate, avem niște funcționalități suplimentare, enumerate <a href="#utilizare">aici</a>.
+</p>
+</section>
     <section id="tehnologii">
-        <h2>2. Tehnologii folosite</h2>
+        <h2>3. Tehnologii folosite</h2>
+        <ul>
+            <li>Web: PHP, HTML, CSS, JS</li>
+            <li>JWT</li>
+            <li>Deployment: Docker</li>
+            <li>Baze de date: PostgreSQL, SQL</li>
+        </ul>
     </section>
     <section id="utilizare">
-        <h2>3. Exemple de utilizare</h2>
+        <h2>4. Exemple de utilizare și funcționalități</h2>
+        <p>
+            Funcționalități:
+        </p>
+        <ul>
+            <li>Login, Register, Change Password, Forgot Password.</li>
+            <li>Crearea și ștergerea inventarelor.</li>
+            <li>Permisiuni granulare asupra inventarelor (Read, Edit, Update, Delete).</li>
+            <li>Import și export a inventarelor în formatele CSV, XML și JSON.</li>
+            <li>Crearea și ștergerea de resurse în cadrul unui inventar.</li>
+            <li>Crearea tranzacțiilor în cadrul unui inventar (schimbarea cantității unei resurse).</li>
+            <li>Trimis mail + notificare în aplicație când cantitatea unei resurse scade sub un anumit prag.</li>
+            <li>Trimis mail cand se modifică anumite permisiuni ale unui user, respectiv când se șterge un inventar.</li>
+            <li>Organizarea resurselor pe tag-uri create de utilizator.</li>
+            <li>Un istoric al tuturor tranzacțiilor.</li>
+            <li>Crearea unui raport (HTML, PDF) al tuturor tranzacțiilor pentru o anumită resursă într-un anumit interval de timp.</li>
+            <li>O listă cu toate valutele raportate la USD. </li>
+            <li>Un panel pentru admini.</li>
+            <li>Prevenție XSS (folosind htmlspecialchars()) și SQL Injection (folosind proceduri stocate).</li>
+            <li>Front-end responsiv folosind media queries și valori relative (eg. 90%) pentru dimensiunea elementelor.</li>
+        </ul>
     </section>
     <section id="structura">
-        <h2>4. Structura internă a aplicației</h2>
+        <h2>5. Structura internă a aplicației</h2>
+        <p>
+            Aplicația constă din 3 imagini Docker:
+            <ul>
+                <li>O imagine creată prin maparea subfolder-ului /php_dir în Docker.</li>
+                <li>O imagine pentru baza de date (PostgreSQL).</li>
+                <li>O imagine pentru PGAdmin.</li>
+            </ul>
+            <p>Containerele rezultate vor comunica prin cadrul rețelei rwp_net din cadrul Docker.</p>
+        </p>
+        <p>
+            Arhitectura aplicației este bazată pe modelul MVC. Subfolderul /php_dir/app conține la rândul său 4 subfoldere:
+            <ul>
+                <li>/php_dir/app/models: folderul care conține toate modelele.</li>
+                <li>/php_dir/app/views: folderul care conține toate view-urile.</li>
+                <li>/php_dir/app/controllers: folderul care conține toate controllerele.</li>
+                <li>/php_dir/app/services: folderul care conține toate serviciile.</li>
+            </ul>
+
+            Pe lângă acestea, mai există următoarele foldere:
+            <ul>
+                <li>/php_dir/admin_scripts: conține scripturile de populare a bazei de date.</li>
+                <li>/php_dir/style: conține toate fișierele CSS folosite.</li>
+                <li>/php_dir/assets: folderul care conține toate asset-urile (favicon + un clopot inactiv nefolosit).</li>
+                <li>/php_dir/js: folderul care conține toate scripturile Javascript folosite.</li>
+            </ul>
+            Toate celelalte fișiere PHP din php_dir/ sunt menite să fie accesate de către utilizatorii aplicației.
+        </p>
     </section>
     <section id="livrabile">
-        <h2>5. Livrabile</h2>
+        <h2>6. Livrabile</h2>
         <ul>
             <li><a href="">[WIP] Diagramă C4</a></li>
             <li><a href="">[WIP] Video</a></li>
@@ -45,7 +170,17 @@
         </ul>
     </section>
     <section id="concluzii">
-        <h2>6. Concluzii</h2>
+        <h2>7. Concluzii</h2>
+
+        <p>Acest proiect ar putea beneficia de următoarele îmbunătățiri:</p>
+        <ul>
+            <li>Editarea numelui si descrierilor inventarelor.</li>
+            <li>Editarea numelui si descrierilor resurselor și fondurilor.</li>
+            <li>Threshold dinamic pentru resurse.</li>
+            <li>Tranzacții compuse.</li>
+            <li>Tranzacții recurente.</li>
+            <li>Mai mult testing :)</li>
+        </ul>
     </section>
 </body>
 </html>
