@@ -1414,4 +1414,5 @@ require_once __DIR__ . "/NotificationService.php";
       }
       return $current_amount;
   }
+}
 ?>
