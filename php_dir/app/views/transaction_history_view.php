@@ -43,8 +43,9 @@ usort($allHistory, function($a, $b) {
         <thead onclick="toggleTableContents(event)">
             <tr>
                 <th>Item</th>
-                <th>Operation</th>
-                <th>Amount</th>
+                <th>Change</th>
+                <th>Old Amount</th>
+                <th>New Amount</th>
                 <th>Description</th>
                 <th>Time</th>
             </tr>
@@ -55,14 +56,20 @@ usort($allHistory, function($a, $b) {
             foreach ($allHistory as $record):
                 $itemName = htmlspecialchars($record['resource_name'] ?? $record['fonduri_name'] ?? $record['currency_code'] ?? 'Unknown');
                 $operation = htmlspecialchars($record['operation_type'] ?? '');
-                $amount = htmlspecialchars($record['quantity_change'] ?? $record['amount_change'] ?? '');
+                $change = htmlspecialchars($record['quantity_change'] ?? $record['amount_change'] ?? '');
+                settype($change, "integer");
+                if($operation == 'Subtract') $change = -$change;
+                $old = htmlspecialchars($record['old_quantity'] ?? $record['old_amount'] ?? '');
+                $new = htmlspecialchars($record['new_quantity'] ?? $record['new_amount'] ?? '');
+                $unit = htmlspecialchars($record['unit'] ?? '');
                 $description = htmlspecialchars($record['description'] ?? '');
                 $timestamp = date('M d Y, H:i', strtotime($record['created_at'] ?? ''));
         ?>
         <tr>
             <td><?php echo $itemName; ?></td>
-            <td><?php echo ucfirst($operation); ?></td>
-            <td><?php echo $amount; ?></td>
+            <td><?php echo $change; ?></td>
+            <td><?php echo $old; ?></td>
+            <td><?php echo $new; ?></td>
             <td><?php echo $description; ?></td>
             <td><?php echo $timestamp; ?></td>
         </tr>

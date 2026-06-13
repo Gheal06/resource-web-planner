@@ -38,7 +38,7 @@
     </tr>
     <?php endforeach; ?>
     <tr>
-        <td colspan="5"><a href="new_currency.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Add new currency</a></td>
+        <td colspan="6"><a href="new_currency.php?inventory_id=<?php echo urlencode($inventory_id); ?>">Add new currency</a></td>
     </tr>
     </tbody>
 </table>
