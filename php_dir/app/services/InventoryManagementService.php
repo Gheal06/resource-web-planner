@@ -28,10 +28,10 @@ require_once __DIR__ . "/../controllers/AuthController.php";
 
     private $notificationService;
 
-    private $readPermissionMask = 1;
-    private $editPermissionMask = 2;
-    private $updatePermissionMask = 4;
-    private $deletePermissionMask = 8;
+    public $readPermissionMask = 1;
+    public $editPermissionMask = 2;
+    public $updatePermissionMask = 4;
+    public $deletePermissionMask = 8;
 
     public function __construct($connection) {
       $this->inventoryModel= new InventoryModel($connection);
